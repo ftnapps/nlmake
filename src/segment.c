@@ -1264,7 +1264,7 @@ short test_segment(void)
 
         if(STATS == 'Y' || NOTIFY == 'Y')
         {
-        if (segmentfile) fclose(segmentfile);
+//        if (segmentfile) fclose(segmentfile);  //This was causing a segfault under Linux.  Needs testing and return if required.
         get_file_date(namebuf,date_stamp);
         sprintf(logline,"Processing %-8.8s %-5d last received on %s",SegmentType[segfile[bcnt].SegmentType].String,segfile[bcnt].Net,date_stamp);
         if(STATS == 'Y') stat_text(logline);
@@ -1272,7 +1272,7 @@ short test_segment(void)
         segmentfile = fopen (namebuf, "rt");
         }
 
-        if (segmentfile) fclose(segmentfile);
+//        if (segmentfile) fclose(segmentfile);  //This was causing a segfault under Linux.  Needs testing and return if required.
    eof = calc_eof(namebuf);
         segmentfile = fopen (namebuf, "rb");
 

@@ -71,8 +71,8 @@ create_diff (char *ODFile)
   char exten[5];
 //      char newext[5];
   char fullname[255];
-  short ext = 0, i = 0, rc = 0;
-  long matchline = 0;
+  short ext, i, rc;
+  long matchline;
 
   _splitpath (OutFile, drive, path, fname, exten);
 
@@ -344,7 +344,7 @@ apply_diff (char *filename, short SFI)
   char logline[255];
   char CRCLine[100];
   char newext[5];
-  short ext = 0, i = 0;
+  short ext, i;
 
   if (strchr (filename, '.') != NULL)
     {

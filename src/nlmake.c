@@ -31,17 +31,18 @@ int MajVer = 1;
 int MinVer = 13;
 int Rev = 1;
 int SubRev = 2;
-#ifdef OS2
-char OStype[] = { "OS/2" };
-#endif
-#ifdef DOS
-char OStype[] = { "DOS" };
-#endif
-#ifdef WIN
-char OStype[] = { "Win32" };
-#endif
-#ifdef LINUX
-char OSType[] = { "Linux" };
+
+
+#if defined(OS2)
+  #define OStype "OS/2"
+#elif defined(DOS)
+  #define OStype "DOS"
+#elif defined(WIN32)
+  #define OSType "Win32"
+#elif defined(LINUX)
+  #define OSType "Linux"
+#else
+  #define OSType "Unknown"
 #endif
 
 #ifdef LINUX
@@ -167,7 +168,7 @@ main (short ParmsCtr, char *Parms[])
   char *Pathptr;
   FILE *temp;
   char textline[512];
-  short cntr = 0, cntr2 = 0;
+  short cntr = 0, cntr2;
 
   printf ("%s v%i.%i.%i%i (%s) \n", ProgName, MajVer, MinVer, Rev, SubRev,
           OSType);
@@ -532,6 +533,7 @@ main (short ParmsCtr, char *Parms[])
 
 
   // Exit Cleanup
+  return 0;
 }
 
 int
@@ -544,7 +546,7 @@ proctrlfile (void)
   char str[255];
   char altnot[75];
   char LogLine[255];
-  short cntr = 0, cnt = 0;
+  short cntr = 0, cnt;
   char *ptr, *ptr2;
   short mark_file = 0;
   short mark_data = 0;
@@ -1561,7 +1563,7 @@ proctrlfile (void)
                       exit (255);       // abort fatal cfg file error
                       break;
                     default:
-                      cntr = 0;
+                      //cntr = 0;
                       break;
                     }
                   ptr = strchr (ptr, ' ');
@@ -2329,7 +2331,6 @@ testctrlinfo (void)
           logtext ("Private nodes are restricted to NETWORK/HUB level.", 5,
                    YES);
           break;
-          break;
         case 4:
           logtext
             ("Private nodes are restricted to REGION/NETWORK/HUB level.", 5,
@@ -2366,12 +2367,13 @@ makedirerror (void)
       break;
     case 5:
       break;                    //BC 4.5++ returns this if mkdir() and dir already exists
+      /* commenting out unreachable code, because of break above???
       logtext ("Memory Problem.", 5, YES);
       logwrite (CFE_ABORT, 0);
       logwrite (SYS_STOP, 0);
       closelog ();              // close logfile
       exit (255);
-      break;
+      break; */
     case 6:
       //logtext("Directory Exists or Permission denied.",5,YES);
       break;

@@ -52,7 +52,7 @@ compress (char *filename)
   char compress[255];
   char logline[255];
   char *ptr;
-  short value = 0;
+  //short value = 0;
 
   strcpy (compress, filename);
 
@@ -84,7 +84,9 @@ compress (char *filename)
     deletefile (compress);
 
   //     printf("%s\n",logline);
-  value = call_spawn ();
+  call_spawn ();
+  //value = call_spawn ();
+  // What to do with "value"?
 
   //memset(filename,0,254);
   filename[0] = 0;
@@ -104,7 +106,7 @@ decompress (char *filename)
   char path[255];
   char fname[9];
   char exten[4];
-  short value = 0;
+  short value;
 
   char compress[255];
   char *ptr;
@@ -181,7 +183,8 @@ init_compressors (void)
 {
   FILE *comctl;
   char str[256];
-  short linecnt = 0, cntr = 0, compcnt = 0;
+  //short linecnt = 0, cntr = 0, compcnt = 0;
+  short cntr = 0, compcnt = 0;
   char *ptr, *ptr1;
   long eof;
 
@@ -199,9 +202,9 @@ init_compressors (void)
       while (1)
         {
           //memset (str, 0, 254);
-          str[0] = 0;
+          //str[0] = 0;
           fgets (str, 254, comctl);
-          linecnt++;
+          // linecnt++; // this isn't used
           // kill leading spaces
           while (str[0] == ' ')
             memmove (str, str + 1, 253);
@@ -362,7 +365,7 @@ short
 call_spawn (void)
 {
   short i = 1;
-  long val_exit = 0;
+  long val_exit;
   char logline[255], cmdline[255];
 
   fflush (stdout);

@@ -97,8 +97,10 @@ cre_flags_db (char *filename)
 char *
 estrstr (char *haystack, char *needle)
 {
-  unsigned short i, j, len = strlen (needle);
-  if (!len)
+  unsigned int i, j, len;
+
+  len = strlen (needle);
+  if (len == 0)
     return haystack;            /* if search string empty, return */
 
   for (i = 0; i < strlen (haystack); i++)       /* search string for target */
@@ -287,7 +289,7 @@ checkflags (char *allflags)
   char hue = 0;
   char umode = 0;               // 0 = off  1 = ,UREC   2 = ,U,REC  3 = DONE
   char *chptr;
-  short luoffset = 0;
+  short luoffset;
   char *delims = { ",\r\n" };
   char *fptr;
 

@@ -55,8 +55,8 @@ copyfile (char *filename, char *destination)
   //char buffer[255];
   FILE *inf, *otf;
   char *mbptr;
-  long size_read = 0;
-  unsigned long fsize = 0L;
+  long size_read;
+  unsigned long fsize;
 
   inf = fopen (filename, "rb");
   if (inf == NULL)
@@ -474,7 +474,7 @@ file_age (char *filename)
 {
   int handle;
   unsigned short date, time;
-  unsigned short Today_JDate = 0, File_JDate = 0, dayscnt = 367;
+  unsigned short Today_JDate, File_JDate = 0, dayscnt = 367;
   struct dosdate_t cdate;
   _dos_getdate (&cdate);
 

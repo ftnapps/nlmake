@@ -191,10 +191,10 @@ process_segment (void)
   struct dosdate_t date;
   char logline[255];
   short errorlvl = 0;
-  short linecnt = 0;
+  short linecnt;
   char errorcomnt[255];
-  short errcnt = 0;
-  short lineistype = 0;
+  short errcnt;
+  short lineistype;
   char namebuf[255];
   char *ptr;
   short comptype;
@@ -822,6 +822,7 @@ kill_spaces (void)
     {
 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()\"\\\'?><,.+=-_`~|/ :;{}[]\n"
 };
+  unsigned int space;
 
   chptr = strchr (str, ' ');
   while (chptr != NULL)
@@ -838,7 +839,7 @@ kill_spaces (void)
 // printf("spn %d strlen %d\n",strspn(str,cset),strlen(str));
 
   if (strspn (str, cset) != strlen (str))
-    for (unsigned int space = 0; space < strlen (str); space++)
+    for (space = 0; space < strlen (str); space++)
       {
         if (str[space] & 0x80)
           str[space] = '?';
@@ -859,7 +860,7 @@ is_node_there (short current)
 {
   short i, host = 0;
   short retvalue = 0;
-  long local = 0;
+  long local;
   //char magic[40];
   //char zone[5];
 
@@ -1087,7 +1088,7 @@ short
 checkbaud (void)
 {
 
-  long bps = 0;
+  long bps;
   short cntr = 0;
 
   bps = atol (baud_rate);
@@ -1136,7 +1137,7 @@ copy_info_files (short type)
     default:
       return;
 
-      break;
+      // break;
     }
 
   if (info != NULL)
@@ -1200,7 +1201,7 @@ short
 test_crc (char *filename, char *logline)
 {
   FILE *fp;
-  unsigned short listedcrc = 0, actualcrc = 0;
+  unsigned short listedcrc, actualcrc;
   char crc[10];
   char localstr[256];
 
@@ -1262,12 +1263,12 @@ test_segment (void)
   short bcnt;
   char logline[255];
   short errorlvl = 0;
-  short linecnt = 0;
+  short linecnt;
   char errorcomnt[255];
   char date_stamp[100];
-  short totalerrcnt = 0;
-  short errcnt = 0;
-  short lineistype = 0;
+  short totalerrcnt;
+  short errcnt;
+  short lineistype;
   char namebuf[255];
   short phonecnt;
   short flgerr = 0;
@@ -1749,16 +1750,16 @@ process_new (void)
   char date_stamp[100];
   char CRCLine[100];
   short errorlvl = 0;
-  short linecnt = 0;
+  short linecnt;
   char errorcomnt[255];
-  short errcnt = 0;
+  short errcnt;
   short totalerrcnt = 0;
-  short lineistype = 0;
+  short lineistype;
   short phonecnt;
   short flgerr = 0;
   short prcssed = YES;
   char namebuf[255];
-  short ageis = 0;
+  short ageis;
 
   str = (char *) malloc (MAXSTR);
   memset (str, 0, sizeof (str));

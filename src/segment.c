@@ -77,7 +77,7 @@ extern char *extchr (char *string, char dot);
 
 
 // extern functions
-extern void fix_proc_date (struct tm *date);
+extern void get_proc_date (char *buf, int maxlen);
 extern short FindMostCurr (char *FileName);
 //extern unsigned long getcrc(char *str,unsigned long crctt);
 extern unsigned short getcrc (char *filename, long offset);
@@ -191,9 +191,7 @@ short
 process_segment (void)
 {
   short bcnt;
-  time_t utime;
-  struct tm *tm;
-  char date[100];
+  char date[50];
   char logline[255];
   short errorlvl = 0;
   short linecnt;
@@ -238,10 +236,7 @@ process_segment (void)
 
   // set CRC line
 
-  time (&utime);
-  tm = localtime (&utime);
-  fix_proc_date (tm);
-  strftime(date, 100, "%A, %B %d, %Y -- Day number %j", tm);
+  get_proc_date (date, sizeof(date));
 
   //memset(str,0,254);
   str[0] = 0;

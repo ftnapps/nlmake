@@ -13,164 +13,54 @@
 extern LINEPRMS WeekDays[];
 extern char Publish_day[];
 
-// Get current day_of_year (if type == 0) or day_of_year for next publish day (if type == 1)
-short
-getJDate (short type)
+// Get day_of_year for next publish day
+int
+getJDate (void)
 {
-  short jdate, jfriday, i;
-  time_t utime;
+  time_t t;
   struct tm *tm;
+  int pub_wday, jfriday;
 
-  time (&utime);
-  tm = localtime (&utime);
-
-  jdate = tm->tm_yday;
-
-  for (i = 0; i <= 6; i++)
+  // Get day_of_week for publish
+  for (pub_wday = 0; pub_wday <= 6; pub_wday++)
     {
-      if (stricmp (Publish_day, WeekDays[i].String) == 0)
+      if (stricmp (Publish_day, WeekDays[pub_wday].String) == 0)
         break;
     }
 
-  if ((i - tm->tm_wday) >= 0)
-    jfriday = jdate + i - tm->tm_wday;
-  else
-    jfriday = jdate + i - tm->tm_wday + 7;
+  time (&t);
+  tm = localtime (&t);
 
-  //printf("today is -> %d Friday is ->%d",jdate, jfriday);
-  if (type == 1)
-    return (jfriday);
-  else
-    return (jdate);
+  jfriday = tm->tm_yday + pub_wday - tm->tm_wday + 1;
+  if (pub_wday < tm->tm_wday)
+    jfriday += 7;
 
+  return (jfriday);
 }
 
 
-/* Get next publishing date */
-void
-fix_proc_date (struct tm *date)
+/* Get text string describing next publish day */
+void get_proc_date (char *buf, int maxlen)
 {
-  short i, jfriday;
+  time_t t;
+  struct tm *tm;
+  int pub_wday, days;
 
   // Get day_of_week for publish
-  for (i = 0; i <= 6; i++)
+  for (pub_wday = 0; pub_wday <= 6; pub_wday++)
     {
-      if (stricmp (Publish_day, WeekDays[i].String) == 0)
+      if (stricmp (Publish_day, WeekDays[pub_wday].String) == 0)
         break;
     }
 
-  // Get day_of_month for publish
-  if ((i - date->tm_wday) >= 0)
-    jfriday = date->tm_mday + i - date->tm_wday;
-  else
-    jfriday = date->tm_mday + i - date->tm_wday + 7;
+  time (&t);
+  tm = localtime (&t);
 
+  days = pub_wday - tm->tm_wday;
+  if (days < 0)
+    days += 7;
+  t += days * 24 * 3600;
+  tm = localtime (&t);
 
-  // No adjustment of day & month needed
-  if (jfriday <= 28)
-    {
-      date->tm_mday = jfriday;
-      return;
-    }
-
-  // Adjust day & month if we've fallen into next month...
-  switch (date->tm_mon)
-    {
-    case 1:                     // jan
-      if (jfriday >= 32)
-        {
-          jfriday -= 31;
-          date->tm_mon++;
-        }
-      break;
-    case 2:                     // feb
-      if ((date->tm_year % 4) == 0)        // is leap
-        {
-          if (jfriday >= 30)
-            {
-              jfriday -= 29;
-              date->tm_mon++;
-            }
-        }
-      else if (jfriday >= 29)
-        {
-          jfriday -= 28;
-          date->tm_mon++;
-        }
-      break;
-    case 3:                     // mar
-      if (jfriday >= 32)
-        {
-          jfriday -= 31;
-          date->tm_mon++;
-        }
-      break;
-    case 4:                     // april
-      if (jfriday >= 31)
-        {
-          jfriday -= 30;
-          date->tm_mon++;
-        }
-      break;
-    case 5:                     // may
-      if (jfriday >= 32)
-        {
-          jfriday -= 31;
-          date->tm_mon++;
-        }
-      break;
-    case 6:                     // june
-      if (jfriday >= 31)
-        {
-          jfriday -= 30;
-          date->tm_mon++;
-        }
-      break;
-    case 7:                     // jul
-      if (jfriday >= 32)
-        {
-          jfriday -= 31;
-          date->tm_mon++;
-        }
-      break;
-    case 8:                     // aug
-      if (jfriday >= 32)
-        {
-          jfriday -= 31;
-          date->tm_mon++;
-        }
-      break;
-    case 9:                     // sep
-      if (jfriday >= 31)
-        {
-          jfriday -= 30;
-          date->tm_mon++;
-        }
-      break;
-    case 10:                    // oct
-      if (jfriday >= 32)
-        {
-          jfriday -= 31;
-          date->tm_mon++;
-        }
-      break;
-    case 11:                    // nov
-      if (jfriday >= 31)
-        {
-          jfriday -= 30;
-          date->tm_mon++;
-        }
-      break;
-    case 12:                    // dec
-      if (jfriday >= 32)
-        {
-          jfriday -= 31;
-          date->tm_mon -= 12;
-          date->tm_year++;
-        }
-      break;
-    }
-
-  date->tm_mday = jfriday;
-
+  strftime (buf, maxlen, "%A, %B %d, %Y -- Day number %j", tm);
 }

@@ -38,9 +38,9 @@ extern char *extchr (char *string, char dot);
 extern void logtext (char *string, short indicator, short dateon);
 extern void logwrite (short message, short indicator);
 extern void closelog (void);
-extern void fix_proc_date (struct tm *date);
+extern void get_proc_date (char *buf, int maxlen);
 extern short FindMostCurr (char *FileName);
-extern short getJDate (short type);
+extern int getJDate (void);
 
 // prototype
 long calc_eof (char *filename);
@@ -197,7 +197,7 @@ clean_dir (char *filename)
   long rc;
   char cleaname[255];
   struct find_t fileinfo;
-  short jfriday, lastfriday;
+  int jfriday, lastfriday;
   char *dot;
   char ascjfriday[5];
 
@@ -212,7 +212,7 @@ clean_dir (char *filename)
   else
     strcpy (cleaname, ".*");    // Should probably be strcat?
 
-  jfriday = getJDate (1);
+  jfriday = getJDate ();
   lastfriday = jfriday - 7;
   if (lastfriday <= 0)
     {
@@ -400,9 +400,7 @@ list_file_dates (char *filename)
   char date_stamp[100];
   FILE *segmentfile;
   FILE *stats2;
-  time_t utime;
-  struct tm *tm;
-  char date[100];
+  char date[50];
 
   stats2 = fopen (filename, "wt");
   if (stats2 == NULL)
@@ -411,11 +409,7 @@ list_file_dates (char *filename)
       return;
     }
 
-  time (&utime);
-  tm = localtime (&utime);
-  fix_proc_date (tm);
-  strftime (date, 100, "%A, %B %d, %Y -- Day number %j", tm);
-
+  get_proc_date (date, sizeof(date));
   fprintf (stats2, "Segment file Dates for the week of %s \n\n", date);
   fprintf (stats2, "Last Processed Files:\n\n");
 

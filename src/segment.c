@@ -1179,22 +1179,22 @@ copy_info_files (short type)
           str[0] = 0;
           if (fgets (str, MAXSTR, info) == NULL)
             break;
+
+          sprintf (asc_year, "%d", date.year);
+          ins_date = strstr (str, "####");
+          if (ins_date != NULL)
+            {
+              strncpy (ins_date, asc_year, 4);
+            }
           if (str[0] == ';')
             {
-              ins_date = strstr (str, "####");
-              sprintf (asc_year, "%d", date.year);
-              if (ins_date != NULL)
-                strncpy (ins_date, asc_year, 4);
               fprintf (outfilep, "%s", str);
             }
           else
             {
-              ins_date = strstr (str, "####");
-              sprintf (asc_year, "%d", date.year);
-              if (ins_date != NULL)
-                strncpy (ins_date, asc_year, 4);
               fprintf (outfilep, ";%c %s", linetype[type], str);        //HERE
             }
+
           // log
           if (eof == ftell (info))
             break;

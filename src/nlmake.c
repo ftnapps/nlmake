@@ -30,6 +30,7 @@ char ProgName[] = {"NLMake"};
 int MajVer = 1;
 int MinVer = 13;
 int Rev = 1;
+int SubRev =2;
 #ifdef OS2
 char OStype[] = {"OS/2"};
 #endif
@@ -162,7 +163,7 @@ int main (short ParmsCtr, char *Parms[])
   char textline[512];
   short cntr = 0, cntr2 = 0;
 
-  printf("%s v%i.%i.%i (%s) \n",ProgName, MajVer, MinVer, Rev, OSType);
+  printf("%s v%i.%i.%i%i (%s) \n",ProgName, MajVer, MinVer, Rev, SubRev, OSType);
   printf("Copyright (c) 2002, RuneSoft Creations\n");
   printf("Original Copyright: (c) 1999, DSO Enterprises\n");
   printf("Original Linux Port: (c) 2001, Carl Austin Bennett 1:249/116\n");

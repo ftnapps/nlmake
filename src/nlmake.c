@@ -6,33 +6,33 @@
 #include <sys/stat.h>
 
 #ifdef __linux__
-#include <unistd.h> // getcwd
+#include <unistd.h>		// getcwd
 #include "doslinux.h"
 #elif defined(__DOS__) || defined(__NT__) || defined(__OS2__)
-#include <direct.h> // getcwd
+#include <direct.h>		// getcwd
 #endif
 
 #include "records.h"
 #include "logdef.h"
-#include "textstr.inc"          // Processing commands in string form
+#include "textstr.inc"		// Processing commands in string form
 
 
 #ifdef __DOS__
-#define MAXSUBFILES 35          //Files in CTL
+#define MAXSUBFILES 35		//Files in CTL
 #else
-#define MAXSUBFILES 100         // Files in CTL
+#define MAXSUBFILES 100		// Files in CTL
 #endif
 
 #if defined(__linux__)
-  #define strnicmp strncasecmp
+#define strnicmp strncasecmp
 #endif
 
 #if defined(__linux__)
-  #define PathChar '/'
-  #define ARGIND "-"
+#define PathChar '/'
+#define ARGIND "-"
 #else
-  #define PathChar '\\'
-  #define ARGIND "/"
+#define PathChar '\\'
+#define ARGIND "/"
 #endif
 
 
@@ -44,13 +44,13 @@ int SubRev = 2;
 
 
 #if defined(__DOS__)
-  #define OSType "DOS"
+#define OSType "DOS"
 #elif defined(__OS2__) || defined(__EMX__)
-  #define OSType "OS/2"
+#define OSType "OS/2"
 #elif defined(__NT__)
-  #define OSType "Win32"
+#define OSType "Win32"
 #elif defined(__linux__)
-  #define OSType "Linux"
+#define OSType "Linux"
 #endif
 
 
@@ -66,7 +66,7 @@ extern short getJDate (short type);
 extern short test_segment (void);
 extern short process_new (void);
 extern short copynew (void);
-extern int create_directory (char *dirname);
+extern void create_directory (char *dirname);
 extern int copyfile (char *filename, char *destination);
 extern void deletefile (char *filename);
 extern short init_compressors (void);
@@ -174,7 +174,7 @@ main (int ParmsCtr, char *Parms[])
   short cntr = 0, cntr2;
 
   printf ("%s v%i.%i.%i%i (%s) \n", ProgName, MajVer, MinVer, Rev, SubRev,
-          OSType);
+	  OSType);
   printf ("Copyright (c) 2002, RuneSoft Creations\n");
   printf ("Original Copyright: (c) 1999, DSO Enterprises\n");
   printf ("Original Linux Port: (c) 2001, Carl Austin Bennett 1:249/116\n");
@@ -183,7 +183,7 @@ main (int ParmsCtr, char *Parms[])
 
   memset (textline, 0, sizeof (textline));
 
-  errorlvl = openlog ();        // open logfile
+  errorlvl = openlog ();	// open logfile
   if (errorlvl > 0)
     {
       printf ("ERRORLEVEL %d - Critial stop - I/O problem\n", errorlvl);
@@ -200,153 +200,154 @@ main (int ParmsCtr, char *Parms[])
   initglobals ();
 
   logwrite (SYS_COMMAND, 0);
-  strcat (textline, Parms[0]);  // Log Comand Line
-  strcat (textline, " ");       // Space
+  strcat (textline, Parms[0]);	// Log Comand Line
+  strcat (textline, " ");	// Space
 
   for (cntr2 = 1; cntr2 <= (ParmsCtr - 1); cntr2++)
     {
-      strcat (textline, Parms[cntr2]);  // Log Comand Line
-      strcat (textline, " ");   // Space
+      strcat (textline, Parms[cntr2]);	// Log Comand Line
+      strcat (textline, " ");	// Space
       //printf("got %s\n",Parms[cntr2]);
 
       while (LinePrms[cntr].String != NULL)
-        {
-          if (strnicmp
-              (Parms[cntr2], LinePrms[cntr].Single,
-               strlen (LinePrms[cntr].Single)) == 0)
-            break;
-          if (LinePrms[cntr].String == NULL)
-            {
-              cntr = 0;         // HardCode
-              break;
-            }
-          cntr++;
-        }
+	{
+	  if (strnicmp
+	      (Parms[cntr2], LinePrms[cntr].Single,
+	       strlen (LinePrms[cntr].Single)) == 0)
+	    break;
+	  if (LinePrms[cntr].String == NULL)
+	    {
+	      cntr = 0;		// HardCode
+	      break;
+	    }
+	  cntr++;
+	}
       switch (LinePrms[cntr].Type)
-        {
-        case 0:
-          cntr = 0;
-          break;
-        case 1:
-          PROCESS = 'Y';
-          cntr = 0;
-          break;
-        case 2:
-          TEST = 'Y';
-          cntr = 0;
-          break;
-        case 3:
-          Pathptr = strchr (Parms[cntr2], '=');
-          if (Pathptr != NULL)
-            {
-              Pathptr++;
-              strcpy (MergePath, strupr (Pathptr));
-            }
-          cntr = 0;
-          break;
-        case 4:
-          Pathptr = strchr (Parms[cntr2], '=');
-          if (Pathptr != NULL)
-            {
-              Pathptr++;
-              strcpy (NetWorkName, Pathptr);
-            }
-          cntr = 0;
-          break;
-        case 5:
-          DISP = 'Y';
-          cntr = 0;
-          break;
-        case 6:
-          FORCE = 'Y';
-          cntr = 0;
-          break;
-        case 7:
-          //printf("Nodelist production/testing utility\n");
-          printf (
-            "Syntax:\n"
-            "\n"
-            "-Standard Functions:\n"
-            "nlmake [nlmake.ctl] " ARGIND "P " ARGIND "F " ARGIND "T " ARGIND "M=[Nodelist] " ARGIND "N=[NetWork]\n"
-            "\n"
-            ARGIND "Process - Processes all segment files and submits changes, if needed.\n"
-            ARGIND "Force   - During a production run, Forces submission to submit address\n"
-            ARGIND "Test    - Tests & accepts new inbound segments. (default)\n"
-            ARGIND "Merge=  - Creates a merged nodelist. [Nodelist + Segment]\n"
-            ARGIND "Name=   - Network Name.\n"
-            "\n"
-            "Statistic Files and Netmail:\n"
-            "nlmake [nlmake.ctl] " ARGIND "ALL " ARGIND "ERR " ARGIND "STA " ARGIND "LAS\n\n"
-            ARGIND "ALL     - Tests All & accepts new inbound segments.\n"
-            ARGIND "ERRors  - NetMail Notify all (current errors).\n"
-            ARGIND "STAts   - Saves stats to [nlmake].ERR.\n"
-            ARGIND "LASt    - Last segment receive dates output to lastin.txt\n"
-            ARGIND "LATe    - NetMail Notify all who's segments are older than MAXAGE.\n"
-            "\n"
-            "Debugging and Flags:\n"
-            "nlmake [nlmake.ctl] " ARGIND "D " ARGIND "COM\n"
-            "\n"
-            ARGIND "Display - Displays what is read from the *.ctl file. (debug)\n"
-            ARGIND "COMpile - Refresh Database with flags.ctl.\n");
-          logtext ("User requested command line help", 4, YES);
-          logwrite (SYS_STOP, 0);
-          closelog ();          // close logfile
-          exit (0);
-          cntr = 0;
-          break;
-        case 8:
-          deletefile ("quick.lst");
-          cntr = 0;
-          break;
-        case 9:
-          TESTALL = 'Y';
-          cntr = 0;
-          break;
-        case 10:
-          STATS = 'Y';
-          TESTALL = 'Y';
-          cntr = 0;
-          break;
-        case 11:
-          LASTDATES = 'Y';
-          cntr = 0;
-          break;
-        case 12:
-          NOTIFY = 'Y';
-          TESTALL = 'Y';
-          cntr = 0;
-          break;
-        case 13:
-          ISLATE = 'Y';
-          TEST = 'Y';
-          cntr = 0;
-          break;
-        case 99:
-          if (ControlFile[0] == 0)
-            {
-              Pathptr = strchr (Parms[cntr2], '.');
-              if (Pathptr != NULL)
-                strcpy (ControlFile, Parms[cntr2]);
-              else
-                {
-                  strcpy (ControlFile, Parms[cntr2]);
-                  strcat (ControlFile, ".ctl");
-                }
-              temp = fopen (ControlFile, "rt");
-              if (temp == NULL)
-                ControlFile[0] = 0;
-              if (temp)
-                fclose (temp);
-            }
-          else
-            printf ("Ignoring bad command in commandline <%s>\n",
-                    Parms[cntr2]);
-          cntr = 0;
-          break;
-        default:
-          cntr = 0;
-          break;
-        }
+	{
+	case 0:
+	  cntr = 0;
+	  break;
+	case 1:
+	  PROCESS = 'Y';
+	  cntr = 0;
+	  break;
+	case 2:
+	  TEST = 'Y';
+	  cntr = 0;
+	  break;
+	case 3:
+	  Pathptr = strchr (Parms[cntr2], '=');
+	  if (Pathptr != NULL)
+	    {
+	      Pathptr++;
+	      strcpy (MergePath, strupr (Pathptr));
+	    }
+	  cntr = 0;
+	  break;
+	case 4:
+	  Pathptr = strchr (Parms[cntr2], '=');
+	  if (Pathptr != NULL)
+	    {
+	      Pathptr++;
+	      strcpy (NetWorkName, Pathptr);
+	    }
+	  cntr = 0;
+	  break;
+	case 5:
+	  DISP = 'Y';
+	  cntr = 0;
+	  break;
+	case 6:
+	  FORCE = 'Y';
+	  cntr = 0;
+	  break;
+	case 7:
+	  //printf("Nodelist production/testing utility\n");
+	  printf ("Syntax:\n"
+		  "\n"
+		  "-Standard Functions:\n"
+		  "nlmake [nlmake.ctl] " ARGIND "P " ARGIND "F " ARGIND "T "
+		  ARGIND "M=[Nodelist] " ARGIND "N=[NetWork]\n" "\n" ARGIND
+		  "Process - Processes all segment files and submits changes, if needed.\n"
+		  ARGIND
+		  "Force   - During a production run, Forces submission to submit address\n"
+		  ARGIND
+		  "Test    - Tests & accepts new inbound segments. (default)\n"
+		  ARGIND
+		  "Merge=  - Creates a merged nodelist. [Nodelist + Segment]\n"
+		  ARGIND "Name=   - Network Name.\n" "\n"
+		  "Statistic Files and Netmail:\n" "nlmake [nlmake.ctl] "
+		  ARGIND "ALL " ARGIND "ERR " ARGIND "STA " ARGIND "LAS\n\n"
+		  ARGIND
+		  "ALL     - Tests All & accepts new inbound segments.\n"
+		  ARGIND "ERRors  - NetMail Notify all (current errors).\n"
+		  ARGIND "STAts   - Saves stats to [nlmake].ERR.\n" ARGIND
+		  "LASt    - Last segment receive dates output to lastin.txt\n"
+		  ARGIND
+		  "LATe    - NetMail Notify all who's segments are older than MAXAGE.\n"
+		  "\n" "Debugging and Flags:\n" "nlmake [nlmake.ctl] " ARGIND
+		  "D " ARGIND "COM\n" "\n" ARGIND
+		  "Display - Displays what is read from the *.ctl file. (debug)\n"
+		  ARGIND "COMpile - Refresh Database with flags.ctl.\n");
+	  logtext ("User requested command line help", 4, YES);
+	  logwrite (SYS_STOP, 0);
+	  closelog ();		// close logfile
+	  exit (0);
+	  cntr = 0;
+	  break;
+	case 8:
+	  deletefile ("quick.lst");
+	  cntr = 0;
+	  break;
+	case 9:
+	  TESTALL = 'Y';
+	  cntr = 0;
+	  break;
+	case 10:
+	  STATS = 'Y';
+	  TESTALL = 'Y';
+	  cntr = 0;
+	  break;
+	case 11:
+	  LASTDATES = 'Y';
+	  cntr = 0;
+	  break;
+	case 12:
+	  NOTIFY = 'Y';
+	  TESTALL = 'Y';
+	  cntr = 0;
+	  break;
+	case 13:
+	  ISLATE = 'Y';
+	  TEST = 'Y';
+	  cntr = 0;
+	  break;
+	case 99:
+	  if (ControlFile[0] == 0)
+	    {
+	      Pathptr = strchr (Parms[cntr2], '.');
+	      if (Pathptr != NULL)
+		strcpy (ControlFile, Parms[cntr2]);
+	      else
+		{
+		  strcpy (ControlFile, Parms[cntr2]);
+		  strcat (ControlFile, ".ctl");
+		}
+	      temp = fopen (ControlFile, "rt");
+	      if (temp == NULL)
+		ControlFile[0] = 0;
+	      if (temp)
+		fclose (temp);
+	    }
+	  else
+	    printf ("Ignoring bad command in commandline <%s>\n",
+		    Parms[cntr2]);
+	  cntr = 0;
+	  break;
+	default:
+	  cntr = 0;
+	  break;
+	}
     }
 
   logtext (textline, 5, YES);
@@ -366,7 +367,7 @@ main (int ParmsCtr, char *Parms[])
       logtext (textline, 0, YES);
       logwrite (SYS_COMMAND_ABORT, 0);
       logwrite (SYS_STOP, 0);
-      closelog ();              // close logfile
+      closelog ();		// close logfile
       exit (255);
     }
   fclose (temp);
@@ -392,7 +393,7 @@ main (int ParmsCtr, char *Parms[])
       printf ("%s\n", textline);
       logwrite (CFE_ABORT, 0);
       logwrite (SYS_STOP, 0);
-      closelog ();              // close logfile
+      closelog ();		// close logfile
       exit (255);
     }
   else
@@ -407,14 +408,14 @@ main (int ParmsCtr, char *Parms[])
   if (FLAGCHK == 'Y' || FLAGCHKAUTO == 'Y')
     {
       if (comp_compile_date () == 1)
-        {
-          sprintf (textline,
-                   "Compiling flag lookup file from flags.ctl ... ");
-          logtext (textline, 0, YES);
-          cre_flags_db ("flags.ctl");
-          sprintf (textline, "Compile completed.");
-          logtext (textline, 0, YES);
-        }
+	{
+	  sprintf (textline,
+		   "Compiling flag lookup file from flags.ctl ... ");
+	  logtext (textline, 0, YES);
+	  cre_flags_db ("flags.ctl");
+	  sprintf (textline, "Compile completed.");
+	  logtext (textline, 0, YES);
+	}
     }
 
   // disp control info
@@ -426,14 +427,14 @@ main (int ParmsCtr, char *Parms[])
       errorlvl = process_new ();
       //test if file is here first
       if (CLEANUPOUT == 'N')
-        copyfile (OutFile, "outfile.tmp");
+	copyfile (OutFile, "outfile.tmp");
       else
-        {
-          memset (textline, 0, sizeof (textline));
-          memcpy (textline, OutFile, strlen (OutFile) - 4);
-          FindMostCurr (textline);
-          copyfile (textline, "outfile.tmp");
-        }
+	{
+	  memset (textline, 0, sizeof (textline));
+	  memcpy (textline, OutFile, strlen (OutFile) - 4);
+	  FindMostCurr (textline);
+	  copyfile (textline, "outfile.tmp");
+	}
       copynew ();
       errorlvl = process_segment ();
     }
@@ -463,23 +464,23 @@ main (int ParmsCtr, char *Parms[])
   deletefile ("outfile.tmp");
 
   logwrite (SYS_STOP, 0);
-  closelog ();                  // close logfile
+  closelog ();			// close logfile
 
   if (errorlvl <= 5)
     {
       if (PROCESS == 'Y')
-        {
-          printf ("ERRORLEVEL %d Process mode - %s\n", errorlvl,
-                  errorlevelstr[errorlvl]);
-          exit (errorlvl);
-        }
+	{
+	  printf ("ERRORLEVEL %d Process mode - %s\n", errorlvl,
+		  errorlevelstr[errorlvl]);
+	  exit (errorlvl);
+	}
       else if (TEST == 'Y')
-        {
-          errorlvl += 3;
-          printf ("ERRORLEVEL %d Test mode - %s\n", errorlvl,
-                  errorlevelstr[errorlvl]);
-          exit (errorlvl);
-        }
+	{
+	  errorlvl += 3;
+	  printf ("ERRORLEVEL %d Test mode - %s\n", errorlvl,
+		  errorlevelstr[errorlvl]);
+	  exit (errorlvl);
+	}
     }
   else
     {
@@ -543,1183 +544,1183 @@ proctrlfile (void)
     {
       memset (str, 0, sizeof (str));
 
-      str[0] = ';';             // to get us to the first fgets (cheat)
+      str[0] = ';';		// to get us to the first fgets (cheat)
 
       fgets (str, MAXSTR, ctrlfile);
       linecnt++;
 
       while (str[0] == ' ')
-        memmove (str, str + 1, 253);
+	memmove (str, str + 1, 253);
 
       ptr = strchr (str, ';');
       if (ptr != NULL)
-        *ptr = 0;
+	*ptr = 0;
 
 //                      *(ptr+strlen(str)) = 0;
       if (str[0] != 0 && strlen (str) >= 4)
-        {
-          while (CfilePrms[cntr].String != NULL)
-            {
-              if (strnicmp
-                  (str, CfilePrms[cntr].Single,
-                   strlen (CfilePrms[cntr].Single)) == 0)
-                {
-                  break;
-                }
-              else
-                cntr++;
-            }
-          if (CfilePrms[cntr].Type == 99)
-            {
-              if (mark_data == 1)
-                cntr = 27;
-              else if (mark_file == 1)
-                cntr = 28;
-            }
-          else
-            {
-              mark_data = 0;
-              mark_file = 0;
-            }
-          switch (CfilePrms[cntr].Type)
-            {
-            case 0:
-              break;
-            case 1:             // Make
-              ptr = strchr (str, ' ');
-              ptr++;
-              while (ptr[0] == ' ')
-                memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-              cnt = 0;
-              while (SegmentType[cnt].Single != NULL)
-                {
-                  if (strnicmp
-                      (ptr, SegmentType[cnt].Single,
-                       strlen (SegmentType[cnt].Single)) == 0)
-                    {
-                      MAKETYPE = SegmentType[cnt].Type;
-                      break;
-                    }
-                  cnt++;
-                }
-              if (SegmentType[cnt].Single == NULL)
-                {
-                  logwrite (CFE_MAKE, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              ptr2 = strchr (ptr, ' ');
-              if (ptr2 != NULL)
-                {
-                  ptr2++;
-                  while (ptr2[0] == ' ')
-                    memmove (ptr2, ptr2 + 1, (strlen (ptr2) - 1));
-                  MAKENUMBER = atoi (ptr2);
-                  ptr2 = strchr (ptr2, ' ');
-                }
-              if (ptr2 != NULL)
-                {
-                  ptr2++;
-                  while (ptr2[0] == ' ')
-                    memmove (ptr2, ptr2 + 1, (strlen (ptr) - 1));
-                  strncpy (expSourceFile, ptr2, strlenII (ptr2));
-                }
-              logwrite (CF_MAKE, 0);
-              sprintf (LogLine, "%s [%d] [%s]", SegmentType[MAKETYPE].String,
-                       MAKENUMBER, expSourceFile);
-              logtext (LogLine, 5, NO);
-              cntr = 0;
-              break;
-            case 2:             // Name
-              ptr = strchr (str, ' ');
-              if (ptr == NULL)
-                {
-                  logwrite (CFE_NAME, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              ptr++;
-              while (ptr[0] == ' ')
-                memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-              if (strlenII (ptr) <= 20)
-                strncpy (NetWorkName, ptr, strlenII (ptr));
-              else
-                strncpy (NetWorkName, ptr, 20);
-              logwrite (CF_NAME, 0);
-              logtext (NetWorkName, 5, NO);
-              cntr = 0;
-              break;
-            case 3:             // Publish
-              ptr = strchr (str, ' ');
-              if (ptr == NULL)
-                {
-                  logwrite (CFE_PUBLISH, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              ptr++;
-              while (ptr[0] == ' ')
-                memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-              cnt = 0;
-              while (WeekDays[cnt].Single != NULL)
-                {
-                  if (strnicmp
-                      (ptr, WeekDays[cnt].Single,
-                       strlen (WeekDays[cnt].Single)) == 0)
-                    {
-                      strncpy (Publish_day, WeekDays[cnt].String,
-                               strlen (WeekDays[cnt].String));
-                      break;
-                    }
-                  cnt++;
-                }
-              if (WeekDays[cnt].Single == NULL)
-                {
-                  logwrite (CFE_PUBLISH, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              else
-                logwrite (CF_PUBLISH, 0);
-              sprintf (LogLine, "%s", Publish_day);
-              logtext (LogLine, 5, NO);
-              cntr = 0;
-              break;
-            case 4:             // Process
-              ptr = strchr (str, ' ');
-              if (ptr == NULL)
-                {
-                  logwrite (CFE_PROCESS, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              ptr++;
-              while (ptr[0] == ' ')
-                memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-              cnt = 0;
-              while (WeekDays[cnt].Single != NULL)
-                {
-                  if (strnicmp
-                      (ptr, WeekDays[cnt].Single,
-                       strlen (WeekDays[cnt].Single)) == 0)
-                    {
-                      strncpy (Process_day, WeekDays[cnt].String,
-                               strlen (WeekDays[cnt].String));
-                      break;
-                    }
-                  cnt++;
-                }
-              if (WeekDays[cnt].Single == NULL)
-                {
-                  logwrite (CFE_PROCESS, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              else
-                {
-                  logwrite (CF_PROCESS, 0);
-                  sprintf (LogLine, "%s", Process_day);
-                  logtext (LogLine, 5, NO);
-                  if (is_proc_day (cnt) == 0)
-                    {
-                      if (TEST == 'N')
-                        PROCESS = 'Y';
-                      else
-                        PROCESS = 'N';
-                    }
-                  else if (PROCESS == 'Y')
-                    TEST = 'N';
-                  else
-                    TEST = 'Y';
-                }
-              cntr = 0;
-              break;
-            case 5:             // Merge
-              if (MergePath[0] == 0)
-                {
-                  ptr = strchr (str, ' ');
-                  if (ptr == NULL)
-                    {
-                      logwrite (CFE_MERGE, linecnt);
-                      logwrite (CFE_ABORT, 0);
-                      logwrite (SYS_STOP, 0);
-                      closelog ();      // close logfile
-                      exit (255);       // abort fatal cfg file error
-                    }
-                  ptr++;
+	{
+	  while (CfilePrms[cntr].String != NULL)
+	    {
+	      if (strnicmp
+		  (str, CfilePrms[cntr].Single,
+		   strlen (CfilePrms[cntr].Single)) == 0)
+		{
+		  break;
+		}
+	      else
+		cntr++;
+	    }
+	  if (CfilePrms[cntr].Type == 99)
+	    {
+	      if (mark_data == 1)
+		cntr = 27;
+	      else if (mark_file == 1)
+		cntr = 28;
+	    }
+	  else
+	    {
+	      mark_data = 0;
+	      mark_file = 0;
+	    }
+	  switch (CfilePrms[cntr].Type)
+	    {
+	    case 0:
+	      break;
+	    case 1:		// Make
+	      ptr = strchr (str, ' ');
+	      ptr++;
+	      while (ptr[0] == ' ')
+		memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+	      cnt = 0;
+	      while (SegmentType[cnt].Single != NULL)
+		{
+		  if (strnicmp
+		      (ptr, SegmentType[cnt].Single,
+		       strlen (SegmentType[cnt].Single)) == 0)
+		    {
+		      MAKETYPE = SegmentType[cnt].Type;
+		      break;
+		    }
+		  cnt++;
+		}
+	      if (SegmentType[cnt].Single == NULL)
+		{
+		  logwrite (CFE_MAKE, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      ptr2 = strchr (ptr, ' ');
+	      if (ptr2 != NULL)
+		{
+		  ptr2++;
+		  while (ptr2[0] == ' ')
+		    memmove (ptr2, ptr2 + 1, (strlen (ptr2) - 1));
+		  MAKENUMBER = atoi (ptr2);
+		  ptr2 = strchr (ptr2, ' ');
+		}
+	      if (ptr2 != NULL)
+		{
+		  ptr2++;
+		  while (ptr2[0] == ' ')
+		    memmove (ptr2, ptr2 + 1, (strlen (ptr) - 1));
+		  strncpy (expSourceFile, ptr2, strlenII (ptr2));
+		}
+	      logwrite (CF_MAKE, 0);
+	      sprintf (LogLine, "%s [%d] [%s]", SegmentType[MAKETYPE].String,
+		       MAKENUMBER, expSourceFile);
+	      logtext (LogLine, 5, NO);
+	      cntr = 0;
+	      break;
+	    case 2:		// Name
+	      ptr = strchr (str, ' ');
+	      if (ptr == NULL)
+		{
+		  logwrite (CFE_NAME, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      ptr++;
+	      while (ptr[0] == ' ')
+		memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+	      if (strlenII (ptr) <= 20)
+		strncpy (NetWorkName, ptr, strlenII (ptr));
+	      else
+		strncpy (NetWorkName, ptr, 20);
+	      logwrite (CF_NAME, 0);
+	      logtext (NetWorkName, 5, NO);
+	      cntr = 0;
+	      break;
+	    case 3:		// Publish
+	      ptr = strchr (str, ' ');
+	      if (ptr == NULL)
+		{
+		  logwrite (CFE_PUBLISH, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      ptr++;
+	      while (ptr[0] == ' ')
+		memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+	      cnt = 0;
+	      while (WeekDays[cnt].Single != NULL)
+		{
+		  if (strnicmp
+		      (ptr, WeekDays[cnt].Single,
+		       strlen (WeekDays[cnt].Single)) == 0)
+		    {
+		      strncpy (Publish_day, WeekDays[cnt].String,
+			       strlen (WeekDays[cnt].String));
+		      break;
+		    }
+		  cnt++;
+		}
+	      if (WeekDays[cnt].Single == NULL)
+		{
+		  logwrite (CFE_PUBLISH, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      else
+		logwrite (CF_PUBLISH, 0);
+	      sprintf (LogLine, "%s", Publish_day);
+	      logtext (LogLine, 5, NO);
+	      cntr = 0;
+	      break;
+	    case 4:		// Process
+	      ptr = strchr (str, ' ');
+	      if (ptr == NULL)
+		{
+		  logwrite (CFE_PROCESS, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      ptr++;
+	      while (ptr[0] == ' ')
+		memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+	      cnt = 0;
+	      while (WeekDays[cnt].Single != NULL)
+		{
+		  if (strnicmp
+		      (ptr, WeekDays[cnt].Single,
+		       strlen (WeekDays[cnt].Single)) == 0)
+		    {
+		      strncpy (Process_day, WeekDays[cnt].String,
+			       strlen (WeekDays[cnt].String));
+		      break;
+		    }
+		  cnt++;
+		}
+	      if (WeekDays[cnt].Single == NULL)
+		{
+		  logwrite (CFE_PROCESS, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      else
+		{
+		  logwrite (CF_PROCESS, 0);
+		  sprintf (LogLine, "%s", Process_day);
+		  logtext (LogLine, 5, NO);
+		  if (is_proc_day (cnt) == 0)
+		    {
+		      if (TEST == 'N')
+			PROCESS = 'Y';
+		      else
+			PROCESS = 'N';
+		    }
+		  else if (PROCESS == 'Y')
+		    TEST = 'N';
+		  else
+		    TEST = 'Y';
+		}
+	      cntr = 0;
+	      break;
+	    case 5:		// Merge
+	      if (MergePath[0] == 0)
+		{
+		  ptr = strchr (str, ' ');
+		  if (ptr == NULL)
+		    {
+		      logwrite (CFE_MERGE, linecnt);
+		      logwrite (CFE_ABORT, 0);
+		      logwrite (SYS_STOP, 0);
+		      closelog ();	// close logfile
+		      exit (255);	// abort fatal cfg file error
+		    }
+		  ptr++;
 
-                  while (ptr[0] == ' ')
-                    memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-                  strncpy (MergePath, ptr, strlenII (ptr));
-                }
-              if (MergePath[0] == 0)
-                logwrite (CFE_MERGE, linecnt);
-              else
-                logwrite (CF_MERGE, 0);
-              sprintf (LogLine, "%s", MergePath);
-              logtext (LogLine, 5, NO);
-              cntr = 0;
-              break;
-            case 6:             // Private
-              ptr = strchr (str, ' ');
-              if (ptr == NULL)
-                {
-                  logwrite (CFE_PRIVATE, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              ptr++;
-              while (ptr[0] == ' ')
-                memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-              cnt = 0;
-              while (PVTDisposition[cnt].Single != NULL)
-                {
-                  if (strnicmp
-                      (ptr, PVTDisposition[cnt].Single,
-                       strlen (PVTDisposition[cnt].Single)) == 0)
-                    {
-                      DispPVT = PVTDisposition[cnt].Type;
-                      break;
-                    }
-                  else
-                    cnt++;
-                }
-              if (PVTDisposition[cnt].Single == NULL)
-                {
-                  logwrite (CFE_PRIVATE, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              else
-                logwrite (CF_PRIVATE, 0);
-              sprintf (LogLine, "%s", PVTDisposition[cnt].String);
-              logtext (LogLine, 5, NO);
-              cntr = 0;
-              break;
-            case 7:             // MinPhone
-              ptr = strchr (str, ' ');
-              if (ptr == NULL)
-                {
-                  logwrite (CFE_MINPHONE, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              ptr++;
-              while (ptr[0] == ' ')
-                memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-              MinPhone = atoi (ptr);
-              if (MinPhone >= 30 || ptr[0] == 0)
-                {
-                  logwrite (CFE_MINPHONE, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              else
-                logwrite (CF_MINPHONE, 0);
-              sprintf (LogLine, "%d", MinPhone);
-              logtext (LogLine, 5, NO);
-              cntr = 0;
-              break;
-            case 8:             // BaudRate
-              ptr = strchr (str, ' ');
-              if (ptr == NULL)
-                {
-                  logwrite (CFE_BAUDRATE, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              ptr++;
-              while (ptr[0] == ' ')
-                memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-              BaudRates[0] = ',';
-              strncat (BaudRates, ptr, strlenII (ptr));
-              breakbaud ();
-              // here
-              cntr = 0;
-              break;
-            case 9:             // Master
-              ptr = strchr (str, ' ');
-              if (ptr == NULL)
-                {
-                  logwrite (CFE_MASTER, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              ptr++;
-              while (ptr[0] == ' ')
-                memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-              strncpy (Master, ptr, strlenII (ptr));
-              if (Master[0] == 0)
-                logwrite (CFE_MASTER, linecnt);
-              else
-                logwrite (CF_MASTER, 0);
-              sprintf (LogLine, "%s", Master);
-              logtext (LogLine, 5, NO);
-              cntr = 0;
-              break;
-            case 10:            // Uploads
-              ptr = strchr (str, ' ');
-              if (ptr == NULL)
-                {
-                  logwrite (CFE_UPLOADS, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              ptr++;
-              while (ptr[0] == ' ')
-                memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-              strncpy (Uploads, ptr, strlenII (ptr));
-              if (Uploads[0] == 0)
-                logwrite (CFE_UPLOADS, linecnt);
-              else
-                logwrite (CF_UPLOADS, 0);
-              sprintf (LogLine, "%s", Uploads);
-              logtext (LogLine, 5, NO);
-              cntr = 0;
-              break;
-            case 11:            // MailFiles
-              ptr = strchr (str, ' ');
-              if (ptr == NULL)
-                {
-                  logwrite (CFE_MAILFILES, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              ptr++;
-              while (ptr[0] == ' ')
-                memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-              strncpy (MailFiles, ptr, strlenII (ptr));
-              if (MailFiles[0] == 0)
-                {
-                  logwrite (CFE_MAILFILES, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              else
-                logwrite (CF_MAILFILES, 0);
-              sprintf (LogLine, "%s", MailFiles);
-              logtext (LogLine, 5, NO);
-              cntr = 0;
-              break;
-            case 12:            // Update
-              ptr = strchr (str, ' ');
-              if (ptr == NULL)
-                {
-                  logwrite (CFE_UPDATE, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              ptr++;
-              while (ptr[0] == ' ')
-                memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-              strncpy (Update, ptr, strlenII (ptr));
-              if (Update[0] == 0)
-                {
-                  logwrite (CFE_UPDATE, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              else
-                logwrite (CF_UPDATE, 0);
-              sprintf (LogLine, "%s", Update);
-              logtext (LogLine, 5, NO);
-              cntr = 0;
-              break;
-            case 13:            // BadFiles
-              ptr = strchr (str, ' ');
-              if (ptr == NULL)
-                {
-                  logwrite (CFE_BADFILES, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              ptr++;
-              while (ptr[0] == ' ')
-                memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-              strncpy (BadFiles, ptr, strlenII (ptr));
-              if (BadFiles[0] == 0)
-                {
-                  logwrite (CFE_BADFILES, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              else
-                logwrite (CF_BADFILES, 0);
-              sprintf (LogLine, "%s", BadFiles);
-              logtext (LogLine, 5, NO);
-              cntr = 0;
-              break;
-            case 14:            // OutFile
-              ptr = strchr (str, ' ');
-              if (ptr == NULL)
-                {
-                  logwrite (CFE_OUTFILE, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              ptr++;
-              while (ptr[0] == ' ')
-                memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-              if (strlenII (ptr) <= MAXFILELEN)
-                strncpy (OutFile, ptr, strlenII (ptr));
-              else
-                strncpy (OutFile, ptr, MAXFILELEN);
-              if (OutFile[0] == 0)
-                {
-                  logwrite (CFE_OUTFILE, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              else
-                logwrite (CF_OUTFILE, 0);
-              sprintf (LogLine, "%s", OutFile);
-              logtext (LogLine, 5, NO);
-              cntr = 0;
-              break;
-            case 15:            // OutPath
-              ptr = strchr (str, ' ');
-              if (ptr == NULL)
-                {
-                  logwrite (CFE_OUTPATH, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              ptr++;
-              while (ptr[0] == ' ')
-                memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-              strncpy (OutPath, ptr, strlenII (ptr));
-              if (OutPath[0] == 0)
-                {
-                  logwrite (CFE_OUTPATH, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              else
-                logwrite (CF_OUTPATH, 0);
-              sprintf (LogLine, "%s", OutPath);
-              logtext (LogLine, 5, NO);
-              cntr = 0;
-              break;
-            case 16:            // Threshold
-              ptr = strchr (str, ' ');
-              if (ptr == NULL)
-                {
-                  logwrite (CFE_THRESHOLD, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              ptr++;
-              while (ptr[0] == ' ')
-                memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-              ptr = strchr (ptr, ' ');
-              if (ptr != NULL)
-                *ptr = 0;
-              ptr = strchr (str, ' ');
-              ptr++;
-              threshold.arc_size = atoi (ptr);
-              ptr = strchr (ptr, 0);
-              ptr++;
-              threshold.diff_size = atoi (ptr);
-              //here
-              cntr = 0;
-              break;
-            case 17:            // Arc
-              ptr = strchr (str, ' ');
-              if (ptr != NULL)
-                {
-                  ptr++;
-                  while (ptr[0] == ' ')
-                    memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-                  ARC = atoi (ptr);
-                }
-              else
-                {
-                  logwrite (CFE_ARC, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              // here
-              cntr = 0;
-              break;
-            case 18:            // OutDiff
-              ptr = strchr (str, ' ');
-              if (ptr != NULL)
-                {
-                  ptr++;
-                  while (ptr[0] == ' ')
-                    memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-                  if (strlenII (ptr) <= MAXFILELEN)
-                    strncpy (OutDiff, ptr, strlenII (ptr));
-                  else
-                    strncpy (OutDiff, ptr, MAXFILELEN);
-                  logwrite (CF_OUTDIFF, 0);
-                  sprintf (LogLine, "%s", OutDiff);
-                  logtext (LogLine, 5, NO);
-                }
-              else
-                {
-                  logwrite (CFE_OUTDIFF, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              cntr = 0;
-              break;
-            case 19:            // Cleanup
-              CLEANUP = 'Y';
-              //here
-              cntr = 0;
-              break;
-            case 20:            // NetAddess
-              if (NetAddress[0] == 0)
-                {
-                  ptr = strchr (str, ' ');
-                  if (ptr == NULL)
-                    {
-                      logwrite (CFE_NETADDRESS, linecnt);
-                      logwrite (CFE_ABORT, 0);
-                      logwrite (SYS_STOP, 0);
-                      closelog ();      // close logfile
-                      exit (255);       // abort fatal cfg file error
-                    }
-                  ptr++;
-                  while (ptr[0] == ' ')
-                    memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-                  strncpy (NetAddress, ptr, strlenII (ptr));
-                }
-              if (NetAddress[0] == 0)
-                {
-                  logwrite (CFE_NETADDRESS, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              if (breakaddress () == 1)
-                {
-                  logwrite (CFE_NETADDRESS_INV, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              logwrite (CF_NETADDRESS, 0);
-              sprintf (LogLine, "%s", NetAddress);
-              logtext (LogLine, 5, NO);
-              // here
-              strcpy (altnot, ptr);
-              ptr = strchr (altnot, '<');
-              ptr2 = strchr (altnot, '>');
-              if (ptr == NULL || ptr2 == NULL)
-                segfile[0].NameNotify[0] = 0;
-              else
-                {
-                  if ((ptr2 - ptr) <= 72)
-                    strncpy (segfile[0].NameNotify, ptr + 1,
-                             (ptr2 - ptr - 1));
-                  else
-                    strncpy (segfile[0].NameNotify, ptr + 1, 72);
-                }
-              cntr = 0;
-              break;
-            case 21:            // Messages
-              ptr = strchr (str, ' ');
-              if (ptr == NULL)
-                {
-                  logwrite (CFE_MESSAGES, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              ptr++;
-              while (ptr[0] == ' ')
-                memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-              strncpy (Messages, ptr, strlenII (ptr));
-              if (Messages[0] == 0)
-                {
-                  logwrite (CFE_MESSAGES, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              else
-                logwrite (CF_MESSAGES, 0);
-              sprintf (LogLine, "%s", Messages);
-              logtext (LogLine, 5, NO);
-              cntr = 0;
-              break;
-            case 22:            // Submit
-              ptr = strchr (str, ' ');
-              if (ptr == NULL)
-                {
-                  logwrite (CFE_SUBMIT, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              ptr++;
-              while (ptr[0] == ' ')
-                memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-              if (SubAddress[0] == 0)
-                {
-                  strncpy (SubAddress, ptr, strlenII (ptr));
-                  if (SubAddress[0] == 0)
-                    {
-                      logwrite (CFE_SUBMIT, linecnt);
-                      logwrite (CFE_ABORT, 0);
-                      logwrite (SYS_STOP, 0);
-                      closelog ();      // close logfile
-                      exit (255);       // abort fatal cfg file error
-                    }
-                  else
-                    logwrite (CF_SUBMIT, 0);
-                  sprintf (LogLine, "%s ", SubAddress);
-                  strcpy (altnot, ptr);
-                  cnt = 0;
-                  while (MFlagstype[cnt].String != NULL)
-                    {
-                      if (strstr (strupr (ptr), MFlagstype[cnt].String) !=
-                          NULL)
-                        {
-                          switch (MFlagstype[cnt].Type)
-                            {
-                            case 0:
-                              break;
-                            case 1:
-                              mnotify[3].Crash = 'Y';
-                              strcat (LogLine, "Crash,");
-                              break;
-                            case 2:
-                              mnotify[3].Hold = 'Y';
-                              strcat (LogLine, "Hold,");
-                              break;
-                            case 3:
-                              mnotify[3].Intl = 'Y';
-                              strcat (LogLine, "Intl,");
-                              break;
-                            case 4:
-                              mnotify[3].Normal = 'Y';
-                              strcat (LogLine, "Normal,");
-                              break;
-                            default:
-                              break;
-                            }
-                        }
-                      cnt++;
-                    }
-                  logtext (LogLine, 5, NO);
-                }
-              // here
-              ptr = strchr (altnot, '<');
-              ptr2 = strchr (altnot, '>');
-              if (ptr == NULL || ptr2 == NULL)
-                SubNameNotify[0] = 0;
-              else
-                {
-                  if ((ptr2 - ptr) <= 72)
-                    strncpy (SubNameNotify, ptr + 1, (ptr2 - ptr - 1));
-                  else
-                    strncpy (SubNameNotify, ptr + 1, 72);
-                }
-              cntr = 0;
-              break;
-            case 23:            // Notify
-              parnotify (str);
-              cntr = 0;
-              break;
-            case 24:            // Copyright
-              ptr = strchr (str, ' ');
-              if (ptr != NULL)
-                {
-                  ptr++;
-                  while (ptr[0] == ' ')
-                    memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-                  memset (CopyRight, 0, sizeof (CopyRight));
-                  strncpy (CopyRight, ptr, strlenII (ptr));
-                }
-              if (CopyRight[0] == 0)
-                {
-                  logwrite (CFE_COPYRIGHT, linecnt);
-                  sprintf (LogLine,
-                           "Assuming default copyright: cpyright.txt");
-                  logtext (LogLine, 5, YES);
-                }
-              else
-                {
-                  logwrite (CF_COPYRIGHT, 0);
-                  sprintf (LogLine, "%s", CopyRight);
-                  logtext (LogLine, 5, NO);
-                }
-              cntr = 0;
-              break;
-            case 25:            // Prolog
-              ptr = strchr (str, ' ');
-              if (ptr != NULL)
-                {
-                  ptr++;
-                  while (ptr[0] == ' ')
-                    memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-                  memset (Prolog, 0, sizeof (Prolog));
-                  strncpy (Prolog, ptr, strlenII (ptr));
-                }
-              if (Prolog[0] == 0)
-                {
-                  logwrite (CFE_PROLOG, linecnt);
-                  sprintf (LogLine, "Assuming default prolog: prolog.txt");
-                  logtext (LogLine, 5, YES);
-                }
-              else
-                {
-                  logwrite (CF_PROLOG, 0);
-                  sprintf (LogLine, "%s", Prolog);
-                  logtext (LogLine, 5, NO);
-                }
-              cntr = 0;
-              break;
-            case 26:            // Epilog
-              ptr = strchr (str, ' ');
-              if (ptr != NULL)
-                {
-                  ptr++;
-                  while (ptr[0] == ' ')
-                    memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-                  memset (Epilog, 0, sizeof (Epilog));
-                  strncpy (Epilog, ptr, strlenII (ptr));
-                }
-              if (Epilog[0] == 0)
-                {
-                  logwrite (CFE_EPILOG, linecnt);
-                  sprintf (LogLine, "Assuming default epilog: epilog.txt");
-                  logtext (LogLine, 5, YES);
-                }
-              else
-                logwrite (CF_EPILOG, 0);
-              sprintf (LogLine, "%s", Epilog);
-              logtext (LogLine, 5, NO);
-              cntr = 0;
-              break;
-            case 27:            // Comments
-              ptr = strchr (str, ' ');
-              if (ptr != NULL)
-                {
-                  ptr++;
-                  while (ptr[0] == ' ')
-                    memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-                  memset (Comments, 0, sizeof (Comments));
-                  strncpy (Comments, ptr, strlenII (ptr));
-                }
-              if (Comments[0] == 0)
-                {
-                  logwrite (CFE_COMMENTS, linecnt);
-                  sprintf (LogLine, "No File Name");
-                  logtext (LogLine, 5, YES);
-                }
-              else
-                logwrite (CF_COMMENTS, 0);
-              sprintf (LogLine, "%s", Comments);
-              logtext (LogLine, 5, NO);
-              cntr = 0;
-              break;
-            case 28:            // Data
-              if (expSourceFile[0] != 0)
-                {
-                  logtext ("Master input file and DATA stream both specified",
-                           0, YES);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);
-                }
-              if (mark_data != 0)
-                {
-                  if (str[0] == 0)
-                    {
-                      fprintf (outfilep, ";\n");
-                      cntr = 0;
-                      break;
-                    }
-                  fprintf (outfilep, "%s", str);
-                }
-              else
-                {
-                  mark_data = 1;
-                  Dlineoff = linecnt;
-                }
-              cntr = 0;
-              break;
-            case 29:            // Files
-              if (sfilecnt > (MAXSUBFILES - 2))
-                {
-                  logwrite (CFE_MAXFILES, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              if (mark_file != 0)
-                {
-                  if (str[0] == 0)
-                    {
-                      cntr = 0;
-                      break;
-                    }
-                  cnt = 0;
-                  while (SegmentType[cnt].Single != NULL)
-                    {
-                      if (strnicmp
-                          (str, SegmentType[cnt].Single,
-                           strlen (SegmentType[cnt].Single)) == 0)
-                        {
-                          segfile[sfilecnt].SegmentType =
-                            SegmentType[cnt].Type;
-                          break;
-                        }
-                      else
-                        cnt++;
-                    }
-                  if (SegmentType[cnt].Single == NULL)
-                    {
-                      logwrite (CFE_FILES_STYPE, linecnt);
-                      logwrite (CFE_ABORT, 0);
-                      logwrite (SYS_STOP, 0);
-                      closelog ();      // close logfile
-                      exit (255);       // abort fatal cfg file error
-                      // Error
-                      cntr = 0;
-                      break;
-                    }
-                  ptr = strchr (str, ' ');
-                  if (ptr == NULL)
-                    {
-                      logwrite (CFE_FILES, linecnt);
-                      logwrite (CFE_ABORT, 0);
-                      logwrite (SYS_STOP, 0);
-                      closelog ();      // close logfile
-                      exit (255);       // abort fatal cfg file error
-                    }
-                  // pointer crap
-                  ptr++;
-                  while (ptr[0] == ' ')
-                    memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-                  // need to extp zone and net
-                  if (MAKETYPE <= segfile[sfilecnt].SegmentType)
-                    {
-                      logwrite (CFE_FILES_STYPE, linecnt);
-                      sprintf (LogLine,
-                               "A %s segment can not contain a %s segment",
-                               SegmentType[MAKETYPE].String,
-                               SegmentType[segfile[sfilecnt].SegmentType].
-                               String);
-                      logtext (LogLine, 0, YES);
-                      logwrite (CFE_ABORT, 0);
-                      logwrite (SYS_STOP, 0);
-                      closelog ();      // close logfile
-                      exit (255);       // abort fatal cfg file error
-                    }
-                  switch (segfile[sfilecnt].SegmentType)
-                    {
-                    case 0:     // Node
-                      segfile[sfilecnt].Zone = MAKEZONE;
-                      segfile[sfilecnt].Net = MAKENET;
-                      segfile[sfilecnt].Node = atoi (ptr);
-                      break;
-                    case 1:     // Hub
-                      segfile[sfilecnt].Zone = MAKEZONE;
-                      segfile[sfilecnt].Net = MAKENET;
-                      segfile[sfilecnt].Node = atoi (ptr);
-                      break;
-                    case 2:     // Host
-                      segfile[sfilecnt].Zone = MAKEZONE;
-                      segfile[sfilecnt].Net = atoi (ptr);
-                      segfile[sfilecnt].Node = 0;
-                      break;
-                    case 3:     // Net
-                      segfile[sfilecnt].Zone = MAKEZONE;
-                      segfile[sfilecnt].Net = atoi (ptr);
-                      segfile[sfilecnt].Node = 0;
-                      break;
-                    case 4:     // Region
-                      segfile[sfilecnt].Zone = MAKEZONE;
-                      segfile[sfilecnt].Net = atoi (ptr);
-                      segfile[sfilecnt].Node = 0;
-                      break;
-                    case 5:     // Zone
-                      segfile[sfilecnt].Zone = atoi (ptr);
-                      segfile[sfilecnt].Net = atoi (ptr);
-                      segfile[sfilecnt].Node = 0;
-                      break;
-                    case 6:     // Composite
-                      logwrite (CFE_FILES_STYPE, linecnt);
-                      logwrite (CFE_ABORT, 0);
-                      logwrite (SYS_STOP, 0);
-                      closelog ();      // close logfile
-                      exit (255);       // abort fatal cfg file error
-                      break;
-                    default:
-                      //cntr = 0;
-                      break;
-                    }
-                  ptr = strchr (ptr, ' ');
-                  ptr++;
-                  while (ptr[0] == ' ')
-                    memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-                  strncpy (segfile[sfilecnt].FileName, ptr, strlenII (ptr));
-                  if (strlen (segfile[sfilecnt].FileName) >= 14)
-                    logwrite (CFE_FILES_NAME, linecnt);
-                  else
-                    {
-                      logwrite (CF_FILES, 0);
-                      sprintf (LogLine, "%s", segfile[sfilecnt].FileName);
-                      logtext (LogLine, 5, NO);
-                    }
-                  ptr = strchr (ptr, ' ');
-                  if (ptr != NULL)
-                    {
-                      while (ptr[0] == ' ')
-                        memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-                      memset (altnot, 0, sizeof (altnot));
-                      strcpy (altnot, ptr);
-                      // printf("anot1  %s\n",altnot);
-                      ptr2 = strtok (altnot, " \r\n");  // 1
-                      if (strchr (ptr2, '/') != NULL && ptr2 != NULL)
-                        strcpy (segfile[sfilecnt].AltNotify, ptr2);
-                      else
-                        segfile[sfilecnt].AltNotify[0] = 0;
-                      strcpy (altnot, ptr);
-                      ptr = strchr (altnot, '<');
-                      ptr2 = strchr (altnot, '>');
-                      if (ptr == NULL || ptr2 == NULL)
-                        segfile[sfilecnt].NameNotify[0] = 0;
-                      else
-                        {
-                          if ((ptr2 - ptr) <= 72)
-                            strncpy (segfile[sfilecnt].NameNotify, ptr + 1,
-                                     (ptr2 - ptr - 1));
-                          else
-                            strncpy (segfile[sfilecnt].NameNotify, ptr + 1,
-                                     72);
-                        }
-                      //printf("%d - NN: %s AN: %s\n",sfilecnt,segfile[sfilecnt].NameNotify,segfile[sfilecnt].AltNotify);
-                    }
-                  sfilecnt++;
-                }
-              else
-                {
-                  mark_file = 1;
-                  Flineoff = linecnt - 1;
-                }
-              cntr = 0;
-              break;
-            case 30:            // LogLevel
-              ptr = strchr (str, ' ');
-              if (ptr == NULL)
-                {
-                  logwrite (CFE_LOGLEVEL, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              ptr++;
-              while (ptr[0] == ' ')
-                memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-              loglvl = atoi (ptr);
-              if (loglvl <= 0)
-                loglvl = 0;
-              if (loglvl >= 5)
-                loglvl = 5;
-              // here
-              cntr = 0;
-              break;
-            case 31:            // Compress
-              ptr = strchr (str, ' ');
-              if (ptr == NULL)
-                {
-                  logwrite (CFE_COMPRESS, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              ptr++;
-              while (ptr[0] == ' ')
-                memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-              cnt = 0;
-              while (compressor_name[cnt] != 0)
-                {
-                  if (strnicmp
-                      (ptr, compressor_name[cnt],
-                       strlen (compressor_name[cnt])) == 0)
-                    {
-                      DefCompressor = cnt;
-                      sprintf (LogLine, "Outbound compressor set to %s",
-                               compressor_name[cnt]);
-                      logtext (LogLine, 2, YES);
-                      break;
-                    }
-                  else
-                    cnt++;
-                }
-              if (compressor_name[cnt] == 0)
-                {
-                  DefCompressor = 0;
-                  sprintf (LogLine, "Outbound compressor default %s",
-                           compressor_name[0]);
-                  logtext (LogLine, 2, YES);
-                }
-              cntr = 0;
-              break;
-            case 32:            // Flags
-              FLAGCHK = 'Y';
-              ptr = strstr (strupr (str), "NOCASE");
-              if (ptr != NULL)
-                IGNORCASE = 'Y';
-              cntr = 0;
-              break;
-            case 33:            // FlagsAuto
-              FLAGCHKAUTO = 'Y';
-              ptr = strstr (strupr (str), "NOCASE");
-              if (ptr != NULL)
-                IGNORCASE = 'Y';
-              cntr = 0;
-              break;
-            case 34:            // Warnings
-              WARNINGS = 'Y';
-              cntr = 0;
-              break;
-            case 35:            // PVTlevel
-              ptr = strchr (str, ' ');
-              if (ptr == NULL)
-                {
-                  logwrite (CFE_PVTLEVEL, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              ptr++;
-              while (ptr[0] == ' ')
-                memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-              cnt = 0;
-              while (SegmentType[cnt].Single != NULL)
-                {
-                  if (strnicmp
-                      (ptr, SegmentType[cnt].Single,
-                       strlen (SegmentType[cnt].Single)) == 0)
-                    {
-                      PVTlvl = SegmentType[cnt].Type;
-                      break;
-                    }
-                  else
-                    cnt++;
-                }
-              if (SegmentType[cnt].Single == NULL)
-                {
-                  logwrite (CFE_PVTLEVEL, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              else
-                logwrite (CF_PVTLEVEL, 0);
-              sprintf (LogLine, "%s", SegmentType[cnt].String);
-              logtext (LogLine, 5, NO);
-              cntr = 0;
-              break;
-            case 36:            // LogLevel
-              ptr = strchr (str, ' ');
-              if (ptr == NULL)
-                {
-                  logwrite (CFE_MAXAGE, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              ptr++;
-              while (ptr[0] == ' ')
-                memmove (ptr, ptr + 1, (strlen (ptr) - 1));
-              MAXAGE = atoi (ptr);
-              if (MAXAGE <= 0)
-                MAXAGE = 0;
-              if (MAXAGE >= 365)
-                MAXAGE = 365;
-              // here
-              cntr = 0;
-              break;
-            case 99:
-            default:
-              //printf("Ignoring bad command in connand file\n");
-              if (str[0] != 0)
-                {
-                  logwrite (CFE_ERR_BAD, linecnt);
-                  logwrite (CFE_ABORT, 0);
-                  logwrite (SYS_STOP, 0);
-                  closelog ();  // close logfile
-                  exit (255);   // abort fatal cfg file error
-                }
-              cntr = 0;
-              break;
-            }
+		  while (ptr[0] == ' ')
+		    memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+		  strncpy (MergePath, ptr, strlenII (ptr));
+		}
+	      if (MergePath[0] == 0)
+		logwrite (CFE_MERGE, linecnt);
+	      else
+		logwrite (CF_MERGE, 0);
+	      sprintf (LogLine, "%s", MergePath);
+	      logtext (LogLine, 5, NO);
+	      cntr = 0;
+	      break;
+	    case 6:		// Private
+	      ptr = strchr (str, ' ');
+	      if (ptr == NULL)
+		{
+		  logwrite (CFE_PRIVATE, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      ptr++;
+	      while (ptr[0] == ' ')
+		memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+	      cnt = 0;
+	      while (PVTDisposition[cnt].Single != NULL)
+		{
+		  if (strnicmp
+		      (ptr, PVTDisposition[cnt].Single,
+		       strlen (PVTDisposition[cnt].Single)) == 0)
+		    {
+		      DispPVT = PVTDisposition[cnt].Type;
+		      break;
+		    }
+		  else
+		    cnt++;
+		}
+	      if (PVTDisposition[cnt].Single == NULL)
+		{
+		  logwrite (CFE_PRIVATE, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      else
+		logwrite (CF_PRIVATE, 0);
+	      sprintf (LogLine, "%s", PVTDisposition[cnt].String);
+	      logtext (LogLine, 5, NO);
+	      cntr = 0;
+	      break;
+	    case 7:		// MinPhone
+	      ptr = strchr (str, ' ');
+	      if (ptr == NULL)
+		{
+		  logwrite (CFE_MINPHONE, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      ptr++;
+	      while (ptr[0] == ' ')
+		memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+	      MinPhone = atoi (ptr);
+	      if (MinPhone >= 30 || ptr[0] == 0)
+		{
+		  logwrite (CFE_MINPHONE, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      else
+		logwrite (CF_MINPHONE, 0);
+	      sprintf (LogLine, "%d", MinPhone);
+	      logtext (LogLine, 5, NO);
+	      cntr = 0;
+	      break;
+	    case 8:		// BaudRate
+	      ptr = strchr (str, ' ');
+	      if (ptr == NULL)
+		{
+		  logwrite (CFE_BAUDRATE, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      ptr++;
+	      while (ptr[0] == ' ')
+		memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+	      BaudRates[0] = ',';
+	      strncat (BaudRates, ptr, strlenII (ptr));
+	      breakbaud ();
+	      // here
+	      cntr = 0;
+	      break;
+	    case 9:		// Master
+	      ptr = strchr (str, ' ');
+	      if (ptr == NULL)
+		{
+		  logwrite (CFE_MASTER, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      ptr++;
+	      while (ptr[0] == ' ')
+		memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+	      strncpy (Master, ptr, strlenII (ptr));
+	      if (Master[0] == 0)
+		logwrite (CFE_MASTER, linecnt);
+	      else
+		logwrite (CF_MASTER, 0);
+	      sprintf (LogLine, "%s", Master);
+	      logtext (LogLine, 5, NO);
+	      cntr = 0;
+	      break;
+	    case 10:		// Uploads
+	      ptr = strchr (str, ' ');
+	      if (ptr == NULL)
+		{
+		  logwrite (CFE_UPLOADS, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      ptr++;
+	      while (ptr[0] == ' ')
+		memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+	      strncpy (Uploads, ptr, strlenII (ptr));
+	      if (Uploads[0] == 0)
+		logwrite (CFE_UPLOADS, linecnt);
+	      else
+		logwrite (CF_UPLOADS, 0);
+	      sprintf (LogLine, "%s", Uploads);
+	      logtext (LogLine, 5, NO);
+	      cntr = 0;
+	      break;
+	    case 11:		// MailFiles
+	      ptr = strchr (str, ' ');
+	      if (ptr == NULL)
+		{
+		  logwrite (CFE_MAILFILES, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      ptr++;
+	      while (ptr[0] == ' ')
+		memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+	      strncpy (MailFiles, ptr, strlenII (ptr));
+	      if (MailFiles[0] == 0)
+		{
+		  logwrite (CFE_MAILFILES, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      else
+		logwrite (CF_MAILFILES, 0);
+	      sprintf (LogLine, "%s", MailFiles);
+	      logtext (LogLine, 5, NO);
+	      cntr = 0;
+	      break;
+	    case 12:		// Update
+	      ptr = strchr (str, ' ');
+	      if (ptr == NULL)
+		{
+		  logwrite (CFE_UPDATE, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      ptr++;
+	      while (ptr[0] == ' ')
+		memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+	      strncpy (Update, ptr, strlenII (ptr));
+	      if (Update[0] == 0)
+		{
+		  logwrite (CFE_UPDATE, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      else
+		logwrite (CF_UPDATE, 0);
+	      sprintf (LogLine, "%s", Update);
+	      logtext (LogLine, 5, NO);
+	      cntr = 0;
+	      break;
+	    case 13:		// BadFiles
+	      ptr = strchr (str, ' ');
+	      if (ptr == NULL)
+		{
+		  logwrite (CFE_BADFILES, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      ptr++;
+	      while (ptr[0] == ' ')
+		memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+	      strncpy (BadFiles, ptr, strlenII (ptr));
+	      if (BadFiles[0] == 0)
+		{
+		  logwrite (CFE_BADFILES, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      else
+		logwrite (CF_BADFILES, 0);
+	      sprintf (LogLine, "%s", BadFiles);
+	      logtext (LogLine, 5, NO);
+	      cntr = 0;
+	      break;
+	    case 14:		// OutFile
+	      ptr = strchr (str, ' ');
+	      if (ptr == NULL)
+		{
+		  logwrite (CFE_OUTFILE, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      ptr++;
+	      while (ptr[0] == ' ')
+		memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+	      if (strlenII (ptr) <= MAXFILELEN)
+		strncpy (OutFile, ptr, strlenII (ptr));
+	      else
+		strncpy (OutFile, ptr, MAXFILELEN);
+	      if (OutFile[0] == 0)
+		{
+		  logwrite (CFE_OUTFILE, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      else
+		logwrite (CF_OUTFILE, 0);
+	      sprintf (LogLine, "%s", OutFile);
+	      logtext (LogLine, 5, NO);
+	      cntr = 0;
+	      break;
+	    case 15:		// OutPath
+	      ptr = strchr (str, ' ');
+	      if (ptr == NULL)
+		{
+		  logwrite (CFE_OUTPATH, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      ptr++;
+	      while (ptr[0] == ' ')
+		memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+	      strncpy (OutPath, ptr, strlenII (ptr));
+	      if (OutPath[0] == 0)
+		{
+		  logwrite (CFE_OUTPATH, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      else
+		logwrite (CF_OUTPATH, 0);
+	      sprintf (LogLine, "%s", OutPath);
+	      logtext (LogLine, 5, NO);
+	      cntr = 0;
+	      break;
+	    case 16:		// Threshold
+	      ptr = strchr (str, ' ');
+	      if (ptr == NULL)
+		{
+		  logwrite (CFE_THRESHOLD, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      ptr++;
+	      while (ptr[0] == ' ')
+		memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+	      ptr = strchr (ptr, ' ');
+	      if (ptr != NULL)
+		*ptr = 0;
+	      ptr = strchr (str, ' ');
+	      ptr++;
+	      threshold.arc_size = atoi (ptr);
+	      ptr = strchr (ptr, 0);
+	      ptr++;
+	      threshold.diff_size = atoi (ptr);
+	      //here
+	      cntr = 0;
+	      break;
+	    case 17:		// Arc
+	      ptr = strchr (str, ' ');
+	      if (ptr != NULL)
+		{
+		  ptr++;
+		  while (ptr[0] == ' ')
+		    memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+		  ARC = atoi (ptr);
+		}
+	      else
+		{
+		  logwrite (CFE_ARC, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      // here
+	      cntr = 0;
+	      break;
+	    case 18:		// OutDiff
+	      ptr = strchr (str, ' ');
+	      if (ptr != NULL)
+		{
+		  ptr++;
+		  while (ptr[0] == ' ')
+		    memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+		  if (strlenII (ptr) <= MAXFILELEN)
+		    strncpy (OutDiff, ptr, strlenII (ptr));
+		  else
+		    strncpy (OutDiff, ptr, MAXFILELEN);
+		  logwrite (CF_OUTDIFF, 0);
+		  sprintf (LogLine, "%s", OutDiff);
+		  logtext (LogLine, 5, NO);
+		}
+	      else
+		{
+		  logwrite (CFE_OUTDIFF, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      cntr = 0;
+	      break;
+	    case 19:		// Cleanup
+	      CLEANUP = 'Y';
+	      //here
+	      cntr = 0;
+	      break;
+	    case 20:		// NetAddess
+	      if (NetAddress[0] == 0)
+		{
+		  ptr = strchr (str, ' ');
+		  if (ptr == NULL)
+		    {
+		      logwrite (CFE_NETADDRESS, linecnt);
+		      logwrite (CFE_ABORT, 0);
+		      logwrite (SYS_STOP, 0);
+		      closelog ();	// close logfile
+		      exit (255);	// abort fatal cfg file error
+		    }
+		  ptr++;
+		  while (ptr[0] == ' ')
+		    memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+		  strncpy (NetAddress, ptr, strlenII (ptr));
+		}
+	      if (NetAddress[0] == 0)
+		{
+		  logwrite (CFE_NETADDRESS, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      if (breakaddress () == 1)
+		{
+		  logwrite (CFE_NETADDRESS_INV, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      logwrite (CF_NETADDRESS, 0);
+	      sprintf (LogLine, "%s", NetAddress);
+	      logtext (LogLine, 5, NO);
+	      // here
+	      strcpy (altnot, ptr);
+	      ptr = strchr (altnot, '<');
+	      ptr2 = strchr (altnot, '>');
+	      if (ptr == NULL || ptr2 == NULL)
+		segfile[0].NameNotify[0] = 0;
+	      else
+		{
+		  if ((ptr2 - ptr) <= 72)
+		    strncpy (segfile[0].NameNotify, ptr + 1,
+			     (ptr2 - ptr - 1));
+		  else
+		    strncpy (segfile[0].NameNotify, ptr + 1, 72);
+		}
+	      cntr = 0;
+	      break;
+	    case 21:		// Messages
+	      ptr = strchr (str, ' ');
+	      if (ptr == NULL)
+		{
+		  logwrite (CFE_MESSAGES, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      ptr++;
+	      while (ptr[0] == ' ')
+		memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+	      strncpy (Messages, ptr, strlenII (ptr));
+	      if (Messages[0] == 0)
+		{
+		  logwrite (CFE_MESSAGES, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      else
+		logwrite (CF_MESSAGES, 0);
+	      sprintf (LogLine, "%s", Messages);
+	      logtext (LogLine, 5, NO);
+	      cntr = 0;
+	      break;
+	    case 22:		// Submit
+	      ptr = strchr (str, ' ');
+	      if (ptr == NULL)
+		{
+		  logwrite (CFE_SUBMIT, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      ptr++;
+	      while (ptr[0] == ' ')
+		memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+	      if (SubAddress[0] == 0)
+		{
+		  strncpy (SubAddress, ptr, strlenII (ptr));
+		  if (SubAddress[0] == 0)
+		    {
+		      logwrite (CFE_SUBMIT, linecnt);
+		      logwrite (CFE_ABORT, 0);
+		      logwrite (SYS_STOP, 0);
+		      closelog ();	// close logfile
+		      exit (255);	// abort fatal cfg file error
+		    }
+		  else
+		    logwrite (CF_SUBMIT, 0);
+		  sprintf (LogLine, "%s ", SubAddress);
+		  strcpy (altnot, ptr);
+		  cnt = 0;
+		  while (MFlagstype[cnt].String != NULL)
+		    {
+		      if (strstr (strupr (ptr), MFlagstype[cnt].String) !=
+			  NULL)
+			{
+			  switch (MFlagstype[cnt].Type)
+			    {
+			    case 0:
+			      break;
+			    case 1:
+			      mnotify[3].Crash = 'Y';
+			      strcat (LogLine, "Crash,");
+			      break;
+			    case 2:
+			      mnotify[3].Hold = 'Y';
+			      strcat (LogLine, "Hold,");
+			      break;
+			    case 3:
+			      mnotify[3].Intl = 'Y';
+			      strcat (LogLine, "Intl,");
+			      break;
+			    case 4:
+			      mnotify[3].Normal = 'Y';
+			      strcat (LogLine, "Normal,");
+			      break;
+			    default:
+			      break;
+			    }
+			}
+		      cnt++;
+		    }
+		  logtext (LogLine, 5, NO);
+		}
+	      // here
+	      ptr = strchr (altnot, '<');
+	      ptr2 = strchr (altnot, '>');
+	      if (ptr == NULL || ptr2 == NULL)
+		SubNameNotify[0] = 0;
+	      else
+		{
+		  if ((ptr2 - ptr) <= 72)
+		    strncpy (SubNameNotify, ptr + 1, (ptr2 - ptr - 1));
+		  else
+		    strncpy (SubNameNotify, ptr + 1, 72);
+		}
+	      cntr = 0;
+	      break;
+	    case 23:		// Notify
+	      parnotify (str);
+	      cntr = 0;
+	      break;
+	    case 24:		// Copyright
+	      ptr = strchr (str, ' ');
+	      if (ptr != NULL)
+		{
+		  ptr++;
+		  while (ptr[0] == ' ')
+		    memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+		  memset (CopyRight, 0, sizeof (CopyRight));
+		  strncpy (CopyRight, ptr, strlenII (ptr));
+		}
+	      if (CopyRight[0] == 0)
+		{
+		  logwrite (CFE_COPYRIGHT, linecnt);
+		  sprintf (LogLine,
+			   "Assuming default copyright: cpyright.txt");
+		  logtext (LogLine, 5, YES);
+		}
+	      else
+		{
+		  logwrite (CF_COPYRIGHT, 0);
+		  sprintf (LogLine, "%s", CopyRight);
+		  logtext (LogLine, 5, NO);
+		}
+	      cntr = 0;
+	      break;
+	    case 25:		// Prolog
+	      ptr = strchr (str, ' ');
+	      if (ptr != NULL)
+		{
+		  ptr++;
+		  while (ptr[0] == ' ')
+		    memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+		  memset (Prolog, 0, sizeof (Prolog));
+		  strncpy (Prolog, ptr, strlenII (ptr));
+		}
+	      if (Prolog[0] == 0)
+		{
+		  logwrite (CFE_PROLOG, linecnt);
+		  sprintf (LogLine, "Assuming default prolog: prolog.txt");
+		  logtext (LogLine, 5, YES);
+		}
+	      else
+		{
+		  logwrite (CF_PROLOG, 0);
+		  sprintf (LogLine, "%s", Prolog);
+		  logtext (LogLine, 5, NO);
+		}
+	      cntr = 0;
+	      break;
+	    case 26:		// Epilog
+	      ptr = strchr (str, ' ');
+	      if (ptr != NULL)
+		{
+		  ptr++;
+		  while (ptr[0] == ' ')
+		    memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+		  memset (Epilog, 0, sizeof (Epilog));
+		  strncpy (Epilog, ptr, strlenII (ptr));
+		}
+	      if (Epilog[0] == 0)
+		{
+		  logwrite (CFE_EPILOG, linecnt);
+		  sprintf (LogLine, "Assuming default epilog: epilog.txt");
+		  logtext (LogLine, 5, YES);
+		}
+	      else
+		logwrite (CF_EPILOG, 0);
+	      sprintf (LogLine, "%s", Epilog);
+	      logtext (LogLine, 5, NO);
+	      cntr = 0;
+	      break;
+	    case 27:		// Comments
+	      ptr = strchr (str, ' ');
+	      if (ptr != NULL)
+		{
+		  ptr++;
+		  while (ptr[0] == ' ')
+		    memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+		  memset (Comments, 0, sizeof (Comments));
+		  strncpy (Comments, ptr, strlenII (ptr));
+		}
+	      if (Comments[0] == 0)
+		{
+		  logwrite (CFE_COMMENTS, linecnt);
+		  sprintf (LogLine, "No File Name");
+		  logtext (LogLine, 5, YES);
+		}
+	      else
+		logwrite (CF_COMMENTS, 0);
+	      sprintf (LogLine, "%s", Comments);
+	      logtext (LogLine, 5, NO);
+	      cntr = 0;
+	      break;
+	    case 28:		// Data
+	      if (expSourceFile[0] != 0)
+		{
+		  logtext ("Master input file and DATA stream both specified",
+			   0, YES);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);
+		}
+	      if (mark_data != 0)
+		{
+		  if (str[0] == 0)
+		    {
+		      fprintf (outfilep, ";\n");
+		      cntr = 0;
+		      break;
+		    }
+		  fprintf (outfilep, "%s", str);
+		}
+	      else
+		{
+		  mark_data = 1;
+		  Dlineoff = linecnt;
+		}
+	      cntr = 0;
+	      break;
+	    case 29:		// Files
+	      if (sfilecnt > (MAXSUBFILES - 2))
+		{
+		  logwrite (CFE_MAXFILES, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      if (mark_file != 0)
+		{
+		  if (str[0] == 0)
+		    {
+		      cntr = 0;
+		      break;
+		    }
+		  cnt = 0;
+		  while (SegmentType[cnt].Single != NULL)
+		    {
+		      if (strnicmp
+			  (str, SegmentType[cnt].Single,
+			   strlen (SegmentType[cnt].Single)) == 0)
+			{
+			  segfile[sfilecnt].SegmentType =
+			    SegmentType[cnt].Type;
+			  break;
+			}
+		      else
+			cnt++;
+		    }
+		  if (SegmentType[cnt].Single == NULL)
+		    {
+		      logwrite (CFE_FILES_STYPE, linecnt);
+		      logwrite (CFE_ABORT, 0);
+		      logwrite (SYS_STOP, 0);
+		      closelog ();	// close logfile
+		      exit (255);	// abort fatal cfg file error
+		      // Error
+		      cntr = 0;
+		      break;
+		    }
+		  ptr = strchr (str, ' ');
+		  if (ptr == NULL)
+		    {
+		      logwrite (CFE_FILES, linecnt);
+		      logwrite (CFE_ABORT, 0);
+		      logwrite (SYS_STOP, 0);
+		      closelog ();	// close logfile
+		      exit (255);	// abort fatal cfg file error
+		    }
+		  // pointer crap
+		  ptr++;
+		  while (ptr[0] == ' ')
+		    memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+		  // need to extp zone and net
+		  if (MAKETYPE <= segfile[sfilecnt].SegmentType)
+		    {
+		      logwrite (CFE_FILES_STYPE, linecnt);
+		      sprintf (LogLine,
+			       "A %s segment can not contain a %s segment",
+			       SegmentType[MAKETYPE].String,
+			       SegmentType[segfile[sfilecnt].SegmentType].
+			       String);
+		      logtext (LogLine, 0, YES);
+		      logwrite (CFE_ABORT, 0);
+		      logwrite (SYS_STOP, 0);
+		      closelog ();	// close logfile
+		      exit (255);	// abort fatal cfg file error
+		    }
+		  switch (segfile[sfilecnt].SegmentType)
+		    {
+		    case 0:	// Node
+		      segfile[sfilecnt].Zone = MAKEZONE;
+		      segfile[sfilecnt].Net = MAKENET;
+		      segfile[sfilecnt].Node = atoi (ptr);
+		      break;
+		    case 1:	// Hub
+		      segfile[sfilecnt].Zone = MAKEZONE;
+		      segfile[sfilecnt].Net = MAKENET;
+		      segfile[sfilecnt].Node = atoi (ptr);
+		      break;
+		    case 2:	// Host
+		      segfile[sfilecnt].Zone = MAKEZONE;
+		      segfile[sfilecnt].Net = atoi (ptr);
+		      segfile[sfilecnt].Node = 0;
+		      break;
+		    case 3:	// Net
+		      segfile[sfilecnt].Zone = MAKEZONE;
+		      segfile[sfilecnt].Net = atoi (ptr);
+		      segfile[sfilecnt].Node = 0;
+		      break;
+		    case 4:	// Region
+		      segfile[sfilecnt].Zone = MAKEZONE;
+		      segfile[sfilecnt].Net = atoi (ptr);
+		      segfile[sfilecnt].Node = 0;
+		      break;
+		    case 5:	// Zone
+		      segfile[sfilecnt].Zone = atoi (ptr);
+		      segfile[sfilecnt].Net = atoi (ptr);
+		      segfile[sfilecnt].Node = 0;
+		      break;
+		    case 6:	// Composite
+		      logwrite (CFE_FILES_STYPE, linecnt);
+		      logwrite (CFE_ABORT, 0);
+		      logwrite (SYS_STOP, 0);
+		      closelog ();	// close logfile
+		      exit (255);	// abort fatal cfg file error
+		      break;
+		    default:
+		      //cntr = 0;
+		      break;
+		    }
+		  ptr = strchr (ptr, ' ');
+		  ptr++;
+		  while (ptr[0] == ' ')
+		    memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+		  strncpy (segfile[sfilecnt].FileName, ptr, strlenII (ptr));
+		  if (strlen (segfile[sfilecnt].FileName) >= 14)
+		    logwrite (CFE_FILES_NAME, linecnt);
+		  else
+		    {
+		      logwrite (CF_FILES, 0);
+		      sprintf (LogLine, "%s", segfile[sfilecnt].FileName);
+		      logtext (LogLine, 5, NO);
+		    }
+		  ptr = strchr (ptr, ' ');
+		  if (ptr != NULL)
+		    {
+		      while (ptr[0] == ' ')
+			memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+		      memset (altnot, 0, sizeof (altnot));
+		      strcpy (altnot, ptr);
+		      // printf("anot1  %s\n",altnot);
+		      ptr2 = strtok (altnot, " \r\n");	// 1
+		      if (strchr (ptr2, '/') != NULL && ptr2 != NULL)
+			strcpy (segfile[sfilecnt].AltNotify, ptr2);
+		      else
+			segfile[sfilecnt].AltNotify[0] = 0;
+		      strcpy (altnot, ptr);
+		      ptr = strchr (altnot, '<');
+		      ptr2 = strchr (altnot, '>');
+		      if (ptr == NULL || ptr2 == NULL)
+			segfile[sfilecnt].NameNotify[0] = 0;
+		      else
+			{
+			  if ((ptr2 - ptr) <= 72)
+			    strncpy (segfile[sfilecnt].NameNotify, ptr + 1,
+				     (ptr2 - ptr - 1));
+			  else
+			    strncpy (segfile[sfilecnt].NameNotify, ptr + 1,
+				     72);
+			}
+		      //printf("%d - NN: %s AN: %s\n",sfilecnt,segfile[sfilecnt].NameNotify,segfile[sfilecnt].AltNotify);
+		    }
+		  sfilecnt++;
+		}
+	      else
+		{
+		  mark_file = 1;
+		  Flineoff = linecnt - 1;
+		}
+	      cntr = 0;
+	      break;
+	    case 30:		// LogLevel
+	      ptr = strchr (str, ' ');
+	      if (ptr == NULL)
+		{
+		  logwrite (CFE_LOGLEVEL, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      ptr++;
+	      while (ptr[0] == ' ')
+		memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+	      loglvl = atoi (ptr);
+	      if (loglvl <= 0)
+		loglvl = 0;
+	      if (loglvl >= 5)
+		loglvl = 5;
+	      // here
+	      cntr = 0;
+	      break;
+	    case 31:		// Compress
+	      ptr = strchr (str, ' ');
+	      if (ptr == NULL)
+		{
+		  logwrite (CFE_COMPRESS, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      ptr++;
+	      while (ptr[0] == ' ')
+		memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+	      cnt = 0;
+	      while (compressor_name[cnt] != 0)
+		{
+		  if (strnicmp
+		      (ptr, compressor_name[cnt],
+		       strlen (compressor_name[cnt])) == 0)
+		    {
+		      DefCompressor = cnt;
+		      sprintf (LogLine, "Outbound compressor set to %s",
+			       compressor_name[cnt]);
+		      logtext (LogLine, 2, YES);
+		      break;
+		    }
+		  else
+		    cnt++;
+		}
+	      if (compressor_name[cnt] == 0)
+		{
+		  DefCompressor = 0;
+		  sprintf (LogLine, "Outbound compressor default %s",
+			   compressor_name[0]);
+		  logtext (LogLine, 2, YES);
+		}
+	      cntr = 0;
+	      break;
+	    case 32:		// Flags
+	      FLAGCHK = 'Y';
+	      ptr = strstr (strupr (str), "NOCASE");
+	      if (ptr != NULL)
+		IGNORCASE = 'Y';
+	      cntr = 0;
+	      break;
+	    case 33:		// FlagsAuto
+	      FLAGCHKAUTO = 'Y';
+	      ptr = strstr (strupr (str), "NOCASE");
+	      if (ptr != NULL)
+		IGNORCASE = 'Y';
+	      cntr = 0;
+	      break;
+	    case 34:		// Warnings
+	      WARNINGS = 'Y';
+	      cntr = 0;
+	      break;
+	    case 35:		// PVTlevel
+	      ptr = strchr (str, ' ');
+	      if (ptr == NULL)
+		{
+		  logwrite (CFE_PVTLEVEL, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      ptr++;
+	      while (ptr[0] == ' ')
+		memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+	      cnt = 0;
+	      while (SegmentType[cnt].Single != NULL)
+		{
+		  if (strnicmp
+		      (ptr, SegmentType[cnt].Single,
+		       strlen (SegmentType[cnt].Single)) == 0)
+		    {
+		      PVTlvl = SegmentType[cnt].Type;
+		      break;
+		    }
+		  else
+		    cnt++;
+		}
+	      if (SegmentType[cnt].Single == NULL)
+		{
+		  logwrite (CFE_PVTLEVEL, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      else
+		logwrite (CF_PVTLEVEL, 0);
+	      sprintf (LogLine, "%s", SegmentType[cnt].String);
+	      logtext (LogLine, 5, NO);
+	      cntr = 0;
+	      break;
+	    case 36:		// LogLevel
+	      ptr = strchr (str, ' ');
+	      if (ptr == NULL)
+		{
+		  logwrite (CFE_MAXAGE, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      ptr++;
+	      while (ptr[0] == ' ')
+		memmove (ptr, ptr + 1, (strlen (ptr) - 1));
+	      MAXAGE = atoi (ptr);
+	      if (MAXAGE <= 0)
+		MAXAGE = 0;
+	      if (MAXAGE >= 365)
+		MAXAGE = 365;
+	      // here
+	      cntr = 0;
+	      break;
+	    case 99:
+	    default:
+	      //printf("Ignoring bad command in connand file\n");
+	      if (str[0] != 0)
+		{
+		  logwrite (CFE_ERR_BAD, linecnt);
+		  logwrite (CFE_ABORT, 0);
+		  logwrite (SYS_STOP, 0);
+		  closelog ();	// close logfile
+		  exit (255);	// abort fatal cfg file error
+		}
+	      cntr = 0;
+	      break;
+	    }
 
-        }
+	}
       if (eof == ftell (ctrlfile))
-        break;
+	break;
     }
 
   fclose (outfilep);
@@ -1747,19 +1748,19 @@ breakaddress (void)
     {
       pzone = NetAddress;
       if (strchr (NetAddress, '/') != NULL)
-        {
-          pnet = strchr (NetAddress, ':');
-          pnode = strchr (NetAddress, '/');
-        }
+	{
+	  pnet = strchr (NetAddress, ':');
+	  pnode = strchr (NetAddress, '/');
+	}
     }
   else
     {
       if (strchr (NetAddress, '/') != NULL)
-        {
-          pnode = strchr (NetAddress, '/');
-        }
+	{
+	  pnode = strchr (NetAddress, '/');
+	}
       else
-        return (1);
+	return (1);
     }
 
   if (pzone == NULL)
@@ -1787,18 +1788,18 @@ breakbaud (void)
   short cntr = 0;
   char *delims = { " ,\r\n" };
 
-  cpt = strtok (BaudRates, delims);     // 1
+  cpt = strtok (BaudRates, delims);	// 1
   bauds[cntr] = atol (cpt);
 
   for (cntr = 1; cntr < MAXBAUD; cntr++)
     {
       cpt = strtok (NULL, delims);
       if (cpt != NULL)
-        {
-          bauds[cntr] = atol (cpt);
-        }
+	{
+	  bauds[cntr] = atol (cpt);
+	}
       else
-        bauds[cntr] = 0;
+	bauds[cntr] = 0;
     }
 
 
@@ -1812,37 +1813,37 @@ parnotify (char *str)
   while (NotifyType[cnt1].Single != NULL)
     {
       if (strstr (strupr (str), NotifyType[cnt1].Single) != NULL)
-        {
-          mnotify[cnt1].active = 'Y';
-          while (MFlagstype[cnt2].String != NULL)
-            {
-              if (strstr (strupr (str), MFlagstype[cnt2].String) != NULL)
-                {
-                  switch (MFlagstype[cnt2].Type)
-                    {
-                    case 0:
-                      break;
-                    case 1:
-                      mnotify[cnt1].Crash = 'Y';
-                      break;
-                    case 2:
-                      mnotify[cnt1].Hold = 'Y';
-                      break;
-                    case 3:
-                      mnotify[cnt1].Intl = 'Y';
-                      break;
-                    case 4:
-                      mnotify[cnt1].Normal = 'Y';
-                      break;
-                    default:
-                      mnotify[cnt1].Normal = 'Y';
-                      break;
-                    }
+	{
+	  mnotify[cnt1].active = 'Y';
+	  while (MFlagstype[cnt2].String != NULL)
+	    {
+	      if (strstr (strupr (str), MFlagstype[cnt2].String) != NULL)
+		{
+		  switch (MFlagstype[cnt2].Type)
+		    {
+		    case 0:
+		      break;
+		    case 1:
+		      mnotify[cnt1].Crash = 'Y';
+		      break;
+		    case 2:
+		      mnotify[cnt1].Hold = 'Y';
+		      break;
+		    case 3:
+		      mnotify[cnt1].Intl = 'Y';
+		      break;
+		    case 4:
+		      mnotify[cnt1].Normal = 'Y';
+		      break;
+		    default:
+		      mnotify[cnt1].Normal = 'Y';
+		      break;
+		    }
 
-                }
-              cnt2++;
-            }
-        }
+		}
+	      cnt2++;
+	    }
+	}
       cnt1++;
       cnt2 = 0;
     }
@@ -1856,26 +1857,23 @@ testctrlinfo (void)
   FILE *temp;
   char buffer[255];
   short jfriday;
-  char *CWD;
-
-  CWD = getcwd (NULL, 0);
 
   // make directive test
 
   if (MAKETYPE != 6)
     {
       if (MAKENUMBER != 0)
-        {
-          segfile[0].Net = MAKENUMBER;
-        }
+	{
+	  segfile[0].Net = MAKENUMBER;
+	}
       else
-        {
-          logtext ("Make Directive does not indicate a number ", 0, YES);
-          logwrite (CFE_ABORT, 0);
-          logwrite (SYS_STOP, 0);
-          closelog ();            // close logfile
-          exit (255);
-        }
+	{
+	  logtext ("Make Directive does not indicate a number ", 0, YES);
+	  logwrite (CFE_ABORT, 0);
+	  logwrite (SYS_STOP, 0);
+	  closelog ();		// close logfile
+	  exit (255);
+	}
     }
 
   // set and test name
@@ -1907,18 +1905,18 @@ testctrlinfo (void)
       FindMostCurr (MergePath);
       temp = fopen (MergePath, "rt");
       if (temp == NULL)
-        {
-          logtext ("Merge File not found - Merging not done", 2, YES);
-          MergePath[0] = 0;
-        }
+	{
+	  logtext ("Merge File not found - Merging not done", 2, YES);
+	  MergePath[0] = 0;
+	}
       else
-        fclose (temp);
+	fclose (temp);
     }
   // test baudrates set defaults
   if (BaudRates[0] == 0)
     {
       logtext ("No BaudRates statement - Def 300,1200,2400,4800,9600", 4,
-               YES);
+	       YES);
       strcpy (BaudRates, ",300,1200,2400,4800,9600");
       breakbaud ();
     }
@@ -1927,18 +1925,18 @@ testctrlinfo (void)
   if (Master[0] == 0)
     {
       logtext ("No Master statement - assuming current directory", 3, YES);
-      strcpy (Master, CWD);
+      getcwd (Master, 250);
     }
   else
     {
-          create_directory (Master);
+      create_directory (Master);
     }
   // test uploads
   if (Uploads[0] == 0)
     logtext ("No Uploads statement - not scanned", 3, YES);
   else
     {
-          create_directory (Uploads);
+      create_directory (Uploads);
     }
   // test mailfiles
   // need to figure out if this is needed
@@ -1948,7 +1946,7 @@ testctrlinfo (void)
     }
   else
     {
-          create_directory (MailFiles);
+      create_directory (MailFiles);
     }
 
   // update
@@ -1956,11 +1954,11 @@ testctrlinfo (void)
   if (Update[0] == 0)
     {
       logtext ("No Update statement - assuming current directory", 2, YES);
-      strcpy (Update, CWD);
+      getcwd (Update, 250);
     }
   else
     {
-          create_directory (Update);
+      create_directory (Update);
     }
 
   // test badfiles
@@ -1969,7 +1967,7 @@ testctrlinfo (void)
     logtext ("No BadFiles statement - files will be deleted", 2, YES);
   else
     {
-          create_directory (BadFiles);
+      create_directory (BadFiles);
     }
   // test outpath
   if (OutPath[0] == 0)
@@ -1979,7 +1977,7 @@ testctrlinfo (void)
     }
   else
     {
-          create_directory (OutPath);
+      create_directory (OutPath);
     }
 
   // test outfile
@@ -1989,7 +1987,7 @@ testctrlinfo (void)
       logtext ("No OutFile statement critical error", 0, YES);
       logwrite (CFE_ABORT, 0);
       logwrite (SYS_STOP, 0);
-      closelog ();              // close logfile
+      closelog ();		// close logfile
       exit (255);
     }
   else
@@ -1999,27 +1997,27 @@ testctrlinfo (void)
       memset (OutFile, 0, sizeof (OutFile));
       CLEANUPOUT = 'N';
       if (strchr (buffer, '.') == NULL)
-        {
-          jfriday = getJDate (1);
-          sprintf (OutFile, "%s%s.%03d", OutPath, buffer, jfriday);
-          if (CLEANUP == 'Y')
-            CLEANUPOUT = 'Y';
-        }
+	{
+	  jfriday = getJDate (1);
+	  sprintf (OutFile, "%s%s.%03d", OutPath, buffer, jfriday);
+	  if (CLEANUP == 'Y')
+	    CLEANUPOUT = 'Y';
+	}
       else
-        {
-          sprintf (OutFile, "%s%s", OutPath, buffer);
-          if (threshold.diff_size > -1)
-            {
-              logwrite (CFE_THRESHOLD, 0);
-              logtext
-                ("Can not create Diff - Outfile has an Explicit extension", 0,
-                 YES);
-              logwrite (CFE_ABORT, 0);
-              logwrite (SYS_STOP, 0);
-              closelog ();      // close logfile
-              exit (255);
-            }
-        }
+	{
+	  sprintf (OutFile, "%s%s", OutPath, buffer);
+	  if (threshold.diff_size > -1)
+	    {
+	      logwrite (CFE_THRESHOLD, 0);
+	      logtext
+		("Can not create Diff - Outfile has an Explicit extension", 0,
+		 YES);
+	      logwrite (CFE_ABORT, 0);
+	      logwrite (SYS_STOP, 0);
+	      closelog ();	// close logfile
+	      exit (255);
+	    }
+	}
       // set threshold crap
     }
   // test outdiff
@@ -2031,19 +2029,19 @@ testctrlinfo (void)
       strcpy (buffer, OutDiff);
       memset (OutDiff, 0, sizeof (OutDiff));
       if (strchr (OutDiff, '.') == NULL)
-        {
-          jfriday = getJDate (1);
-          sprintf (OutDiff, "%s%s.%03d", OutPath, buffer, jfriday);
-        }
+	{
+	  jfriday = getJDate (1);
+	  sprintf (OutDiff, "%s%s.%03d", OutPath, buffer, jfriday);
+	}
       else
-        {
-          logtext ("OutDiff statement critical error", 0, YES);
-          logtext ("OutDiff can not have an extension", 0, YES);
-          logwrite (CFE_ABORT, 0);
-          logwrite (SYS_STOP, 0);
-          closelog ();          // close logfile
-          exit (255);
-        }
+	{
+	  logtext ("OutDiff statement critical error", 0, YES);
+	  logtext ("OutDiff can not have an extension", 0, YES);
+	  logwrite (CFE_ABORT, 0);
+	  logwrite (SYS_STOP, 0);
+	  closelog ();		// close logfile
+	  exit (255);
+	}
     }
 
 
@@ -2051,11 +2049,11 @@ testctrlinfo (void)
   if (Messages[0] == 0)
     {
       logtext ("No Messages will be sent including Attached Segments", 1,
-               YES);
+	       YES);
     }
   else
     {
-          create_directory (Messages);
+      create_directory (Messages);
     }
   // test copyright
   if (strcmp (CopyRight, "NONE") == 0)
@@ -2063,17 +2061,17 @@ testctrlinfo (void)
   else
     {
       if (strchr (CopyRight, PathChar) == NULL)
-        {
-          memset (buffer, 0, sizeof (buffer));
-          strcpy (buffer, CopyRight);
-          memset (CopyRight, 0, sizeof (CopyRight));
-          sprintf (CopyRight, "%s%s", Master, buffer);
-        }
+	{
+	  memset (buffer, 0, sizeof (buffer));
+	  strcpy (buffer, CopyRight);
+	  memset (CopyRight, 0, sizeof (CopyRight));
+	  sprintf (CopyRight, "%s%s", Master, buffer);
+	}
       temp = fopen (CopyRight, "rt");
       if (temp == NULL)
-        logtext ("Copyright File not found - None appended", 4, YES);
+	logtext ("Copyright File not found - None appended", 4, YES);
       else
-        fclose (temp);
+	fclose (temp);
     }
   // test prolog
   if (strcmp (Prolog, "NONE") == 0)
@@ -2081,17 +2079,17 @@ testctrlinfo (void)
   else
     {
       if (strchr (Prolog, PathChar) == NULL)
-        {
-          memset (buffer, 0, sizeof (buffer));
-          strcpy (buffer, Prolog);
-          memset (Prolog, 0, sizeof (Prolog));
-          sprintf (Prolog, "%s%s", Master, buffer);
-        }
+	{
+	  memset (buffer, 0, sizeof (buffer));
+	  strcpy (buffer, Prolog);
+	  memset (Prolog, 0, sizeof (Prolog));
+	  sprintf (Prolog, "%s%s", Master, buffer);
+	}
       temp = fopen (Prolog, "rt");
       if (temp == NULL)
-        logtext ("Prolog File not found - None appended", 4, YES);
+	logtext ("Prolog File not found - None appended", 4, YES);
       else
-        fclose (temp);
+	fclose (temp);
     }
   // test epilog
   if (strcmp (Epilog, "NONE") == 0)
@@ -2099,17 +2097,17 @@ testctrlinfo (void)
   else
     {
       if (strchr (Epilog, PathChar) == NULL)
-        {
-          memset (buffer, 0, sizeof (buffer));
-          strcpy (buffer, Epilog);
-          memset (Epilog, 0, sizeof (Epilog));
-          sprintf (Epilog, "%s%s", Master, buffer);
-        }
+	{
+	  memset (buffer, 0, sizeof (buffer));
+	  strcpy (buffer, Epilog);
+	  memset (Epilog, 0, sizeof (Epilog));
+	  sprintf (Epilog, "%s%s", Master, buffer);
+	}
       temp = fopen (Epilog, "rt");
       if (temp == NULL)
-        logtext ("Epilog File not found - None appended", 4, YES);
+	logtext ("Epilog File not found - None appended", 4, YES);
       else
-        fclose (temp);
+	fclose (temp);
     }
   // test comments
   if (Comments[0] == 0 || strcmp (Comments, "NONE") == 0)
@@ -2129,63 +2127,60 @@ testctrlinfo (void)
 
   if (MAKETYPE >= 2)
     {
-      segfile[0].Net = MAKENUMBER;      // hardcode
-      segfile[0].Node = 0;      // hardcode
+      segfile[0].Net = MAKENUMBER;	// hardcode
+      segfile[0].Node = 0;	// hardcode
     }
   else
     {
-      segfile[0].Net = MAKENET; // hardcode
-      segfile[0].Node = MAKENUMBER;     // hardcode
+      segfile[0].Net = MAKENET;	// hardcode
+      segfile[0].Node = MAKENUMBER;	// hardcode
     }
-  segfile[0].Zone = MAKEZONE;   // hardcode
-  segfile[0].SegmentType = MAKETYPE;    // hardcode
+  segfile[0].Zone = MAKEZONE;	// hardcode
+  segfile[0].SegmentType = MAKETYPE;	// hardcode
 
   strcpy (segfile[0].AltNotify, NetAddress);
 
   if (PVTlvl == 0)
     {
       logtext ("Default - Private nodes are restricted to NETWORK/HUB level.",
-               5, YES);
+	       5, YES);
       PVTlvl = 3;
     }
   else
     {
       switch (PVTlvl)
-        {
-        case 0:
-          PVTlvl = 3;
-          logtext ("Private nodes are restricted to NETWORK/HUB level.", 5,
-                   YES);
-          break;
-        case 1:
-          logtext ("Private nodes are restricted to HUB level.", 5, YES);
-          break;
-        case 2:
-        case 3:
-          PVTlvl = 3;
-          logtext ("Private nodes are restricted to NETWORK/HUB level.", 5,
-                   YES);
-          break;
-        case 4:
-          logtext
-            ("Private nodes are restricted to REGION/NETWORK/HUB level.", 5,
-             YES);
-          break;
-        case 5:
-          logtext ("Private nodes are not restricted.", 5, YES);
-          break;
-        case 6:
-        case 7:
-        default:
-          PVTlvl = 3;
-          logtext ("Private nodes are restricted to NETWORK/HUB level.", 5,
-                   YES);
-          break;
-        }
+	{
+	case 0:
+	  PVTlvl = 3;
+	  logtext ("Private nodes are restricted to NETWORK/HUB level.", 5,
+		   YES);
+	  break;
+	case 1:
+	  logtext ("Private nodes are restricted to HUB level.", 5, YES);
+	  break;
+	case 2:
+	case 3:
+	  PVTlvl = 3;
+	  logtext ("Private nodes are restricted to NETWORK/HUB level.", 5,
+		   YES);
+	  break;
+	case 4:
+	  logtext
+	    ("Private nodes are restricted to REGION/NETWORK/HUB level.", 5,
+	     YES);
+	  break;
+	case 5:
+	  logtext ("Private nodes are not restricted.", 5, YES);
+	  break;
+	case 6:
+	case 7:
+	default:
+	  PVTlvl = 3;
+	  logtext ("Private nodes are restricted to NETWORK/HUB level.", 5,
+		   YES);
+	  break;
+	}
     }
-
-  free (CWD);
-
 }
 
 void
@@ -2199,7 +2194,7 @@ printctrlinfo (void)
   printf ("Merge Path      : %s\n", MergePath);
   printf ("Control File    : %s\n", ControlFile);
   printf ("Make            : %s [%d] [%s]\n", SegmentType[MAKETYPE].String,
-          MAKENUMBER, expSourceFile);
+	  MAKENUMBER, expSourceFile);
   printf ("Process         : %s\n", Process_day);
   printf ("Publish         : %s\n", Publish_day);
   printf ("Private         : %s\n", PVTDisposition[DispPVT].String);
@@ -2220,7 +2215,7 @@ printctrlinfo (void)
   printf ("OutFile         : %s\n", OutFile);
   printf ("OutPath         : %s\n", OutPath);
   printf ("Threshold       : %ld %ld\n", threshold.arc_size,
-          threshold.diff_size);
+	  threshold.diff_size);
   printf ("Arc             : %d\n", ARC);
   printf ("OutDiff         : %s\n", OutDiff);
   printf ("Cleanup         : %c\n", CLEANUP);
@@ -2242,39 +2237,39 @@ printctrlinfo (void)
     {
       printf ("Receipt- ");
       if (mnotify[0].Crash == 'Y')
-        printf ("Crash,");
+	printf ("Crash,");
       if (mnotify[0].Hold == 'Y')
-        printf ("Hold,");
+	printf ("Hold,");
       if (mnotify[0].Intl == 'Y')
-        printf ("Intl,");
+	printf ("Intl,");
       if (mnotify[0].Normal == 'Y')
-        printf ("Normal,");
+	printf ("Normal,");
     }
 
   if (mnotify[1].active == 'Y')
     {
       printf ("Errors- ");
       if (mnotify[1].Crash == 'Y')
-        printf ("Crash,");
+	printf ("Crash,");
       if (mnotify[1].Hold == 'Y')
-        printf ("Hold,");
+	printf ("Hold,");
       if (mnotify[1].Intl == 'Y')
-        printf ("Intl,");
+	printf ("Intl,");
       if (mnotify[1].Normal == 'Y')
-        printf ("Normal,");
+	printf ("Normal,");
     }
 
   if (mnotify[2].active == 'Y')
     {
       printf ("Self- ");
       if (mnotify[2].Crash == 'Y')
-        printf ("Crash,");
+	printf ("Crash,");
       if (mnotify[2].Hold == 'Y')
-        printf ("Hold,");
+	printf ("Hold,");
       if (mnotify[2].Intl == 'Y')
-        printf ("Intl,");
+	printf ("Intl,");
       if (mnotify[2].Normal == 'Y')
-        printf ("Normal,");
+	printf ("Normal,");
     }
   printf ("\n");
 

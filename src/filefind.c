@@ -4,14 +4,18 @@
 #include <ctype.h>
 #ifdef LINUX
 #include "doslinux.h"
-#define PathChar '/'
 #else
 #include <dos.h>
-#define PathChar '\\'
 #endif
 // #include "records.h"
 // #include "logdef.h"
 #include "compress.h"
+
+#ifdef LINUX
+#define PathChar '/'
+#else
+#define PathChar '\\'
+#endif
 
 extern COMPRESSTYPE CompressType[];
 

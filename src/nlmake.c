@@ -3,29 +3,36 @@
 #include <string.h>
 #include <ctype.h>
 //#include <malloc.h> // needed for mem test
+#include <sys/types.h>
 #ifdef LINUX
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
 #include "doslinux.h"
-#define strnicmp strncasecmp
-#define PathChar '/'
 #else
-#include <sys\types.h>
 #include <direct.h>
 #include <dos.h>
-#define PathChar '\\'
 #endif
 #include "records.h"
 #include "logdef.h"
 #include "textstr.inc"          // Processing commands in string form
+
 #ifdef DOS
 #define MAXSUBFILES 35          //Files in CTL
 #else
 #define MAXSUBFILES 100         // Files in CTL
 #endif
+
+#ifdef LINUX
+#define strnicmp strncasecmp
+#define PathChar '/'
+#define mkdir(x) mkdir(x, 0750)
+#else
+#define PathChar '\\'
+#endif
+
+
 char ProgName[] = { "NLMake" };
 int MajVer = 1;
 int MinVer = 13;
@@ -43,10 +50,6 @@ int SubRev = 2;
   #define OSType "Linux"
 #else
   #define OSType "Unknown"
-#endif
-
-#ifdef LINUX
-#define mkdir(x) mkdir(x, 0750)
 #endif
 
 

@@ -6,8 +6,6 @@
 #ifdef LINUX
 #include <errno.h>
 #include "doslinux.h"
-#define stricmp strcasecmp
-#define strnicmp strncasecmp
 #else
 #include <dos.h>
 #endif
@@ -22,6 +20,12 @@
 #else
 #define MAXNODES 30000          // Per segment
 #endif
+
+#ifdef LINUX
+#define stricmp strcasecmp
+#define strnicmp strncasecmp
+#endif
+
 
 // extern
 extern SEGFILE segfile[];

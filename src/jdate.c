@@ -4,13 +4,15 @@
 #include <ctype.h>
 #ifdef LINUX
 #include "doslinux.h"
-#define stricmp strcasecmp
 #else
 #include <dos.h>
 #endif
 #include "records.h"
 #include "logdef.h"
 
+#ifdef LINUX
+#define stricmp strcasecmp
+#endif
 
 extern LINEPRMS WeekDays[];
 extern char Publish_day[];

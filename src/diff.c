@@ -4,14 +4,19 @@
 #include <ctype.h>
 #ifdef LINUX
 #include "doslinux.h"
-#define strnicmp strncasecmp
-#define PathChar '/'
 #else
 #include <dos.h>
-#define PathChar '\\'
 #endif
 #include "logdef.h"
 #include "records.h"
+
+#ifdef LINUX
+#define strnicmp strncasecmp
+#define PathChar '/'
+#else
+#define PathChar '\\'
+#endif
+
 
 // globals
 extern char OutFile[];

@@ -3,16 +3,18 @@
 #include <string.h>
 #include <ctype.h>
 #include <malloc.h>
-//#include <mem.h>
-#ifndef LINUX
-#include <dos.h>
-#else
+#ifdef LINUX
 #include "doslinux.h"
-#define strnicmp strncasecmp
-#define stricmp strcasecmp
+#else
+#include <dos.h>
 #endif
 #include "flags.h"
 #include "logdef.h"
+
+#ifdef LINUX
+#define strnicmp strncasecmp
+#define stricmp strcasecmp
+#endif
 
 extern char FLAGCHKAUTO;
 extern char *badflags;

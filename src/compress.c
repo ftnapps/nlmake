@@ -4,25 +4,27 @@
 #include <stddef.h>
 #include <string.h>
 #include <ctype.h>
-#ifndef LINUX
-#include <process.h>
-#include <dos.h>
-#include <sys\types.h>
-#include <sys\stat.h>
-#include <io.h>
-#else
-#include "doslinux.h"
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef LINUX
+#include "doslinux.h"
 #include <sys/io.h>
 #include <unistd.h>
-#define strnicmp strncasecmp
+#else
+#include <process.h>
+#include <dos.h>
+#include <io.h>
 #endif
 #include <fcntl.h>
 #include <malloc.h>
 #include "compress.h"
 #include "logdef.h"
 #include "records.h"
+
+#ifdef LINUX
+#define strnicmp strncasecmp
+#endif
+
 
 COMPRESSTYPE CompressType[10];
 short DefCompressor;

@@ -423,27 +423,14 @@ call_spawn (void)
 short
 fcn_threshold (char *filename)
 {
-  long handle, rc;
+  long rc;
   struct stat buf;
 
-  handle = open (filename, O_RDONLY);
-
-  if (handle != -1)
+  rc = stat (filename, &buf);
+  if (rc)
     {
-      rc = fstat (handle, &buf);
-      if (rc == -1)
-        {
-          close (handle);
-          return (2);
-        }
-    }
-  else
-    {
-      close (handle);
       return (2);
     }
-
-  close (handle);
 
   if (threshold.diff_size == 0)
     threshold.diff_size = (long) (threshold.arc_size * (5 / 3));

@@ -127,26 +127,6 @@ _dos_findfirst (char *name, unsigned start, struct find_t *f)
   return _dos_findnext (f);
 }
 
-/* split unix file timestamp into time (2s increments), and dosdate  */
-/* note that time is non-standard and used only to find newest files */
-void
-_dos_getftime (int file, unsigned short *d, unsigned short *t)
-{
-  time_t utime;
-  struct tm *tm;
-  unsigned short day, month, year;
-
-  time (&utime);
-  tm = localtime (&utime);
-
-  day = (unsigned char) tm->tm_mday;    /* 1-31 */
-  month = (unsigned char) tm->tm_mon + 1;       /* 1-12 */
-  year = (unsigned short) tm->tm_year - 80;     /* 1980-2099 */
-
-  *d = (unsigned short) (day | (month << 5) | (year << 9));
-  *t = (unsigned short) ((utime % 86400) / 2);
-}
-
 /* convert UNIX-style time() to DOS date and time format */
 void
 _dos_getdate (struct dosdate_t *t)

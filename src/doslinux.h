@@ -43,7 +43,6 @@ void _dos_getdate (struct dosdate_t *);
 void _dos_gettime (struct dostime_t *);
 unsigned _dos_findfirst (char *, unsigned, struct find_t *);
 unsigned _dos_findnext (struct find_t *);
-void _dos_getftime (int, unsigned short *, unsigned short *);
 
 void _makepath (const char *path, char *drive, char *dir, char *file,
                 char *ext);

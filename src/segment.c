@@ -220,7 +220,7 @@ process_segment (void)
         sprintf (logline, "Critial Error - Can not open OUTFILE <%s>",
                  errnostr[errno]);
       else
-        sprintf (logline, "Critial Error - Can not open OUTFILE <???>");
+        sprintf (logline, "Critial Error - Can not open OUTFILE <?>");
       logtext (logline, 0, YES);
       errorlvl = 254;
       return (errorlvl);

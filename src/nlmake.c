@@ -554,7 +554,7 @@ proctrlfile (void)
         sprintf (LogLine, "Critial Error - Can not open temporary file <%s>",
                  errnostr[errno]);
       else
-        sprintf (LogLine, "Critial Error - Can not open temporary <???>");
+        sprintf (LogLine, "Critial Error - Can not open temporary <?>");
       logtext (LogLine, 0, YES);
       errorlvl = 254;
       return errorlvl;
@@ -572,7 +572,7 @@ proctrlfile (void)
         sprintf (LogLine, "Critial Error - Can not open file %s <%s>",
                  ControlFile, errnostr[errno]);
       else
-        sprintf (LogLine, "Critial Error - Can not open file %s <???>",
+        sprintf (LogLine, "Critial Error - Can not open file %s <?>",
                  ControlFile);
       logtext (LogLine, 0, YES);
       //fclose(outfilep); - outfilep is NULL
@@ -2360,7 +2360,7 @@ makedirerror (void)
       break;
     case 5:
       break;                    //BC 4.5++ returns this if mkdir() and dir already exists
-      /* commenting out unreachable code, because of break above???
+      /* commenting out unreachable code, because of break above?
       logtext ("Memory Problem.", 5, YES);
       logwrite (CFE_ABORT, 0);
       logwrite (SYS_STOP, 0);

@@ -112,7 +112,7 @@ openlog (void)
         sprintf (logline, "Critial Error - Can not open nlmake.log <%s>",
                  errnostr[errno]);
       else
-        sprintf (logline, "Critial Error - Can not open nlmake.log <???>");
+        sprintf (logline, "Critial Error - Can not open nlmake.log <?>");
       logtext (logline, 0, YES);
       return (254);
     }

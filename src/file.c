@@ -73,7 +73,7 @@ void copyfile(char *filename,char *destination)
         if(mbptr == NULL)
         {
                 fclose(inf);
-                printf("insufficent memory to copy <%ld>\n",fsize);
+                printf("Insufficent memory to copy <%ld>\n",fsize);
                 exit(254);
         }
   //            printf("allocated memory to copy <%ld>\n",fsize);

@@ -100,12 +100,7 @@ send_netmail (char *subject, short SFI, char Type)
   else
     subbreakaddress (SubAddress);
 
-#ifdef DOS
-  front = (char *) _fmalloc (MBUFSIZE);
-#else
   front = (char *) malloc (MBUFSIZE);
-#endif
-
   if (front == NULL)
     {
       printf ("malloc error\n");
@@ -319,12 +314,8 @@ send_netmail (char *subject, short SFI, char Type)
         fclose (ptr1);
     }
   deletefile ("msgtext.tmp");
-#ifdef DOS
-  _ffree (front);
-#else
-  free (front);
-#endif
 
+  free (front);
 }
 
 

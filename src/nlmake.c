@@ -44,6 +44,11 @@ char OStype[] = { "Win32" };
 char OSType[] = { "Linux" };
 #endif
 
+#ifdef LINUX
+#define mkdir(x) mkdir(x, 0750)
+#endif
+
+
 // Externs
 extern short DefCompressor;
 
@@ -1977,11 +1982,7 @@ testctrlinfo (void)
     {
       if (Master[strlen (Master) - 1] != PathChar)
         {
-#ifdef LINUX
-          if (mkdir (Master, 0750) == 0)
-#else
           if (mkdir (Master) == 0)
-#endif
             logtext ("Master Directory not found - Creating", 1, YES);
           else
             makedirerror ();
@@ -1990,11 +1991,7 @@ testctrlinfo (void)
       else
         {
           Master[strlen (Master) - 1] = 0;
-#ifdef LINUX
-          if (mkdir (Master, 0750) == 0)
-#else
           if (mkdir (Master) == 0)
-#endif
             logtext ("Master Directory not found - Creating", 1, YES);
           else
             makedirerror ();
@@ -2009,11 +2006,7 @@ testctrlinfo (void)
     {
       if (Uploads[strlen (Uploads) - 1] != PathChar)
         {
-#ifdef LINUX
-          if (mkdir (Uploads, 0750) == 0)
-#else
           if (mkdir (Uploads) == 0)
-#endif
             logtext ("Uploads Directory not found - Creating", 1, YES);
           else
             makedirerror ();
@@ -2022,11 +2015,7 @@ testctrlinfo (void)
       else
         {
           Uploads[strlen (Uploads) - 1] = 0;
-#ifdef LINUX
-          if (mkdir (Uploads, 0750) == 0)
-#else
           if (mkdir (Uploads) == 0)
-#endif
             logtext ("Uploads Directory not found - Creating", 1, YES);
           else
             makedirerror ();
@@ -2044,11 +2033,7 @@ testctrlinfo (void)
     {
       if (MailFiles[strlen (MailFiles) - 1] != PathChar)
         {
-#ifdef LINUX
-          if (mkdir (MailFiles, 0750) == 0)
-#else
           if (mkdir (MailFiles) == 0)
-#endif
             logtext ("MailFiles Directory not found - Creating", 1, YES);
           else
             makedirerror ();
@@ -2057,11 +2042,7 @@ testctrlinfo (void)
       else
         {
           MailFiles[strlen (MailFiles) - 1] = 0;
-#ifdef LINUX
-          if (mkdir (MailFiles, 0750) == 0)
-#else
           if (mkdir (MailFiles) == 0)
-#endif
             logtext ("MailFiles Directory not found - Creating", 1, YES);
           else
             makedirerror ();
@@ -2080,11 +2061,7 @@ testctrlinfo (void)
     {
       if (Update[strlen (Update) - 1] != PathChar)
         {
-#ifdef LINUX
-          if (mkdir (Update, 0750) == 0)
-#else
           if (mkdir (Update) == 0)
-#endif
             logtext ("Update Directory not found - Creating", 1, YES);
           else
             makedirerror ();
@@ -2093,11 +2070,7 @@ testctrlinfo (void)
       else
         {
           Update[strlen (Update) - 1] = 0;
-#ifdef LINUX
-          if (mkdir (Update, 0750) == 0)
-#else
           if (mkdir (Update) == 0)
-#endif
             logtext ("Update Directory not found - Creating", 1, YES);
           else
             makedirerror ();
@@ -2113,11 +2086,7 @@ testctrlinfo (void)
     {
       if (BadFiles[strlen (BadFiles) - 1] != PathChar)
         {
-#ifdef LINUX
-          if (mkdir (BadFiles, 0750) == 0)
-#else
           if (mkdir (BadFiles) == 0)
-#endif
             logtext ("BadFiles Directory not found - Creating", 1, YES);
           else
             makedirerror ();
@@ -2126,11 +2095,7 @@ testctrlinfo (void)
       else
         {
           BadFiles[strlen (BadFiles) - 1] = 0;
-#ifdef LINUX
-          if (mkdir (BadFiles, 0750) == 0)
-#else
           if (mkdir (BadFiles) == 0)
-#endif
             logtext ("BadFiles Directory not found - Creating", 1, YES);
           else
             makedirerror ();
@@ -2147,11 +2112,7 @@ testctrlinfo (void)
     {
       if (OutPath[strlen (OutPath) - 1] != PathChar)
         {
-#ifdef LINUX
-          if (mkdir (OutPath, 0750) == 0)
-#else
           if (mkdir (OutPath) == 0)
-#endif
             logtext ("OutPath Directory not found - Creating", 1, YES);
           else
             makedirerror ();
@@ -2160,11 +2121,7 @@ testctrlinfo (void)
       else
         {
           OutPath[strlen (OutPath) - 1] = 0;
-#ifdef LINUX
-          if (mkdir (OutPath, 0750) == 0)
-#else
           if (mkdir (OutPath) == 0)
-#endif
             logtext ("OutPath Directory not found - Creating", 1, YES);
           else
             makedirerror ();
@@ -2247,11 +2204,7 @@ testctrlinfo (void)
     {
       if (Messages[strlen (Messages) - 1] != PathChar)
         {
-#ifdef LINUX
-          if (mkdir (Messages, 0750) == 0)
-#else
           if (mkdir (Messages) == 0)
-#endif
             logtext ("Messages Directory not found - Creating", 1, YES);
           else
             makedirerror ();
@@ -2260,11 +2213,7 @@ testctrlinfo (void)
       else
         {
           Messages[strlen (Messages) - 1] = 0;
-#ifdef LINUX
-          if (mkdir (Messages, 0750) == 0)
-#else
           if (mkdir (Messages) == 0)
-#endif
             logtext ("Messages Directory not found - Creating", 1, YES);
           else
             makedirerror ();

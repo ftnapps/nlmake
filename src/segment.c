@@ -161,43 +161,23 @@ char *redunflags;
 void
 init_flags_lists (void)
 {
-#ifdef DOS
-  badflags = (char *) _fmalloc (256);
-  caseflags = (char *) _fmalloc (256);
-  goodflags = (char *) _fmalloc (256);
-  dupeflags = (char *) _fmalloc (256);
-  rplcdflags = (char *) _fmalloc (512);
-  redunflags = (char *) _fmalloc (256);
-#else
   badflags = (char *) malloc (256);
   caseflags = (char *) malloc (256);
   goodflags = (char *) malloc (256);
   dupeflags = (char *) malloc (256);
   rplcdflags = (char *) malloc (512);
   redunflags = (char *) malloc (256);
-#endif
-
 }
 
 void
 free_flags_lists (void)
 {
-
-#ifdef DOS
-  _ffree (badflags);
-  _ffree (caseflags);
-  _ffree (goodflags);
-  _ffree (dupeflags);
-  _ffree (rplcdflags);
-  _ffree (redunflags);
-#else
   free (badflags);
   free (caseflags);
   free (goodflags);
   free (dupeflags);
   free (rplcdflags);
   free (redunflags);
-#endif
 }
 
 
@@ -247,11 +227,7 @@ process_segment (void)
       init_flags_lists ();
     }
 
-#ifdef DOS
-  str = (char *) _fmalloc (MAXSTR);
-#else
   str = (char *) malloc (MAXSTR);
-#endif
 
   memset (str, 0, sizeof (str));
 
@@ -698,11 +674,7 @@ process_segment (void)
       free_flags_lists ();
     }
 
-#ifdef DOS
-  _ffree (str);
-#else
   free (str);
-#endif
 
   // crc insert routine
   add_crc (getcrc (OutFile, headeroffset), OutFile);
@@ -1302,11 +1274,7 @@ test_segment (void)
   char *dot;
 
 
-#ifdef DOS
-  str = (char *) _fmalloc (MAXSTR);
-#else
   str = (char *) malloc (MAXSTR);
-#endif
 
   memset (str, 0, sizeof (str));
 
@@ -1767,11 +1735,7 @@ test_segment (void)
       freequicklst ();
       free_flags_lists ();
     }
-#ifdef DOS
-  _ffree (str);
-#else
   free (str);
-#endif
 
   return (errorlvl);
 
@@ -1796,11 +1760,7 @@ process_new (void)
   char namebuf[255];
   short ageis = 0;
 
-#ifdef DOS
-  str = (char *) _fmalloc (MAXSTR);
-#else
   str = (char *) malloc (MAXSTR);
-#endif
   memset (str, 0, sizeof (str));
 
   if (FLAGCHK == 'Y' || FLAGCHKAUTO == 'Y')
@@ -2322,11 +2282,7 @@ process_new (void)
       freequicklst ();
       free_flags_lists ();
     }
-#ifdef DOS
-  _ffree (str);
-#else
   free (str);
-#endif
 
   return (errorlvl);
 }

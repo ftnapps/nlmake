@@ -66,12 +66,7 @@ copyfile (char *filename, char *destination)
 
   //printf("calculated file size <%ld>\n",fsize);
 
-#ifdef DOS
-  mbptr = (char *) _fmalloc (6000);
-#else
   mbptr = (char *) malloc (10000);
-#endif
-
   if (mbptr == NULL)
     {
       fclose (inf);
@@ -91,19 +86,7 @@ copyfile (char *filename, char *destination)
   fclose (inf);
   fclose (otf);
 
-#ifdef DOS
-  _ffree (mbptr);
-#endif
-#ifdef OS2
   free (mbptr);
-#endif
-#ifdef WIN
-  free (mbptr);
-#endif
-#ifdef LINUX
-  free (mbptr);
-#endif
-
 }
 
 void

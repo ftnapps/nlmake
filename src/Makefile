@@ -34,7 +34,7 @@ default: nlmake$(EXE)
 
 all: nlmake$(EXE)
 
-nlmake: $(OBJFILES)
+nlmake$(EXE): $(OBJFILES)
 	$(GPP) $(LFLAGS) -o nlmake$(EXE) $(OBJFILES)
 
 install:

@@ -51,7 +51,6 @@ void _splitpath (const char *path, char *drive, char *dir, char *file,
 
 char *strupr (char *string);
 
-#define EZERO 0
 #define _A_NORMAL 0
 
 /* map spawnlp() calls to UNIX-style system() calls*/

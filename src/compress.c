@@ -23,6 +23,7 @@
 
 #ifdef LINUX
 #define strnicmp strncasecmp
+#define EZERO 0
 #endif
 
 
@@ -388,102 +389,7 @@ call_spawn (void)
   //     pathp = getenv("PATH");
 //      printf("Path = %s\n",pathp);
 
-#ifdef LINUX
   val_exit = system (cmdline);
-#else
-//      _heapshrink();
-  switch (i)
-    {
-    case 2:
-      val_exit =
-        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3], NULL);
-      break;
-    case 3:
-      val_exit =
-        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-                 aparms[4], NULL);
-      break;
-    case 4:
-      val_exit =
-        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-                 aparms[4], aparms[5], NULL);
-      break;
-    case 5:
-      val_exit =
-        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-                 aparms[4], aparms[5], aparms[6], NULL);
-      break;
-    case 6:
-      val_exit =
-        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-                 aparms[4], aparms[5], aparms[6], aparms[7], NULL);
-      break;
-    case 7:
-      val_exit =
-        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-                 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8], NULL);
-      break;
-    case 8:
-      val_exit =
-        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-                 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
-                 aparms[9], NULL);
-      break;
-    case 9:
-      val_exit =
-        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-                 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
-                 aparms[9], aparms[10], NULL);
-      break;
-    case 10:
-      val_exit =
-        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-                 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
-                 aparms[9], aparms[10], aparms[11], NULL);
-      break;
-    case 11:
-      val_exit =
-        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-                 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
-                 aparms[9], aparms[10], aparms[11], aparms[12], NULL);
-      break;
-    case 12:
-      val_exit =
-        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-                 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
-                 aparms[9], aparms[10], aparms[11], aparms[12], aparms[13],
-                 NULL);
-      break;
-    case 13:
-      val_exit =
-        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-                 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
-                 aparms[9], aparms[10], aparms[11], aparms[12], aparms[13],
-                 aparms[14], NULL);
-      break;
-    case 14:
-      val_exit =
-        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-                 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
-                 aparms[9], aparms[10], aparms[11], aparms[12], aparms[13],
-                 aparms[14], aparms[15], NULL);
-      break;
-    case 15:
-      val_exit =
-        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-                 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
-                 aparms[9], aparms[10], aparms[11], aparms[12], aparms[13],
-                 aparms[14], aparms[15], aparms[16], NULL);
-      break;
-    default:
-      val_exit =
-        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-                 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
-                 aparms[9], aparms[10], aparms[11], aparms[12], aparms[13],
-                 aparms[14], aparms[15], aparms[16], aparms[17], NULL);
-      break;
-    }
-#endif
 
   sprintf (logline, "spawned compressor %s", aparms[0]);
   logtext (logline, 4, YES);
@@ -504,29 +410,10 @@ call_spawn (void)
 
 //       printf("error no %d\n",errno);
 //       printf(logline);
-  if (val_exit < 0)
-    switch (errno)
-      {
-      case EZERO:               // No Error
-        break;
-      case ENOENT:              // No Such File
-        sprintf (logline, "Archiver not found - Check PATH.\n");
-        logtext (logline, 0, YES);
-        break;
-      case E2BIG:               // Too many arguments
-        sprintf (logline,
-                 "Archiver command line too long. - Check compress.ctl!\n");
-        logtext (logline, 0, YES);
-        break;
-      case ENOMEM:              // Not Enough Memory
-        sprintf (logline, "Not enough memory to activate archiver.\n");
-        logtext (logline, 0, YES);
-        break;
-      default:
-        sprintf (logline, "Unknown Archiver error.\n");
-        logtext (logline, 0, YES);
-        break;
-      }
+  if (val_exit < 0) {
+    sprintf (logline, "Couldn't start archiver.\n");
+    logtext (logline, 0, YES);
+  }
 
   return val_exit;              //5-01-01 return 0 if success, error code if not
 }

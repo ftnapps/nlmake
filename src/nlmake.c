@@ -336,7 +336,7 @@ int main (short ParmsCtr, char *Parms[])
                                                 ControlFile[0] = 0;
                                                 if (temp) fclose(temp);
                                 } else
-                                printf("Ignoring bad command in connand line <%s>\n",Parms[cntr2]);
+                                printf("Ignoring bad command in command line <%s>\n",Parms[cntr2]);
                                 cntr = 0;
                                 break;
                                 default:
@@ -383,7 +383,7 @@ int main (short ParmsCtr, char *Parms[])
         // read compressor file
   if(init_compressors() == 1)
   {
-                sprintf(textline,"compress.ctl archiver config file not found");
+                sprintf(textline,"compress.ctl archiver config file not found.");
                 logtext(textline,0,YES);
                 printf("%s\n",textline);
         logwrite(CFE_ABORT,0);
@@ -392,7 +392,7 @@ int main (short ParmsCtr, char *Parms[])
                 exit(255);
   }  else
                 {
-                sprintf(textline,"compress.ctl sucessful load.");
+                sprintf(textline,"compress.ctl successfully loaded.");
                 logtext(textline,5,YES);
                 }
 
@@ -405,7 +405,7 @@ int main (short ParmsCtr, char *Parms[])
         if(temp == NULL)
                 {
                 //fclose(temp); - don't do this, temp==NULL!!!
-                sprintf(textline,"Compiling flag lookup file from flags.ctl.");
+                sprintf(textline,"Compiling flag lookup file from flags.ctl ... ");
                 logtext(textline,0,YES);
         cre_flags_db("flags.ctl");
                 sprintf(textline,"Compile completed.");
@@ -416,7 +416,7 @@ int main (short ParmsCtr, char *Parms[])
                          fclose(temp);
                          if(comp_compile_date() == 1)
                          {
-                         sprintf(textline,"Compiling flag lookup file from flags.ctl.");
+                         sprintf(textline,"Compiling flag lookup file from flags.ctl ... ");
                          logtext(textline,0,YES);
             cre_flags_db("flags.ctl");
                          sprintf(textline,"Compile completed.");
@@ -609,7 +609,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 }
                                 ptr2 = strchr(ptr,' ');
                                 if(ptr2 != NULL)
@@ -640,7 +640,7 @@ int proctrlfile(void)
                          logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                 exit(255); // abort fatal cfg file eror
+                                 exit(255); // abort fatal cfg file error
                                 }
                                 ptr++;
                 while(ptr[0] == ' ')
@@ -661,7 +661,7 @@ int proctrlfile(void)
                          logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                 exit(255); // abort fatal cfg file eror
+                                 exit(255); // abort fatal cfg file error
                                 }
                                 ptr++;
                 while(ptr[0] == ' ')
@@ -682,7 +682,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 }
                                 else
                                 logwrite(CF_PUBLISH,0);
@@ -698,7 +698,7 @@ int proctrlfile(void)
                          logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                 exit(255); // abort fatal cfg file eror
+                                 exit(255); // abort fatal cfg file error
                                 }
                                 ptr++;
                 while(ptr[0] == ' ')
@@ -719,7 +719,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 }
                                 else
                                         {
@@ -748,7 +748,7 @@ int proctrlfile(void)
                          logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                 exit(255); // abort fatal cfg file eror
+                                 exit(255); // abort fatal cfg file error
                                 }
                                 ptr++;
 
@@ -772,7 +772,7 @@ int proctrlfile(void)
                          logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                 exit(255); // abort fatal cfg file eror
+                                 exit(255); // abort fatal cfg file error
                                 }
                                 ptr++;
                 while(ptr[0] == ' ')
@@ -793,7 +793,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 }
                                 else
                                 logwrite(CF_PRIVATE,0);
@@ -809,7 +809,7 @@ int proctrlfile(void)
                          logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                 exit(255); // abort fatal cfg file eror
+                                 exit(255); // abort fatal cfg file error
                                 }
                                 ptr++;
                 while(ptr[0] == ' ')
@@ -821,7 +821,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 }
                                 else
                                 logwrite(CF_MINPHONE,0);
@@ -837,7 +837,7 @@ int proctrlfile(void)
                          logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                 exit(255); // abort fatal cfg file eror
+                                 exit(255); // abort fatal cfg file error
                                 }
                                 ptr++;
                 while(ptr[0] == ' ')
@@ -856,7 +856,7 @@ int proctrlfile(void)
                          logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                 exit(255); // abort fatal cfg file eror
+                                 exit(255); // abort fatal cfg file error
                                 }
                                 ptr++;
                 while(ptr[0] == ' ')
@@ -878,7 +878,7 @@ int proctrlfile(void)
                          logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                 exit(255); // abort fatal cfg file eror
+                                 exit(255); // abort fatal cfg file error
                                 }
                                 ptr++;
                 while(ptr[0] == ' ')
@@ -900,7 +900,7 @@ int proctrlfile(void)
                          logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                 exit(255); // abort fatal cfg file eror
+                                 exit(255); // abort fatal cfg file error
                                 }
                                 ptr++;
                 while(ptr[0] == ' ')
@@ -912,7 +912,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 }
                                 else
                                 logwrite(CF_MAILFILES,0);
@@ -928,7 +928,7 @@ int proctrlfile(void)
                          logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                 exit(255); // abort fatal cfg file eror
+                                 exit(255); // abort fatal cfg file error
                                 }
                                 ptr++;
                 while(ptr[0] == ' ')
@@ -940,7 +940,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 }
                                 else
                                 logwrite(CF_UPDATE,0);
@@ -956,7 +956,7 @@ int proctrlfile(void)
                          logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                 exit(255); // abort fatal cfg file eror
+                                 exit(255); // abort fatal cfg file error
                                 }
                                 ptr++;
                 while(ptr[0] == ' ')
@@ -968,7 +968,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 }
                                 else
                                 logwrite(CF_BADFILES,0);
@@ -984,7 +984,7 @@ int proctrlfile(void)
                          logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                 exit(255); // abort fatal cfg file eror
+                                 exit(255); // abort fatal cfg file error
                                 }
                                 ptr++;
                 while(ptr[0] == ' ')
@@ -999,7 +999,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 }
                                 else
                                 logwrite(CF_OUTFILE,0);
@@ -1015,7 +1015,7 @@ int proctrlfile(void)
                          logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                 exit(255); // abort fatal cfg file eror
+                                 exit(255); // abort fatal cfg file error
                                 }
                                 ptr++;
                 while(ptr[0] == ' ')
@@ -1027,7 +1027,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 }
                                 else
                                 logwrite(CF_OUTPATH,0);
@@ -1043,7 +1043,7 @@ int proctrlfile(void)
                          logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                 exit(255); // abort fatal cfg file eror
+                                 exit(255); // abort fatal cfg file error
                                 }
                                 ptr++;
                 while(ptr[0] == ' ')
@@ -1073,7 +1073,7 @@ int proctrlfile(void)
                                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                                exit(255); // abort fatal cfg file eror
+                                                exit(255); // abort fatal cfg file error
                                           }
                                 // here
                                 cntr = 0;
@@ -1098,7 +1098,7 @@ int proctrlfile(void)
                                 logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                        exit(255); // abort fatal cfg file eror
+                                        exit(255); // abort fatal cfg file error
                                         }
                                 cntr = 0;
                                 break;
@@ -1117,7 +1117,7 @@ int proctrlfile(void)
                          logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                 exit(255); // abort fatal cfg file eror
+                                 exit(255); // abort fatal cfg file error
                                 }
                                 ptr++;
                 while(ptr[0] == ' ')
@@ -1130,7 +1130,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 }
                                 if(breakaddress() == 1)
                                 {
@@ -1138,7 +1138,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 }
                                 logwrite(CF_NETADDRESS,0);
                                 sprintf(LogLine,"%s",NetAddress);
@@ -1166,7 +1166,7 @@ int proctrlfile(void)
                          logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                 exit(255); // abort fatal cfg file eror
+                                 exit(255); // abort fatal cfg file error
                                 }
                                 ptr++;
                 while(ptr[0] == ' ')
@@ -1178,7 +1178,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 }
                                 else
                                 logwrite(CF_MESSAGES,0);
@@ -1194,7 +1194,7 @@ int proctrlfile(void)
                          logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                 exit(255); // abort fatal cfg file eror
+                                 exit(255); // abort fatal cfg file error
                                 }
                                 ptr++;
                 while(ptr[0] == ' ')
@@ -1208,7 +1208,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 }
                                 else
                                 logwrite(CF_SUBMIT,0);
@@ -1278,7 +1278,7 @@ int proctrlfile(void)
                                 if(CopyRight[0] == 0)
                                 {
                                 logwrite(CFE_COPYRIGHT,linecnt);
-                                sprintf(LogLine,"Assuming default copyright cpyright.txt");
+                                sprintf(LogLine,"Assuming default copyright: cpyright.txt");
                                 logtext(LogLine,5,YES);
                                 }
                                 else
@@ -1302,7 +1302,7 @@ int proctrlfile(void)
                                 if(Prolog[0] == 0)
                                 {
                                 logwrite(CFE_PROLOG,linecnt);
-                                sprintf(LogLine,"Assuming default prolog prolog.txt");
+                                sprintf(LogLine,"Assuming default prolog: prolog.txt");
                                 logtext(LogLine,5,YES);
                                 }
                                 else
@@ -1326,7 +1326,7 @@ int proctrlfile(void)
                                 if(Epilog[0] == 0)
                                 {
                                 logwrite(CFE_EPILOG,linecnt);
-                                sprintf(LogLine,"Assuming default epilog epilog.txt");
+                                sprintf(LogLine,"Assuming default epilog: epilog.txt");
                                 logtext(LogLine,5,YES);
                                 }
                                 else
@@ -1389,7 +1389,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 }
                                 if(mark_file != 0)
                                 {
@@ -1414,7 +1414,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 // Error
                                 cntr = 0;
                                 break;
@@ -1426,7 +1426,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 }
                                 // pointer crap
                                 ptr++;
@@ -1443,7 +1443,7 @@ int proctrlfile(void)
                                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                        exit(255); // abort fatal cfg file eror
+                                        exit(255); // abort fatal cfg file error
                                         }
                                 switch(segfile[sfilecnt].SegmentType)
                                 {
@@ -1482,7 +1482,7 @@ int proctrlfile(void)
                                 logwrite(CFE_ABORT,0);
                                    logwrite(SYS_STOP,0);
                                    closelog(); // close logfile
-                                        exit(255); // abort fatal cfg file eror
+                                        exit(255); // abort fatal cfg file error
                                         break;
                                         default:
                                         cntr = 0;
@@ -1544,7 +1544,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 }
                                 ptr++;
                 while(ptr[0] == ' ')
@@ -1563,7 +1563,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 }
                                 ptr++;
                 while(ptr[0] == ' ')
@@ -1614,7 +1614,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 }
                                 ptr++;
                 while(ptr[0] == ' ')
@@ -1635,7 +1635,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 }
                                 else
                                 logwrite(CF_PVTLEVEL,0);
@@ -1651,7 +1651,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 }
                                 ptr++;
                 while(ptr[0] == ' ')
@@ -1671,7 +1671,7 @@ int proctrlfile(void)
                         logwrite(CFE_ABORT,0);
                                 logwrite(SYS_STOP,0);
                                 closelog(); // close logfile
-                                exit(255); // abort fatal cfg file eror
+                                exit(255); // abort fatal cfg file error
                                 }
                                 cntr = 0;
                                 break;
@@ -1834,7 +1834,7 @@ void testctrlinfo(void)
          // set publish day
                 if(Publish_day[0] == 0)
                 {
-                        logtext("No Publish statement - Publish default : Friday",4,YES);
+                        logtext("No Publish statement - Publish default = Friday",4,YES);
                         strcpy(Publish_day,"Friday");
                 }
 
@@ -2130,7 +2130,7 @@ void testctrlinfo(void)
         // test messages
                 if(Messages[0] == 0)
                 {
-                logtext("No Messages will be send including Attached segments",1,YES);
+                logtext("No Messages will be sent including Attached Segments",1,YES);
                 }
                 else
                         {
@@ -2161,7 +2161,7 @@ void testctrlinfo(void)
                         }
         // test copyright
                 if(strcmp(CopyRight,"NONE") == 0)
-                logtext("No CopyRight statement - None appended",5,YES);
+                logtext("No Copyright statement - None appended",5,YES);
                 else
                         {
                         if(strchr(CopyRight,PathChar) == NULL)
@@ -2173,7 +2173,7 @@ void testctrlinfo(void)
                         }
                         temp = fopen (CopyRight, "rt");
                         if(temp == NULL)
-                        logtext("CopyRight File not found - None appended",4,YES);
+                        logtext("Copyright File not found - None appended",4,YES);
                         else fclose(temp);
                         }
         // test prolog
@@ -2387,7 +2387,7 @@ void printctrlinfo(void)
          }
     printf("\n");
 
-    printf("CopyRight       : %s\n",CopyRight);
+    printf("Copyright       : %s\n",CopyRight);
     printf("Prolog          : %s\n",Prolog);
     printf("Epilog          : %s\n",Epilog);
     printf("Comments        : %s\n",Comments);

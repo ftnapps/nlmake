@@ -11,10 +11,6 @@
 #include "records.h"
 #include "logdef.h"
 
-#ifdef DOS
-#else
-#endif
-
 
 #define                 KLUDGE 0x01
 #define                 RCVED  0x04
@@ -106,14 +102,7 @@ send_netmail (char *subject, short SFI, char Type)
 
 #ifdef DOS
   front = (char *) _fmalloc (MBUFSIZE);
-#endif
-#ifdef OS2
-  front = (char *) malloc (MBUFSIZE);
-#endif
-#ifdef WIN
-  front = (char *) malloc (MBUFSIZE);
-#endif
-#ifdef LINUX
+#else
   front = (char *) malloc (MBUFSIZE);
 #endif
 
@@ -126,20 +115,25 @@ send_netmail (char *subject, short SFI, char Type)
   msg = front;
   memset (msg, 0, MBUFSIZE);
 
+  // Write fromName, toName & subject to msg
   memmove (msg, ProgName, strlen (ProgName));
-  memmove (msg += 36, sysop, strlen (sysop));
+  msg += 36;
+  memmove (msg, sysop, strlen (sysop));
+  msg += 36;
   if (strlen (subject) <= 71)
-    memmove (msg += 36, subject, strlen (subject));
+    memmove (msg, subject, strlen (subject));
   else
-    memmove (msg += 36, subject, 71);
+    memmove (msg, subject, 71);
+  msg += 72;
 
+  // Write date/time to msg
   _dos_getdate (&date);
   _dos_gettime (&time);
-  sprintf (msg += 72, "%02d %s %02d  %02d:%02d:%02d",
+  sprintf (msg, "%02d %s %02d  %02d:%02d:%02d",
              date.day, Months[date.month].Single, date.year % 100,
              time.hour, time.minute, time.second);
-
   msg += 22;
+
   if (Type == 3 || segfile[SFI].AltNotify[0] != 0)
     byte_convert (DByte, SUBNODE);      // submit node
   else
@@ -266,33 +260,31 @@ send_netmail (char *subject, short SFI, char Type)
             {
             case 0:
               sprintf (msg, "\rSegment file received \rNo Errors Detected\r");
-              eof = strlen ("\rSegment file received \rNo Errors Detected\r");
+              eof = strlen (msg);
               break;
             case 1:
               sprintf (msg,
                        "\rLocal Segment File Update\rNo Errors Detected\r");
-              eof =
-                strlen ("\rLocal Segment File Update\rNo Errors Detected\r");
+              eof = strlen (msg);
               break;
             case 2:
               sprintf (msg, "\rSegment File Received \rNo Errors Detected\r");
-              eof = strlen ("\rSegment File Received \rNo Errors Detected\r");
+              eof = strlen (msg);
               break;
             case 3:
               sprintf (msg, "\rSegment Update\r\r---\r");
-              eof = strlen ("\rSegment Update\r\r---\r");
+              eof = strlen (msg);
               break;
             default:
               sprintf (msg, "\rSegment Update\r\r---\r");
-              eof = strlen ("\rSegment Update\r\r---\r");
+              eof = strlen (msg);
               break;
             }
           msg += eof;
           multimessage = 1;
         }
 
-      strcpy (messagepath, Messages);
-      strcat (messagepath, "*.msg");
+      sprintf (messagepath, "%s*.msg", Messages);
       rc = _dos_findfirst (messagepath, _A_NORMAL, &fileinfo);
 
       if (rc == 0)

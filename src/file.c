@@ -354,44 +354,22 @@ add_eof (char *filename)
   fclose (temp);
 }
 
-#ifdef LINUX
 void
 touch_file_date (char *filename)
 {
-  char cmd[80];
-  strcpy (cmd, "touch ");
-  strcat (cmd, filename);
-  system (cmd);
-}
-#else
-void
-touch_file_date (char *filename)
-{
-  int handle;
-  unsigned short date, time;
-  struct dosdate_t cdate;
-  struct dostime_t ctime;
+  FILE *f;
 
-  _dos_getdate (&cdate);
-  _dos_gettime (&ctime);
-
-  if (_dos_open (filename, O_RDWR, &handle) != 0)
+  if ((f = fopen(filename, "a")) == NULL)
     {
       logtext ("Unable to set file time stamp", 2, YES);
     }
   else
     {
       logtext ("Reset file time stamp", 5, YES);
-      // set today date time here!
-      date = SETDATE (cdate.day, cdate.month, cdate.year);
-      time = SETTIME (ctime.hour, ctime.minute, ctime.second);
-      //time = (12 << 11) + (0 << 5) + 0;
-      _dos_setftime (handle, date, time);
-      _dos_close (handle);
+      fclose(f);
     }
 
 }
-#endif
 
 void
 list_file_dates (char *filename)

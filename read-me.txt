@@ -1,3 +1,7 @@
+This is the original READ-ME.EH as received by Carl Austin Bennett.
+Additional comments made by me at the bottom.
+
+----BEGIN----
 This NLMake 1.13cb is a port of NLMake 1.13wb (available on ftp.nwstar.com)
 to the following platforms and compilers:
 
@@ -44,3 +48,10 @@ and may have added bugs; it still shows most or all of the following errors:
    has not been tested on the linux version.
 
 carlb@cafe.dyndns.org 1:249/116 4/4/2001
+
+----END----
+
+Note:  The original DSW and IDE files are not included.  If you want them, 
+let me know.
+
+Please contact me at: runemaster@canada.com for requests and info.

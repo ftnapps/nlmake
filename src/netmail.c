@@ -71,7 +71,6 @@ send_netmail (char *subject, short SFI, char Type)
 {
   FILE *ptr;
   FILE *ptr1;
-  char filename[13];
   char messagepath[255];
   char sysop[36];
   short multimessage = 0;
@@ -322,14 +321,9 @@ send_netmail (char *subject, short SFI, char Type)
               rc = _dos_findnext (&fileinfo);
             }
         }
-      memset (filename, 0, sizeof (filename));
-      itoa ((msgnum + 1), filename, 10);
 
-      memset (messagepath, 0, sizeof (messagepath));
+      sprintf (messagepath, "%s%d.msg", Messages, msgnum + 1);
 
-      strcpy (messagepath, Messages);
-      strcat (messagepath, filename);
-      strcat (messagepath, ".msg");
 
       ptr = fopen (messagepath, "wb+");
 

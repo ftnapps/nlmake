@@ -193,28 +193,6 @@ _dos_gettime (struct dostime_t *t)
   t->hsecond = 0;               /* 0-99 */
 }
 
-/* a simple routine to convert integers (0-99999) to string values */
-char *
-itoa (int value, char *string, int radix)
-{
-  /* const char digit[] = "0123456789abcdef"; */
-  char *p = string;
-  *p = 0;
-  if (radix != 10)
-    return string;              /* radix other than 10 not implemented */
-  if (value >= 10000)           /* split integer into 5 ASCII digits */
-    *(p++) = '0' + ((value / 10000) % 10);
-  if (value >= 1000)
-    *(p++) = '0' + ((value / 1000) % 10);
-  if (value >= 100)
-    *(p++) = '0' + ((value / 100) % 10);
-  if (value >= 10)
-    *(p++) = '0' + ((value / 10) % 10);
-  *(p++) = '0' + ((value) % 10);
-  *p = 0;
-  return string;
-}
-
 /* convert a string to UPPERCASE */
 char *
 strupr (char *string)

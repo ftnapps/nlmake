@@ -90,7 +90,6 @@ create_diff (char *ODFile)
     }
   ext -= 7;
 
-  //itoa(ext,newext,10);
   memset (exten, 0, sizeof (exten));
   sprintf (exten, ".%03d", ext);
   //    strncpy(exten+1,newext,3);
@@ -380,7 +379,7 @@ apply_diff (char *filename, short SFI)
 
   ext = atoi ((diffstr + (strlen (diffstr) - 12)));
 
-  itoa (ext, newext, 10);
+  sprintf(newext, "%d", ext);
 
   // the file the diff applies to
   sprintf (localname, "%s%s.%s", Master, filename, newext);
@@ -408,7 +407,7 @@ apply_diff (char *filename, short SFI)
     }
   ext = atoi ((diffstr + (strlen (diffstr) - 12)));
 
-  itoa (ext, newext, 10);
+  sprintf(newext, "%d", ext);
 
   if (ext == 0)
     {

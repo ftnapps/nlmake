@@ -207,11 +207,7 @@ clean_dir (char *filename)
         lastfriday += 365;
     }
 
-  itoa (jfriday, ascjfriday, 10);
-  if (jfriday < 100)
-    {
-      sprintf (ascjfriday, "%03d", jfriday);
-    }
+  sprintf (ascjfriday, "%03d", jfriday);
 
   if (rc == 0)
     {

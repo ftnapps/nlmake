@@ -1182,7 +1182,7 @@ copy_info_files (short type)
           if (str[0] == ';')
             {
               ins_date = strstr (str, "####");
-              itoa (date.year, asc_year, 10);
+              sprintf (asc_year, "%d", date.year);
               if (ins_date != NULL)
                 strncpy (ins_date, asc_year, 4);
               fprintf (outfilep, "%s", str);
@@ -1190,7 +1190,7 @@ copy_info_files (short type)
           else
             {
               ins_date = strstr (str, "####");
-              itoa (date.year, asc_year, 10);
+              sprintf (asc_year, "%d", date.year);
               if (ins_date != NULL)
                 strncpy (ins_date, asc_year, 4);
               fprintf (outfilep, ";%c %s", linetype[type], str);        //HERE

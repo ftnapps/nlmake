@@ -53,7 +53,6 @@ void _splitpath (const char *path, char *drive, char *dir, char *file,
                  char *ext);
 
 char *strupr (char *string);
-char *itoa (int value, char *string, int radix);
 
 #define EZERO 0
 #define _A_NORMAL 0

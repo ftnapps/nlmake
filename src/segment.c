@@ -335,12 +335,17 @@ process_segment (void)
 
               /* If the line is a comment, save it to the comments file */
               if (str[0] == ';' && strlen (str) >= 3)
-                if (comntsp != NULL)
-                  fprintf (comntsp, "%s", str);
+		{
+		  if (comntsp != NULL)
+		    fprintf (comntsp, "%s", str);
+
+		  /* Pass through error lines */
+		  if (str[1] == 'E')
+		    fprintf (outfilep, "%s", str);
+		}
 
               /* Is this line a good data line...? */
-              if (str[0] != ';' && str[0] != 0 && str[0] != 26
-                  && str[0] != '\r' && str[0] != '\n')
+              if (str[0] != 0 && str[0] != 26 && str[0] != '\r' && str[0] != '\n' && str[0] != ';')
                 {
                   kill_spaces ();
                   ExtractInfo ();

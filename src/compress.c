@@ -6,7 +6,7 @@
 #include <sys/stat.h>
 
 #ifdef __linux__
-#include "doslinux.h"
+#include "doslinux.h" // _splitpath
 #endif
 
 #include "compress.h"
@@ -16,7 +16,6 @@
 
 #ifdef __linux__
 #define strnicmp strncasecmp
-#define EZERO 0
 #endif
 
 
@@ -25,10 +24,10 @@ short DefCompressor;
 extern char *compressor_name[];
 extern char *compressor_verbs[];
 extern THRESHOLD threshold;
-extern long calc_eof (char *filename);
 
 // extern
 extern short strlenII (char *ptr);
+extern void fatal_error(char *reason);
 extern void logwrite (short message, short indicator);
 extern void logtext (char *string, short indicator, short dateon);
 extern short is_file_there (char *filename);
@@ -36,11 +35,8 @@ extern void deletefile (char *filename);
 extern char *extchr (char *, char);
 
 // prototypes
-short call_spawn (void);
-void comsplit_parms (char *file, char *params);
+int call_spawn (char *command, char *filename, char *compress);
 
-char *aparms[18];
-char argv[100];
 
 short
 compress (char *filename)
@@ -48,30 +44,23 @@ compress (char *filename)
   char compress[255];
   char logline[255];
   char *ptr;
-  //short value = 0;
 
+  // Calculate archive name
   strcpy (compress, filename);
-
-  ptr = extchr (compress, '.'); /* 4/4/01 - handle more than one . in pathname */
+  ptr = extchr (compress, '.');
   ptr++;
-  if (*ptr != 'D')
+  if (*ptr == 'D')
     {
       *ptr = CompressType[DefCompressor].ext;
+      *++ptr = 'D';
     }
   else
     {
       *ptr = CompressType[DefCompressor].ext;
-      ptr++;
-      *ptr = 'D';
     }
-  memset (aparms, 0, sizeof (aparms));
-
-  strcpy (argv, CompressType[DefCompressor].add);
-  comsplit_parms (filename, compress);
 
   sprintf (logline, "Creating Archive %s", compress);
   logtext (logline, 1, YES);
-  //    printf("%s\n",logline);
 
   sprintf (logline, "Containing %s", filename);
   logtext (logline, 1, YES);
@@ -79,18 +68,12 @@ compress (char *filename)
   if (is_file_there (compress) == 0)
     deletefile (compress);
 
-  //     printf("%s\n",logline);
-  call_spawn ();
-  //value = call_spawn ();
-  // What to do with "value"?
+  call_spawn (CompressType[DefCompressor].add, filename, compress);
+  // What to do with return code?
 
-  //memset(filename,0,254);
-  filename[0] = 0;
   strcpy (filename, compress);
 
-
   return (is_file_there (compress));
-
 }
 
 
@@ -109,15 +92,9 @@ decompress (char *filename)
   short cnt;
 
   _splitpath (filename, drive, path, fname, exten);
-  strcpy (compress, drive);
-  strcat (compress, path);
-//      strcat(compress,"*.*");
 
-//      strcpy(compress,filename);
   ptr = extchr (filename, '.');
   ptr++;
-
-  memset (aparms, 0, sizeof (aparms));
 
   for (cnt = 0; cnt <= 9; cnt++)
     {
@@ -127,51 +104,16 @@ decompress (char *filename)
   if (cnt == 10)
     return 1;                   // 5/1/01 - if not an archive, exit
 
+  strcpy (compress, drive);
+  strcat (compress, path);
   if (CompressType[cnt].compressor == 1)
     strcat (compress, "*.*");
 
-  strcpy (argv, CompressType[cnt].extract);
-  comsplit_parms (compress, filename);
-
-
   sprintf (logline, "Extracting Archive %s", filename);
-  // printf("%s\n",logline);
   logtext (logline, 1, YES);
-  value = call_spawn ();
+  value = call_spawn (CompressType[cnt].extract, compress, filename);
 
   return value;
-}
-
-void
-comsplit_parms (char *filename, char *compress)
-{
-  short pcnt;
-  char *delim = { " " };
-
-  aparms[0] = strtok (argv, delim);
-
-  aparms[1] = aparms[0];
-
-  for (pcnt = 2; pcnt <= 18; pcnt++)
-    {
-      aparms[pcnt] = strtok (NULL, delim);
-      if (aparms[pcnt] == NULL)
-        break;
-      if (strnicmp (aparms[pcnt], "%a", 2) == 0)
-        aparms[pcnt] = compress;        // %a
-      if (strnicmp (aparms[pcnt], "%f", 2) == 0)
-        aparms[pcnt] = filename;        // %f
-      if (strnicmp (aparms[pcnt], "\"%f\"", 4) == 0)    // 4/10/2001 "%f" for linux use
-        {
-          static char qfilename[80];    //a filename enclosed in quotes
-          qfilename[0] = 34;
-          qfilename[1] = 0;     //(to protect it from Linux shell)
-          strcat (qfilename, filename);
-          strcat (qfilename, "\"");
-          aparms[pcnt] = qfilename;
-        }
-    }
-
 }
 
 short
@@ -179,239 +121,219 @@ init_compressors (void)
 {
   FILE *comctl;
   char str[256];
-  //short linecnt = 0, cntr = 0, compcnt = 0;
   short cntr = 0, compcnt = 0;
   char *ptr, *ptr1;
-  long eof;
 
-  eof = calc_eof ("compress.ctl");
   comctl = fopen ("compress.ctl", "rt");
 
   if (comctl == NULL)
     return (1);
 
-  if (comctl != NULL)
+  while (fgets (str, 254, comctl) != NULL)
     {
-      //fseek (comctl, 0L, SEEK_END);
-      //    eof = ftell (comctl);
-      //fseek (comctl, 0L, SEEK_SET);
-      while (1)
-        {
-          //memset (str, 0, 254);
-          //str[0] = 0;
-          fgets (str, 254, comctl);
-          // linecnt++; // this isn't used
-          // kill leading spaces
-          while (str[0] == ' ')
-            memmove (str, str + 1, 253);
-          // remove comments
-          ptr = strchr (str, ';');
-          if (ptr != NULL)
-            *ptr = 0;
+      // kill leading spaces
+      while (str[0] == ' ')
+        memmove (str, str + 1, 253);
 
-          if (str[0] != 0)
+      // remove comments
+      ptr = strchr (str, ';');
+      if (ptr != NULL)
+        *ptr = 0;
+
+      if (str[0] != 0)
+        {
+          while (compressor_verbs[cntr] != NULL)
             {
-              while (compressor_verbs[cntr] != NULL)
+              if (strnicmp
+                  (str, compressor_verbs[cntr],
+                   strlen (compressor_verbs[cntr])) == 0)
                 {
-                  if (strnicmp
-                      (str, compressor_verbs[cntr],
-                       strlen (compressor_verbs[cntr])) == 0)
+                  //printf("found verb %s\n", compressor_verbs[cntr]);
+                  break;
+                }
+              else
+                cntr++;
+            }
+          if (compressor_verbs[cntr] != NULL)
+            {
+              switch (cntr)
+                {
+                case 0: // add
+                  ptr = str;
+                  ptr += strlen (compressor_verbs[cntr]);       // advance ptr to end of verb
+                  while (*ptr == ' ')
+                    ptr++;
+                  if (strlen (ptr) <= 99)
+                    strncpy (CompressType[compcnt].add, ptr,
+                             (strlen (ptr) - 1));
+                  else
+                    strncpy (CompressType[compcnt].add, ptr, 99);
+                  break;
+                case 1: // archiver
+                  ptr = str;
+                  ptr += strlen (compressor_verbs[cntr]);       // advance ptr to end of verb
+                  while (*ptr == ' ')
+                    ptr++;
+                  cntr = 0;
+                  while (compressor_name[cntr] != NULL)
                     {
-                      //printf("found verb %s\n", compressor_verbs[cntr]);
-                      break;
+                      if (strnicmp
+                          (ptr, compressor_name[cntr],
+                           strlen (compressor_name[cntr])) == 0)
+                        {
+                          compcnt = cntr;
+                          CompressType[compcnt].compressor = 0;
+                          break;
+                        }
+                      else
+                        cntr++;
+                    }
+                  //printf("unknown compressor\n");
+                  break;
+                case 2: // extension
+                  ptr = str;
+                  ptr += strlen (compressor_verbs[cntr]);       // advance ptr to end of verb
+                  while (*ptr == ' ')
+                    ptr++;
+                  if (*(ptr + 1) == '?' && *(ptr + 2) == '?')
+                    {
+                      CompressType[compcnt].ext = ptr[0];
                     }
                   else
-                    cntr++;
-                }
-              if (compressor_verbs[cntr] != NULL)
-                {
-                  switch (cntr)
                     {
-                    case 0:     // add
-                      ptr = str;
-                      ptr += strlen (compressor_verbs[cntr]);   // advance ptr to end of verb
-                      while (*ptr == ' ')
-                        ptr++;
-                      if (strlen (ptr) <= 99)
-                        strncpy (CompressType[compcnt].add, ptr,
-                                 (strlen (ptr) - 1));
-                      else
-                        strncpy (CompressType[compcnt].add, ptr, 99);
-                      break;
-                    case 1:     // archiver
-                      ptr = str;
-                      ptr += strlen (compressor_verbs[cntr]);   // advance ptr to end of verb
-                      while (*ptr == ' ')
-                        ptr++;
-                      cntr = 0;
-                      while (compressor_name[cntr] != NULL)
-                        {
-                          if (strnicmp
-                              (ptr, compressor_name[cntr],
-                               strlen (compressor_name[cntr])) == 0)
-                            {
-                              compcnt = cntr;
-                              CompressType[compcnt].compressor = 0;
-                              break;
-                            }
-                          else
-                            cntr++;
-                        }
-                      //printf("unknown compressor\n");
-                      break;
-                    case 2:     // extension
-                      ptr = str;
-                      ptr += strlen (compressor_verbs[cntr]);   // advance ptr to end of verb
-                      while (*ptr == ' ')
-                        ptr++;
-                      if (*(ptr + 1) == '?' && *(ptr + 2) == '?')
-                        {
-                          CompressType[compcnt].ext = ptr[0];
-                        }
-                      else
-                        {
-                          // major error
-                          //printf("unknown compressor extension\n");
-                        }
-                      break;
-                    case 3:     // extract
-                      ptr = str;
-                      ptr += strlen (compressor_verbs[cntr]);   // advance ptr to end of verb
-                      while (*ptr == ' ')
-                        ptr++;
-                      if (strlen (ptr) <= 99)
-                        strncpy (CompressType[compcnt].extract, ptr,
-                                 (strlen (ptr) - 1));
-                      else
-                        strncpy (CompressType[compcnt].extract, ptr, 99);
-                      break;
-                    case 4:     // ident
-                      ptr = str;
-                      ptr += strlen (compressor_verbs[cntr]);   // advance ptr to end of verb
-                      while (*ptr == ' ')
-                        ptr++;
-                      ptr1 = strchr (str, ',');
-                      if (ptr1 != NULL)
-                        {
-                          ptr1++;
-                          if (strlen (ptr1) <= 99)
-                            strncpy (CompressType[compcnt].ident, ptr1,
-                                     (strlenII (ptr1)));
-                          else
-                            strncpy (CompressType[compcnt].ident, ptr1, 99);
-                          ptr1--;
-                          *ptr1 = 0;
-                          CompressType[compcnt].offset = atol (ptr);
-                        }
-                      else
-                        {
-                          // major error
-                          //printf("unknown compressor ident\n");
-                        }
-                      break;
-                    case 5:     // end
-                      if (CompressType[compcnt].add[0] == 0)
-                        {
-                          // major error
-                          printf ("Compressor Config Error\n");
-                        }
-                      else if (CompressType[compcnt].extract[0] == 0)
-                        {
-                          // major error
-                          printf ("Compressor Config Error\n");
-                        }
-                      else if (CompressType[compcnt].ext == 0)
-                        {
-                          // major error
-                          printf ("Compressor Config Error\n");
-                        }
-                      else if (CompressType[compcnt].ident[0] == 0)
-                        {
-                          // major error
-                          printf ("Compressor Config Error\n");
-                        }
-                      //    printf("got %s \n%s \n%c \n%s \n%ul", CompressType[compcnt].add,
-                      //                             CompressType[compcnt].extract,
-                      //                                                                        CompressType[compcnt].ext,
-                      //                                                                        CompressType[compcnt].ident,
-                      //                                                                        CompressType[compcnt].offset);
-                      //compcnt++;
-                      break;
-                    case 6:     // Needs *.* for extraction path
-                      CompressType[compcnt].compressor = 1;
-                      break;
-                    default:
-                      break;
+                      // major error
+                      //printf("unknown compressor extension\n");
                     }
-                  //printf("here %s\n",ptr);
-                  cntr = 0;
-
+                  break;
+                case 3: // extract
+                  ptr = str;
+                  ptr += strlen (compressor_verbs[cntr]);       // advance ptr to end of verb
+                  while (*ptr == ' ')
+                    ptr++;
+                  if (strlen (ptr) <= 99)
+                    strncpy (CompressType[compcnt].extract, ptr,
+                             (strlen (ptr) - 1));
+                  else
+                    strncpy (CompressType[compcnt].extract, ptr, 99);
+                  break;
+                case 4: // ident
+                  ptr = str;
+                  ptr += strlen (compressor_verbs[cntr]);       // advance ptr to end of verb
+                  while (*ptr == ' ')
+                    ptr++;
+                  ptr1 = strchr (str, ',');
+                  if (ptr1 != NULL)
+                    {
+                      ptr1++;
+                      if (strlen (ptr1) <= 99)
+                        strncpy (CompressType[compcnt].ident, ptr1,
+                                 (strlenII (ptr1)));
+                      else
+                        strncpy (CompressType[compcnt].ident, ptr1, 99);
+                      ptr1--;
+                      *ptr1 = 0;
+                      CompressType[compcnt].offset = atol (ptr);
+                    }
+                  else
+                    {
+                      // major error
+                      //printf("unknown compressor ident\n");
+                    }
+                  break;
+                case 5: // end
+                  if (CompressType[compcnt].add[0] == 0)
+                    {
+                      // major error
+                      printf ("Compressor Config Error\n");
+                    }
+                  else if (CompressType[compcnt].extract[0] == 0)
+                    {
+                      // major error
+                      printf ("Compressor Config Error\n");
+                    }
+                  else if (CompressType[compcnt].ext == 0)
+                    {
+                      // major error
+                      printf ("Compressor Config Error\n");
+                    }
+                  else if (CompressType[compcnt].ident[0] == 0)
+                    {
+                      // major error
+                      printf ("Compressor Config Error\n");
+                    }
+                  //    printf("got %s \n%s \n%c \n%s \n%ul", CompressType[compcnt].add,
+                  //                             CompressType[compcnt].extract,
+                  //                                                                        CompressType[compcnt].ext,
+                  //                                                                        CompressType[compcnt].ident,
+                  //                                                                        CompressType[compcnt].offset);
+                  //compcnt++;
+                  break;
+                case 6: // Needs *.* for extraction path
+                  CompressType[compcnt].compressor = 1;
+                  break;
+                default:
+                  break;
                 }
-            }
-          if (eof == ftell (comctl))
-            break;
+              //printf("here %s\n",ptr);
+              cntr = 0;
 
+            }
         }
     }
+
   fclose (comctl);
   return (0);
 }
 
-short
-call_spawn (void)
+int
+call_spawn (char *command, char *filename, char *compress)
 {
-  short i = 1;
   long val_exit;
   char logline[255], cmdline[255];
+  char *p1, *p2;
 
-  fflush (stdout);
-  //printf("Parms ");
-
-  cmdline[0] = 0;
-  while (aparms[i] != NULL)
+  // Expand macros & create command line
+  p1 = command;
+  while ((p2 = strchr (p1, '%')) != NULL)
     {
-      //printf("%s ",aparms[i]);
-      if (i > 1)
-        strcat (cmdline, " ");
-      strcat (cmdline, aparms[i]);
-      i++;
+      *p2++ = 0;
+      strcat (cmdline, p1);
+
+      switch (*p2)
+        {
+        case 'a':
+          strcat (cmdline, compress);
+          p2++;
+          break;
+        case 'f':
+          strcat (cmdline, filename);
+          p2++;
+          break;
+        default:
+          // not a macro - let the '%' character flow through
+          strcat (cmdline, "%");
+          break;
+        }
+      p1 = p2;
     }
-  //printf("(%d)\n",i);
-  //  printf("cmdline:%s\n",cmdline);
+  strcat (cmdline, p1);
 
-  //     pathp = getenv("PATH");
-//      printf("Path = %s\n",pathp);
-
-  val_exit = system (cmdline);
-
-  sprintf (logline, "spawned compressor %s", aparms[0]);
+  sprintf (logline, "spawning compressor %s", cmdline);
   logtext (logline, 4, YES);
 
-  i = 2;
-  strcpy (logline, "PRMS : ");
+  fflush (stdout);
+  val_exit = system (cmdline);
 
-  while (aparms[i] != NULL)
+  if (val_exit < 0)
     {
-      strcat (logline, aparms[i]);
-      strcat (logline, " ");
-      i++;
+      fatal_error("Couldn't start archiver");
     }
-  logtext (logline, 5, YES);
 
   sprintf (logline, "archiver return value %ld", val_exit);
   logtext (logline, 5, YES);
 
-//       printf("error no %d\n",errno);
-//       printf(logline);
-  if (val_exit < 0) {
-    sprintf (logline, "Couldn't start archiver.\n");
-    logtext (logline, 0, YES);
-  }
-
-  return val_exit;              //5-01-01 return 0 if success, error code if not
+  return val_exit;
 }
-
-//#endif
 
 short
 fcn_threshold (char *filename)
@@ -456,6 +378,4 @@ fcn_threshold (char *filename)
       else
         return (2);
     }
-
-//      return(0);
 }

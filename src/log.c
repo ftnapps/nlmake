@@ -207,3 +207,15 @@ logtext (char *string, short indicator, short dateon)
 
     }
 }
+
+void
+fatal_error (char *reason)
+{
+  char msg[256];
+  snprintf (msg, sizeof (msg), "FATAL ERROR: %s (%s)", reason,
+            strerror (errno));
+  logtext (msg, 0, YES);
+  logwrite (SYS_STOP, 0);
+  closelog ();
+  exit (-1);
+}

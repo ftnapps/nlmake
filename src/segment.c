@@ -2253,7 +2253,7 @@ process_new (void)
               if (MAXAGE != 0)
                 {
                   ageis = file_age (namebuf);
-                  if (MAXAGE <= file_age (namebuf))
+                  if (MAXAGE <= ageis)
                     {
                       if (segfile[bcnt].SegmentType >= 2)
                         sprintf (logline,
@@ -2269,7 +2269,7 @@ process_new (void)
                       if (ISLATE == 'Y')
                         {
                           sprintf (logline,
-                                   "Your segment is over %d days old\rPlease Submit a new one as soon as possible.",
+                                   "Your segment is %d days old\rPlease Submit a new one as soon as possible.",
                                    ageis);
                           netmail_text (logline);
                           netmail_text ("\r--End--\r");

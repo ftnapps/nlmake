@@ -3,6 +3,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <malloc.h>
+#include <sys/stat.h>
+#include <time.h>
 #ifdef LINUX
 #include "doslinux.h"
 #else
@@ -445,152 +447,49 @@ list_file_dates (char *filename)
   logtext ("Created lastin.txt", 2, YES);
 }
 
+/* Get last modification time for a file */
 void
 get_file_date (char *filename, char *date_stamp)
 {
-  int handle;
-  unsigned short date, time;
+  struct stat st;
 
-  date_stamp[0] = 0;
+  // Get file info
+  if (stat(filename, &st)) {
+    // FIXME: check errno
+    logtext ("Unable to get file time stamp", 2, YES);
+  } else {
+    struct tm *t;
+    t = localtime(&st.st_mtime);
+    sprintf (date_stamp, "%02d/%02d/%d @ %02d:%02d:%02d",
+               t->tm_mon, t->tm_mday, t->tm_year,
+               t->tm_hour, t->tm_min, t->tm_sec);
 
-  if (_dos_open (filename, O_RDWR, &handle) != 0)
-    {
-      logtext ("Unable to get file time stamp", 2, YES);
-    }
-  else
-    {
-      logtext ("Retrieved file time stamp", 6, YES);
-
-      _dos_getftime (handle, &date, &time);
-      sprintf (date_stamp, "%02d/%02d/%d @ %02d:%02d:%02d",
-               MONTH (date), DAY (date), YEAR (date),
-               HOUR (time), MINUTE (time), SECOND (time));
-      _dos_close (handle);
-    }
+    logtext ("Retrieved file time stamp", 6, YES);
+  }
 }
 
+/* Returns the age of a file, counted in days */
 short
 file_age (char *filename)
 {
-  int handle;
-  unsigned short date, time;
-  unsigned short Today_JDate, File_JDate = 0, dayscnt = 367;
-  struct dosdate_t cdate;
-  _dos_getdate (&cdate);
+  struct stat st;
 
+  // Get file info
+  if (stat(filename, &st)) {
+    // FIXME: check errno
+    logtext ("Unable to get file time stamp", 2, YES);
+    return 0;
+  } else {
+    time_t now;
 
-  if (_dos_open (filename, O_RDWR, &handle) != 0)
-    {
-      logtext ("Unable to get file time stamp", 2, YES);
-    }
-  else
-    {
-      logtext ("Retrieved file time stamp", 6, YES);
+    logtext ("Retrieved file time stamp", 6, YES);
 
-      _dos_getftime (handle, &date, &time);
+    // Get current time
+    now = time(NULL);
 
-      switch (MONTH (date))
-        {
-        case 1:
-          File_JDate = DAY (date);
-          break;
-        case 2:
-          File_JDate += 31;
-          File_JDate += DAY (date);
-          break;
-        case 3:
-          if ((YEAR (date) % 4) == 0)
-            File_JDate += 60;
-          else
-            File_JDate += 59;
-          File_JDate += DAY (date);
-          break;
-        case 4:
-          if ((YEAR (date) % 4) == 0)
-            File_JDate += 91;
-          else
-            File_JDate += 90;
-          File_JDate += DAY (date);
-          break;
-        case 5:
-          if ((YEAR (date) % 4) == 0)
-            File_JDate += 121;
-          else
-            File_JDate += 120;
-          File_JDate += DAY (date);
-          break;
-        case 6:
-          if ((YEAR (date) % 4) == 0)
-            File_JDate += 152;
-          else
-            File_JDate += 151;
-          File_JDate += DAY (date);
-          break;
-        case 7:
-          if ((YEAR (date) % 4) == 0)
-            File_JDate += 182;
-          else
-            File_JDate += 181;
-          File_JDate += DAY (date);
-          break;
-        case 8:
-          if ((YEAR (date) % 4) == 0)
-            File_JDate += 213;
-          else
-            File_JDate += 212;
-          File_JDate += DAY (date);
-          break;
-        case 9:
-          if ((YEAR (date) % 4) == 0)
-            File_JDate += 244;
-          else
-            File_JDate += 243;
-          File_JDate += DAY (date);
-          break;
-        case 10:
-          if ((YEAR (date) % 4) == 0)
-            File_JDate += 274;
-          else
-            File_JDate += 273;
-          File_JDate += DAY (date);
-          break;
-        case 11:
-          if ((YEAR (date) % 4) == 0)
-            File_JDate += 305;
-          else
-            File_JDate += 304;
-          File_JDate += DAY (date);
-          break;
-        case 12:
-          if ((YEAR (date) % 4) == 0)
-            File_JDate += 335;
-          else
-            File_JDate += 334;
-          File_JDate += DAY (date);
-          break;
-        }
-      Today_JDate = getJDate (0);
-
-      if (cdate.year == (unsigned) YEAR (date))    // This year
-        {
-          dayscnt = Today_JDate - File_JDate;
-        }
-      else if (cdate.year == (unsigned) YEAR (date) + 1)   // last year
-        {
-          if ((YEAR (date) % 4) == 0)   // was leap
-            dayscnt = Today_JDate + 366 - File_JDate;
-          else
-            dayscnt = Today_JDate + 365 - File_JDate;
-        }
-
-      _dos_close (handle);
-    }
-
-  if (dayscnt <= 365)
-    return (dayscnt);
-  else
-    return (365);
-
+    // return current time minus file time, in days instead of seconds
+    return (now - st.st_mtime) / (3600 * 24);
+  }
 }
 
 

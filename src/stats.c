@@ -10,30 +10,33 @@
 #include "logdef.h"
 
 // externs
-extern void logtext(char *string, short indicator, short dateon);
+extern void logtext (char *string, short indicator, short dateon);
 
 
 FILE *statptr;
 
-void stat_text(char *info)
+void
+stat_text (char *info)
 {
-	fprintf(statptr,"%s\n",info);
+  fprintf (statptr, "%s\n", info);
 }
 
-short open_stat_file(char *filename)
+short
+open_stat_file (char *filename)
 {
-  	 statptr= fopen (filename, "wt");
+  statptr = fopen (filename, "wt");
 
-	 if(statptr == NULL)
-	 {
-	 logtext("Could not open stats file !",1,YES);
-	 return(1);
-	 }
-	 return(0);
+  if (statptr == NULL)
+    {
+      logtext ("Could not open stats file !", 1, YES);
+      return (1);
+    }
+  return (0);
 
 }
 
-void close_stat_file(void)
+void
+close_stat_file (void)
 {
-	fclose(statptr);
+  fclose (statptr);
 }

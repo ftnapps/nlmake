@@ -1,28 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <malloc.h>
-#include <ctype.h>
 #include <time.h>
-#ifdef LINUX
+
+#ifdef __linux__
 #include <errno.h>
-#include "doslinux.h"
-#else
-#include <dos.h>
 #endif
+
 #include "records.h"
 #include "logdef.h"
 //#include "textstr.inc" // Processing commands in string form
 
+
 #define FTSC_MAXLEN 157         // Maximum FTSC-0005 nodelist line length
 
-#ifdef DOS
+#ifdef __DOS__
 #define MAXNODES 5000           // Per segment
 #else
 #define MAXNODES 30000          // Per segment
 #endif
 
-#ifdef LINUX
+#ifdef __linux__
 #define stricmp strcasecmp
 #define strnicmp strncasecmp
 #endif

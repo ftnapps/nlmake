@@ -1,17 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <time.h>
-#ifdef LINUX
+
+#ifdef __linux__
 #include "doslinux.h"
-#else
-#include <dos.h>
 #endif
+
 #include "logdef.h"
 #include "records.h"
 
-#ifdef LINUX
+
+#ifdef __linux__
 #define strnicmp strncasecmp
 #define PathChar '/'
 #else

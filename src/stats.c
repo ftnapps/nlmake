@@ -1,13 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#ifdef LINUX
-#include "doslinux.h"
-#else
-#include <dos.h>
-#endif
+
 #include "logdef.h"
+
 
 // externs
 extern void logtext (char *string, short indicator, short dateon);

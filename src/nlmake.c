@@ -1,39 +1,39 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <time.h>
-//#include <malloc.h> // needed for mem test
 #include <sys/types.h>
-#ifdef LINUX
 #include <sys/stat.h>
-#include <fcntl.h>
+
+#ifdef __linux__
 #include <unistd.h>
 #include <errno.h>
 #include "doslinux.h"
-#else
-#include <dos.h>
-#ifndef OS2
+#elif defined(__DOS__) || defined(__NT__) || defined(__OS2__)
 #include <direct.h>
 #endif
-#endif
+
 #include "records.h"
 #include "logdef.h"
 #include "textstr.inc"          // Processing commands in string form
 
-#ifdef DOS
+
+#ifdef __DOS__
 #define MAXSUBFILES 35          //Files in CTL
 #else
 #define MAXSUBFILES 100         // Files in CTL
 #endif
 
-#ifdef LINUX
+#if defined(__linux__)
   #define strnicmp strncasecmp
+#endif
+
+#if defined(__linux__) || defined(__EMX__)
+  #define mkdir(x) mkdir(x, 0750)
+#endif
+
+#if defined(__linux__)
   #define PathChar '/'
-  #define mkdir(x) mkdir(x, 0750)
-#elif defined(OS2)
-  #define PathChar '\\'
-  #define mkdir(x) mkdir(x, 0750)
 #else
   #define PathChar '\\'
 #endif
@@ -46,16 +46,14 @@ int Rev = 1;
 int SubRev = 2;
 
 
-#if defined(OS2)
-  #define OSType "OS/2"
-#elif defined(DOS)
+#if defined(__DOS__)
   #define OSType "DOS"
-#elif defined(WIN32)
+#elif defined(__OS2__) || defined(__EMX__)
+  #define OSType "OS/2"
+#elif defined(__NT__)
   #define OSType "Win32"
-#elif defined(LINUX)
+#elif defined(__linux__)
   #define OSType "Linux"
-#else
-  #define OSType "Unknown"
 #endif
 
 
@@ -270,7 +268,7 @@ main (int ParmsCtr, char *Parms[])
           //printf("Nodelist production/testing utility\n");
           printf ("Syntax:\n\n");
           printf ("-Standard Functions:\n");
-#ifdef LINUX
+#ifdef __linux__
           printf
             ("nlmake [nlmake.ctl] -P -F -T -M=[Nodelist] -N=[NetWork]\n\n");
           printf

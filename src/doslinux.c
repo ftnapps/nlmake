@@ -1,4 +1,4 @@
-#if defined(LINUX) || defined(OS2)
+#if defined(__linux__) || defined(__EMX__)
 
 /* DOS-style date and filesystem functions for use in Linux NLmake */
 /* (c) 2001 Carl Austin Bennett, Kingston_ON - no rights reserved  */
@@ -8,15 +8,14 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
-#include <time.h>
 #include <ctype.h>
+#include <dirent.h>
+
 #include "doslinux.h"
 
-#ifndef OS2
+#if defined(__linux__)
 /* split a path into dir/file.ext - DOS-style drive letter is not used */
 void
 _splitpath (const char *path, char *drive, char *dir, char *file, char *ext)
@@ -76,7 +75,6 @@ _makepath (const char *path, char *drive, char *dir, char *file, char *ext)
     sprintf ((char *) path, "%s%s", dir, file);
 }
 #endif
-
 
 /* convert findfirst/findnext to Linux readdir() calls */
 unsigned

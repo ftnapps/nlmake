@@ -1,27 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
-#include <stddef.h>
 #include <string.h>
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifdef LINUX
+
+#ifdef __linux__
 #include "doslinux.h"
-#include <sys/io.h>
-#include <unistd.h>
-#else
-#include <process.h>
-#include <dos.h>
-#include <io.h>
 #endif
-#include <fcntl.h>
-#include <malloc.h>
+
 #include "compress.h"
 #include "logdef.h"
 #include "records.h"
 
-#ifdef LINUX
+
+#ifdef __linux__
 #define strnicmp strncasecmp
 #define EZERO 0
 #endif

@@ -1,17 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include <malloc.h>
-#ifdef LINUX
+
+#ifdef __linux__
 #include "doslinux.h"
-#else
-#include <dos.h>
 #endif
+
 #include "flags.h"
 #include "logdef.h"
 
-#ifdef LINUX
+
+#ifdef __linux__
 #define strnicmp strncasecmp
 #define stricmp strcasecmp
 #endif

@@ -1,19 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <time.h>
-#ifdef LINUX
-#include "doslinux.h"
-#else
-#include <dos.h>
-#endif
-#include "records.h"
-#include "logdef.h"
 
-#ifdef LINUX
+#ifdef __linux__
 #define stricmp strcasecmp
 #endif
+
+#include "records.h"
+#include "logdef.h"
 
 extern LINEPRMS WeekDays[];
 extern char Publish_day[];

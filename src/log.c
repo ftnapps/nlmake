@@ -1,16 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <time.h>
-#ifdef LINUX
+
+#ifdef __linux__
 #include <errno.h>
-#include "doslinux.h"
-#else
-#include <dos.h>
 #endif
+
 #include "records.h"
 #include "logdef.h"
+
 
 extern short loglvl;
 extern char *errnostr[];

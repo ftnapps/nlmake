@@ -25,11 +25,11 @@ struct find_t
 unsigned _dos_findfirst (char *, unsigned, struct find_t *);
 unsigned _dos_findnext (struct find_t *);
 
-#ifndef OS2
+#ifdef __linux__
 void _makepath (const char *path, char *drive, char *dir, char *file, char *ext);
 void _splitpath (const char *path, char *drive, char *dir, char *file, char *ext);
 #endif
 
-char *strupr (char *string);
-
 #define _A_NORMAL 0
+
+char *strupr (char *string);

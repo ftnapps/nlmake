@@ -1,17 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#if defined(LINUX) || defined(OS2)
+
+#if defined(__linux__) || defined(__EMX__)
 #include "doslinux.h"
-#else
+#elif defined(__DOS__) || defined(__NT__) || defined(__OS2__)
 #include <dos.h>
 #endif
-// #include "records.h"
-// #include "logdef.h"
+
 #include "compress.h"
 
-#ifdef LINUX
+
+#ifdef __linux__
 #define PathChar '/'
 #else
 #define PathChar '\\'

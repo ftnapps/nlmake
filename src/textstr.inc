@@ -82,7 +82,7 @@ LINEPRMS Months[] =
         {NULL, NULL, 99}
 };
 
-#ifdef LINUX
+#ifdef __linux__
 LINEPRMS LinePrms[] =
 {
         {"PROCESS", "-P", 1},

@@ -2,16 +2,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <malloc.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
-#if defined(LINUX) || defined(OS2)
+
+#if defined(__linux__) || defined(__EMX__)
 #include "doslinux.h"
-#else
+#elif defined(__DOS__) || defined(__NT__) || defined(__OS2__)
 #include <dos.h>
 #endif
-#include <fcntl.h>
+
 #include "records.h"
 #include "logdef.h"
 

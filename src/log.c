@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
 #ifdef LINUX
 #include <errno.h>
 #include "doslinux.h"
@@ -128,14 +129,17 @@ closelog (void)
 void
 logwrite (short message, short indicator)
 {
-  struct dosdate_t date;
-  struct dostime_t time;
   char denote[] = { "!*+:#        " };
 
   if (LogMsgs[message].loglevel <= loglvl)
     {
-      _dos_getdate (&date);
-      _dos_gettime (&time);
+      time_t utime;
+      struct tm *tm;
+      char date[20];
+
+      time (&utime);
+      tm = localtime (&utime);
+      strftime(date, 20, "%Y-%m-%d %H:%M:%S", tm);
 
       if (message == SYS_START)
         fprintf (LogFile, "\n");
@@ -145,38 +149,29 @@ logwrite (short message, short indicator)
         case 0:         // Control File Errors
           if (indicator >= 1)
             {
-              fprintf (LogFile,
-                       "%c %02d-%s-%02d %02d:%02d:%02d - %-45.45s Line #%d\n",
-                       denote[LogMsgs[message].loglevel], date.day,
-                       Months[date.month].Single, date.year, time.hour,
-                       time.minute, time.second, LogMsgs[message].String,
-                       indicator);
+              fprintf (LogFile, "%c %s - %-45.45s Line #%d\n",
+                       denote[LogMsgs[message].loglevel],
+                       date, LogMsgs[message].String, indicator);
               printf ("%-45.45s Line #%d\n", LogMsgs[message].String,
                       indicator);
             }
           else
             {
-              fprintf (LogFile,
-                       "%c %02d-%s-%02d %02d:%02d:%02d - %-45.45s\n",
-                       denote[LogMsgs[message].loglevel], date.day,
-                       Months[date.month].Single, date.year, time.hour,
-                       time.minute, time.second, LogMsgs[message].String);
+              fprintf (LogFile, "%c %s - %-45.45s\n",
+                       denote[LogMsgs[message].loglevel],
+                       date, LogMsgs[message].String);
               printf ("%-45.45s \n", LogMsgs[message].String);
             }
           break;
         case 1:         // System Indicators
-          fprintf (LogFile,
-                   "%c %02d-%s-%02d %02d:%02d:%02d - %-45.45s\n",
-                   denote[LogMsgs[message].loglevel], date.day,
-                   Months[date.month].Single, date.year, time.hour,
-                   time.minute, time.second, LogMsgs[message].String);
+          fprintf (LogFile, "%c %s - %-45.45s\n",
+                   denote[LogMsgs[message].loglevel],
+                   date, LogMsgs[message].String);
           break;
         case 2:         // Control File Debug
-          fprintf (LogFile, "%c %02d-%s-%02d %02d:%02d:%02d - %-18.18s",
+          fprintf (LogFile, "%c %s - %-18.18s",
                    denote[LogMsgs[message].loglevel],
-                   date.day, Months[date.month].Single, date.year,
-                   time.hour, time.minute, time.second,
-                   LogMsgs[message].String);
+                   date, LogMsgs[message].String);
           break;
 
         }
@@ -188,24 +183,22 @@ logwrite (short message, short indicator)
 void
 logtext (char *string, short indicator, short dateon)
 {
-  struct dosdate_t date;
-  struct dostime_t time;
   char denote[] = { "!*+:#        " };
 
   if (indicator <= loglvl)
     {
-
-
-      _dos_getdate (&date);
-      _dos_gettime (&time);
-
-
       if (dateon == YES)
         {
-          fprintf (LogFile, "%c %02d-%s-%02d %02d:%02d:%02d - %s\n",
-                   denote[indicator],
-                   date.day, Months[date.month].Single, date.year,
-                   time.hour, time.minute, time.second, string);
+          time_t utime;
+          struct tm *tm;
+          char date[20];
+
+          time (&utime);
+          tm = localtime (&utime);
+          strftime(date, 20, "%Y-%m-%d %H:%M:%S", tm);
+
+          fprintf (LogFile, "%c %s - %s\n",
+                   denote[indicator], date, string);
         }
       else
         fprintf (LogFile, "%s\n", string);

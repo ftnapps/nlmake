@@ -18,7 +18,6 @@
 extern char OutPath[];
 extern char Master[];
 extern char Update[];
-extern short getJDate (short type);
 extern short sfilecnt;
 extern SEGFILE segfile[];
 extern LINEPRMS Months[];
@@ -38,7 +37,7 @@ extern char *extchr (char *string, char dot);
 
 // externs
 extern void logtext (char *string, short indicator, short dateon);
-extern void fix_proc_date (struct dosdate_t *date);
+extern void fix_proc_date (struct tm *date);
 extern short FindMostCurr (char *FileName);
 extern short getJDate (short type);
 
@@ -160,7 +159,6 @@ clean_dir (char *filename)
   long rc;
   char cleaname[255];
   struct find_t fileinfo;
-  struct dosdate_t date;
   short jfriday, lastfriday;
   char *dot;
   char ascjfriday[5];
@@ -184,9 +182,14 @@ clean_dir (char *filename)
   lastfriday = jfriday - 7;
   if (lastfriday <= 0)
     {
-      _dos_getdate (&date);
-      date.year--;
-      if ((date.year % 4) == 0)
+      time_t utime;
+      struct tm *tm;
+
+      time (&utime);
+      tm = localtime (&utime);
+
+      // FIXME: bad leap year detection?
+      if ((tm->tm_year % 4) == 0)
         lastfriday += 366;
       else
         lastfriday += 365;
@@ -364,11 +367,9 @@ list_file_dates (char *filename)
   char date_stamp[100];
   FILE *segmentfile;
   FILE *stats2;
-  struct dosdate_t date;
-
-
-  _dos_getdate (&date);
-  fix_proc_date (&date);
+  time_t utime;
+  struct tm *tm;
+  char date[40];
 
   stats2 = fopen (filename, "wt");
   if (stats2 == NULL)
@@ -377,11 +378,12 @@ list_file_dates (char *filename)
       return;
     }
 
-  fprintf (stats2,
-           "Segment file Dates for the week of %s, %s %02d, %d -- Day number %03d \n\n",
-           Publish_day, Months[date.month].String, date.day, date.year,
-           getJDate (1));
+  time (&utime);
+  tm = localtime (&utime);
+  fix_proc_date (tm);
+  strftime(date, 40, "%a, %b %d %Y -- Day number %j", tm);
 
+  fprintf (stats2, "Segment file Dates for the week of %s \n\n", date);
   fprintf (stats2, "Last Processed Files:\n\n");
 
   for (bcnt = 1; bcnt <= sfilecnt; bcnt++)
@@ -459,11 +461,9 @@ get_file_date (char *filename, char *date_stamp)
     logtext ("Unable to get file time stamp", 2, YES);
   } else {
     struct tm *t;
-    t = localtime(&st.st_mtime);
-    sprintf (date_stamp, "%02d/%02d/%d @ %02d:%02d:%02d",
-               t->tm_mon, t->tm_mday, t->tm_year,
-               t->tm_hour, t->tm_min, t->tm_sec);
 
+    t = localtime(&st.st_mtime);
+    strftime(date_stamp, 20, "%Y-%m-%d %H:%M:%S", t);
     logtext ("Retrieved file time stamp", 6, YES);
   }
 }

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
 //#include <malloc.h> // needed for mem test
 #include <sys/types.h>
 #ifdef LINUX
@@ -2543,11 +2544,13 @@ initglobals (void)
 short
 is_proc_day (short file_day)
 {
-  struct dosdate_t date;
+  time_t utime;
+  struct tm *tm;
 
-  _dos_getdate (&date);
+  time (&utime);
+  tm = localtime (&utime);
 
-  if (date.dayofweek == file_day)
+  if (tm->tm_wday == file_day)
     return (0);
   else
     return (1);

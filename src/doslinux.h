@@ -39,8 +39,6 @@ struct find_t
 // long size;
 // char name[13];
 
-void _dos_getdate (struct dosdate_t *);
-void _dos_gettime (struct dostime_t *);
 unsigned _dos_findfirst (char *, unsigned, struct find_t *);
 unsigned _dos_findnext (struct find_t *);
 

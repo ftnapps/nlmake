@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
 #ifdef LINUX
 #include "doslinux.h"
 #else
@@ -65,7 +66,6 @@ extern char *extchr (char *string, char dot);
 short
 create_diff (char *ODFile)
 {
-  struct dosdate_t date;
   fpos_t position;
 
   char logline[255];
@@ -86,9 +86,14 @@ create_diff (char *ODFile)
   //ext -= 7; - moved 4/7/2001 as day 8 (prev wk==day 1) would become 367
   if (ext <= 7)
     {
-      _dos_getdate (&date);
-      date.year--;
-      if ((date.year % 4) == 0)
+      time_t utime;
+      struct tm *tm;
+
+      time (&utime);
+      tm = localtime (&utime);
+
+      // FIXME: bad leap year detection?
+      if ((tm->tm_year % 4) == 0)
         ext += 366;
       else
         ext += 365;

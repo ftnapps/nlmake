@@ -127,33 +127,6 @@ _dos_findfirst (char *name, unsigned start, struct find_t *f)
   return _dos_findnext (f);
 }
 
-/* convert UNIX-style time() to DOS date and time format */
-void
-_dos_getdate (struct dosdate_t *t)
-{
-  time_t utime;
-  struct tm *tm;
-  time (&utime);
-  tm = localtime (&utime);
-  t->day = (unsigned char) tm->tm_mday; /* 1-31 */
-  t->month = (unsigned char) tm->tm_mon + 1;    /* 1-12 */
-  t->year = (unsigned short) tm->tm_year + 1900;        /* 1980-2099 */
-  t->dayofweek = (unsigned char) tm->tm_wday;   /* 0-6, 0=Sunday */
-}
-
-void
-_dos_gettime (struct dostime_t *t)
-{
-  time_t utime;
-  struct tm *tm;
-  time (&utime);
-  tm = localtime (&utime);
-  t->hour = (unsigned char) tm->tm_hour;        /* 0-23 */
-  t->minute = (unsigned char) tm->tm_min;       /* 0-59 */
-  t->second = (unsigned char) tm->tm_sec;       /* 0-59 */
-  t->hsecond = 0;               /* 0-99 */
-}
-
 /* convert a string to UPPERCASE */
 char *
 strupr (char *string)

@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <malloc.h>
+#include <time.h>
 #ifdef LINUX
 #include "doslinux.h"
 #else
@@ -82,8 +83,8 @@ send_netmail (char *subject, short SFI, char Type)
   char *dot;
   char *msg;
 
-  struct dosdate_t date;        //date
-  struct dostime_t time;        //time
+  time_t utime;
+  struct tm *tm;
 
   struct find_t fileinfo;
 
@@ -122,11 +123,10 @@ send_netmail (char *subject, short SFI, char Type)
   msg += 72;
 
   // Write date/time to msg
-  _dos_getdate (&date);
-  _dos_gettime (&time);
-  sprintf (msg, "%02d %s %02d  %02d:%02d:%02d",
-             date.day, Months[date.month].Single, date.year % 100,
-             time.hour, time.minute, time.second);
+  time (&utime);
+  tm = localtime (&utime);
+  strftime(msg, 20, "%d %a %y  %H:%M:%S", tm);
+
   msg += 22;
 
   if (Type == 3 || segfile[SFI].AltNotify[0] != 0)

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
 #ifdef LINUX
 #include "doslinux.h"
 #else
@@ -20,93 +21,14 @@ extern char Publish_day[];
 short
 getJDate (short type)
 {
-  struct dosdate_t date;
-  short jdate = 0, jfriday, i;
+  short jdate, jfriday, i;
+  time_t utime;
+  struct tm *tm;
 
-  _dos_getdate (&date);
+  time (&utime);
+  tm = localtime (&utime);
 
-  // date.year = 2000;
-
-  switch (date.month)
-    {
-    case 1:
-      jdate = date.day;
-      break;
-    case 2:
-      jdate += 31;
-      jdate += date.day;
-      break;
-    case 3:
-      if ((date.year % 4) == 0)
-        jdate += 60;
-      else
-        jdate += 59;
-      jdate += date.day;
-      break;
-    case 4:
-      if ((date.year % 4) == 0)
-        jdate += 91;
-      else
-        jdate += 90;
-      jdate += date.day;
-      break;
-    case 5:
-      if ((date.year % 4) == 0)
-        jdate += 121;
-      else
-        jdate += 120;
-      jdate += date.day;
-      break;
-    case 6:
-      if ((date.year % 4) == 0)
-        jdate += 152;
-      else
-        jdate += 151;
-      jdate += date.day;
-      break;
-    case 7:
-      if ((date.year % 4) == 0)
-        jdate += 182;
-      else
-        jdate += 181;
-      jdate += date.day;
-      break;
-    case 8:
-      if ((date.year % 4) == 0)
-        jdate += 213;
-      else
-        jdate += 212;
-      jdate += date.day;
-      break;
-    case 9:
-      if ((date.year % 4) == 0)
-        jdate += 244;
-      else
-        jdate += 243;
-      jdate += date.day;
-      break;
-    case 10:
-      if ((date.year % 4) == 0)
-        jdate += 274;
-      else
-        jdate += 273;
-      jdate += date.day;
-      break;
-    case 11:
-      if ((date.year % 4) == 0)
-        jdate += 305;
-      else
-        jdate += 304;
-      jdate += date.day;
-      break;
-    case 12:
-      if ((date.year % 4) == 0)
-        jdate += 335;
-      else
-        jdate += 334;
-      jdate += date.day;
-      break;
-    }
+  jdate = tm->tm_yday;
 
   for (i = 0; i <= 6; i++)
     {
@@ -114,10 +36,10 @@ getJDate (short type)
         break;
     }
 
-  if ((i - date.dayofweek) >= 0)
-    jfriday = jdate + i - date.dayofweek;
+  if ((i - tm->tm_wday) >= 0)
+    jfriday = jdate + i - tm->tm_wday;
   else
-    jfriday = jdate + i - date.dayofweek + 7;
+    jfriday = jdate + i - tm->tm_wday + 7;
 
   //printf("today is -> %d Friday is ->%d",jdate, jfriday);
   if (type == 1)
@@ -127,128 +49,132 @@ getJDate (short type)
 
 }
 
-void
-fix_proc_date (struct dosdate_t *date)
-{
-  short i, jfriday, year;
 
+/* Get next publishing date */
+void
+fix_proc_date (struct tm *date)
+{
+  short i, jfriday;
+
+  // Get day_of_week for publish
   for (i = 0; i <= 6; i++)
     {
       if (stricmp (Publish_day, WeekDays[i].String) == 0)
         break;
     }
 
-  if ((i - date->dayofweek) >= 0)
-    jfriday = date->day + i - date->dayofweek;
+  // Get day_of_month for publish
+  if ((i - date->tm_wday) >= 0)
+    jfriday = date->tm_mday + i - date->tm_wday;
   else
-    jfriday = date->day + i - date->dayofweek + 7;
+    jfriday = date->tm_mday + i - date->tm_wday + 7;
 
 
+  // No adjustment of day & month needed
   if (jfriday <= 28)
     {
-      date->day = jfriday;
+      date->tm_mday = jfriday;
       return;
     }
 
-  switch (date->month)
+  // Adjust day & month if we've fallen into next month...
+  switch (date->tm_mon)
     {
     case 1:                     // jan
       if (jfriday >= 32)
         {
           jfriday -= 31;
-          date->month = 2;
+          date->tm_mon++;
         }
       break;
     case 2:                     // feb
-      if ((date->year % 4) == 0)        // is leap
+      if ((date->tm_year % 4) == 0)        // is leap
         {
           if (jfriday >= 30)
             {
               jfriday -= 29;
-              date->month = 3;
+              date->tm_mon++;
             }
         }
       else if (jfriday >= 29)
         {
           jfriday -= 28;
-          date->month = 3;
+          date->tm_mon++;
         }
       break;
     case 3:                     // mar
       if (jfriday >= 32)
         {
           jfriday -= 31;
-          date->month = 4;
+          date->tm_mon++;
         }
       break;
     case 4:                     // april
       if (jfriday >= 31)
         {
           jfriday -= 30;
-          date->month = 5;
+          date->tm_mon++;
         }
       break;
     case 5:                     // may
       if (jfriday >= 32)
         {
           jfriday -= 31;
-          date->month = 6;
+          date->tm_mon++;
         }
       break;
     case 6:                     // june
       if (jfriday >= 31)
         {
           jfriday -= 30;
-          date->month = 7;
+          date->tm_mon++;
         }
       break;
     case 7:                     // jul
       if (jfriday >= 32)
         {
           jfriday -= 31;
-          date->month = 8;
+          date->tm_mon++;
         }
       break;
     case 8:                     // aug
       if (jfriday >= 32)
         {
           jfriday -= 31;
-          date->month = 9;
+          date->tm_mon++;
         }
       break;
     case 9:                     // sep
       if (jfriday >= 31)
         {
           jfriday -= 30;
-          date->month = 10;
+          date->tm_mon++;
         }
       break;
     case 10:                    // oct
       if (jfriday >= 32)
         {
           jfriday -= 31;
-          date->month = 11;
+          date->tm_mon++;
         }
       break;
     case 11:                    // nov
       if (jfriday >= 31)
         {
           jfriday -= 30;
-          date->month = 12;
+          date->tm_mon++;
         }
       break;
     case 12:                    // dec
       if (jfriday >= 32)
         {
           jfriday -= 31;
-          date->month = 1;
-          year = date->year;
-          year++;
-          date->year = year;
+          date->tm_mon -= 12;
+          date->tm_year++;
         }
       break;
     }
 
-  date->day = jfriday;
+  date->tm_mday = jfriday;
 
 }

@@ -3,6 +3,7 @@
 #include <string.h>
 #include <malloc.h>
 #include <ctype.h>
+#include <time.h>
 #ifdef LINUX
 #include <errno.h>
 #include "doslinux.h"
@@ -78,7 +79,7 @@ extern char *extchr (char *string, char dot);
 
 
 // extern functions
-extern void fix_proc_date (struct dosdate_t *date);
+extern void fix_proc_date (struct tm *date);
 extern short FindMostCurr (char *FileName);
 //extern unsigned long getcrc(char *str,unsigned long crctt);
 extern unsigned short getcrc (char *filename, long offset);
@@ -192,7 +193,9 @@ short
 process_segment (void)
 {
   short bcnt;
-  struct dosdate_t date;
+  time_t utime;
+  struct tm *tm;
+  char date[40];
   char logline[255];
   short errorlvl = 0;
   short linecnt;
@@ -236,16 +239,16 @@ process_segment (void)
   memset (str, 0, sizeof (str));
 
   // set CRC line
-  _dos_getdate (&date);
-  fix_proc_date (&date);
 
+  time (&utime);
+  tm = localtime (&utime);
+  fix_proc_date (tm);
+
+  strftime(date, 40, "%a, %b %d %Y -- Day number %j", tm);
 
   //memset(str,0,254);
   str[0] = 0;
-  sprintf (str,
-           ";A %s Nodelist for %s, %s %d, %d -- Day number %03d : 00000\r\n",
-           NetWorkName, Publish_day, Months[date.month].String, date.day,
-           date.year, getJDate (1));
+  sprintf (str, ";A %s Nodelist for %s : 00000\r\n", NetWorkName, date);
 
 
   headeroffset = strlen (str) - 1;
@@ -1114,11 +1117,15 @@ void
 copy_info_files (short type)
 {
   FILE *info;
-  struct dosdate_t date;
   char *ins_date;
   char asc_year[10];
   char linetype[] = { "ASAS        " };
-  _dos_getdate (&date);
+  time_t utime;
+  struct tm *tm;
+
+  time (&utime);
+  tm = localtime (&utime);
+  strftime(asc_year, 10, "%Y", tm);
 
   switch (type)
     {
@@ -1157,7 +1164,6 @@ copy_info_files (short type)
           if (fgets (str, MAXSTR, info) == NULL)
             break;
 
-          sprintf (asc_year, "%d", date.year);
           ins_date = strstr (str, "####");
           if (ins_date != NULL)
             {

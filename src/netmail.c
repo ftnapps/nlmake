@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include <malloc.h>
 #include <time.h>
-#ifdef LINUX
+#if defined(LINUX) || defined(OS2)
 #include "doslinux.h"
 #else
 #include <dos.h>

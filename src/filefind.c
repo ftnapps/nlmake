@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#ifdef LINUX
+#if defined(LINUX) || defined(OS2)
 #include "doslinux.h"
 #else
 #include <dos.h>

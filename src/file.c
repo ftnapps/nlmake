@@ -3,9 +3,10 @@
 #include <string.h>
 #include <ctype.h>
 #include <malloc.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
-#ifdef LINUX
+#if defined(LINUX) || defined(OS2)
 #include "doslinux.h"
 #else
 #include <dos.h>
@@ -24,16 +25,6 @@ extern LINEPRMS Months[];
 extern LINEPRMS SegmentType[];
 extern char Publish_day[];
 extern char *extchr (char *string, char dot);
-
-// macros
-#define YEAR(t)   (((t & 0xFE00) >> 9) + 1980)
-#define MONTH(t)  ((t & 0x01E0) >> 5)
-#define DAY(t)    (t & 0x001F)
-#define HOUR(t)   ((t & 0xF800) >> 11)
-#define MINUTE(t) ((t & 0x07E0) >> 5)
-#define SECOND(t) ((t & 0x001F) << 1)
-#define SETDATE(d,m,y)  (((y-1980) << 9) + (m << 5) + d)
-#define SETTIME(h,m,s)  ((h << 11) + (m << 5) + (s >> 1))
 
 // externs
 extern void logtext (char *string, short indicator, short dateon);

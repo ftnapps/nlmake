@@ -1,4 +1,5 @@
-#ifdef LINUX
+#if defined(LINUX) || defined(OS2)
+
 /* DOS-style date and filesystem functions for use in Linux NLmake */
 /* (c) 2001 Carl Austin Bennett, Kingston_ON - no rights reserved  */
 /* Note that this is not part of the original DSO Enterprises code */
@@ -15,6 +16,7 @@
 #include <ctype.h>
 #include "doslinux.h"
 
+#ifndef OS2
 /* split a path into dir/file.ext - DOS-style drive letter is not used */
 void
 _splitpath (const char *path, char *drive, char *dir, char *file, char *ext)
@@ -73,12 +75,14 @@ _makepath (const char *path, char *drive, char *dir, char *file, char *ext)
   else
     sprintf ((char *) path, "%s%s", dir, file);
 }
+#endif
+
 
 /* convert findfirst/findnext to Linux readdir() calls */
 unsigned
 _dos_findnext (struct find_t *f)        //translate dos-style findfirst/next()
 {                               //calls to linux direntry.h functions
-  char fullpath[NAME_MAX];
+  char fullpath[FILENAME_MAX];
   struct stat fs;
   do
     {

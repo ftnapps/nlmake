@@ -12,8 +12,10 @@
 #include <errno.h>
 #include "doslinux.h"
 #else
-#include <direct.h>
 #include <dos.h>
+#ifndef OS2
+#include <direct.h>
+#endif
 #endif
 #include "records.h"
 #include "logdef.h"
@@ -26,11 +28,14 @@
 #endif
 
 #ifdef LINUX
-#define strnicmp strncasecmp
-#define PathChar '/'
-#define mkdir(x) mkdir(x, 0750)
+  #define strnicmp strncasecmp
+  #define PathChar '/'
+  #define mkdir(x) mkdir(x, 0750)
+#elif defined(OS2)
+  #define PathChar '\\'
+  #define mkdir(x) mkdir(x, 0750)
 #else
-#define PathChar '\\'
+  #define PathChar '\\'
 #endif
 
 
@@ -42,9 +47,9 @@ int SubRev = 2;
 
 
 #if defined(OS2)
-  #define OStype "OS/2"
+  #define OSType "OS/2"
 #elif defined(DOS)
-  #define OStype "DOS"
+  #define OSType "DOS"
 #elif defined(WIN32)
   #define OSType "Win32"
 #elif defined(LINUX)
@@ -165,7 +170,7 @@ short Dlineoff = 0;
 short Flineoff = 0;
 
 int
-main (short ParmsCtr, char *Parms[])
+main (int ParmsCtr, char *Parms[])
 {
 
   char *Pathptr;
@@ -1902,18 +1907,20 @@ testctrlinfo (void)
   // make directive test
 
   if (MAKETYPE != 6)
-    if (MAKENUMBER != 0)
-      {
-        segfile[0].Net = MAKENUMBER;
-      }
-    else
-      {
-        logtext ("Make Directive does not indicate a number ", 0, YES);
-        logwrite (CFE_ABORT, 0);
-        logwrite (SYS_STOP, 0);
-        closelog ();            // close logfile
-        exit (255);
-      }
+    {
+      if (MAKENUMBER != 0)
+        {
+          segfile[0].Net = MAKENUMBER;
+        }
+      else
+        {
+          logtext ("Make Directive does not indicate a number ", 0, YES);
+          logwrite (CFE_ABORT, 0);
+          logwrite (SYS_STOP, 0);
+          closelog ();            // close logfile
+          exit (255);
+        }
+    }
 
   // set and test name
   if (NetWorkName[0] == 0 && MAKETYPE != 5)

@@ -542,20 +542,22 @@ process_segment (void)
                     {           //
                       phonecnt = checkphone ();
                       if (phonecnt != MinPhone)
-                        if (phonecnt < MinPhone)
-                          {
-                            if (WARNINGS == 'N')
-                              errcnt++;
-                            strcat (errorcomnt,
-                                    "<Phone Number too few parts> ");
-                          }
-                        else if (phonecnt > MaxPhone)
-                          {
-                            if (WARNINGS == 'N')
-                              errcnt++;
-                            strcat (errorcomnt,
-                                    "<Phone Number too many parts> ");
-                          }
+                        {
+                          if (phonecnt < MinPhone)
+                            {
+                              if (WARNINGS == 'N')
+                                errcnt++;
+                              strcat (errorcomnt,
+                                      "<Phone Number too few parts> ");
+                            }
+                          else if (phonecnt > MaxPhone)
+                            {
+                              if (WARNINGS == 'N')
+                                errcnt++;
+                              strcat (errorcomnt,
+                                      "<Phone Number too many parts> ");
+                            }
+                        }
                     }           //
 
                   if (checkbaud () != 0)
@@ -1540,20 +1542,22 @@ test_segment (void)
                     {           //
                       phonecnt = checkphone ();
                       if (phonecnt != MinPhone)
-                        if (phonecnt < MinPhone)
-                          {
-                            if (WARNINGS == 'N')
-                              errcnt++;
-                            strcat (errorcomnt,
-                                    "<Phone Number too few parts> ");
-                          }
-                        else if (phonecnt > MaxPhone)
-                          {
-                            if (WARNINGS == 'N')
-                              errcnt++;
-                            strcat (errorcomnt,
-                                    "<Phone Number too many parts> ");
-                          }
+                        {
+                          if (phonecnt < MinPhone)
+                            {
+                              if (WARNINGS == 'N')
+                                errcnt++;
+                              strcat (errorcomnt,
+                                      "<Phone Number too few parts> ");
+                            }
+                          else if (phonecnt > MaxPhone)
+                            {
+                              if (WARNINGS == 'N')
+                                errcnt++;
+                              strcat (errorcomnt,
+                                      "<Phone Number too many parts> ");
+                            }
+                        }
                     }           //
 
                   if (checkbaud () != 0)
@@ -2124,20 +2128,22 @@ process_new (void)
                     {           //
                       phonecnt = checkphone ();
                       if (phonecnt != MinPhone)
-                        if (phonecnt < MinPhone)
-                          {
-                            if (WARNINGS == 'N')
-                              errcnt++;
-                            strcat (errorcomnt,
-                                    "<Phone Number too few parts> ");
-                          }
-                        else if (phonecnt > MaxPhone)
-                          {
-                            if (WARNINGS == 'N')
-                              errcnt++;
-                            strcat (errorcomnt,
-                                    "<Phone Number too many parts> ");
-                          }
+                        {
+                          if (phonecnt < MinPhone)
+                            {
+                              if (WARNINGS == 'N')
+                                errcnt++;
+                              strcat (errorcomnt,
+                                      "<Phone Number too few parts> ");
+                            }
+                          else if (phonecnt > MaxPhone)
+                            {
+                              if (WARNINGS == 'N')
+                                errcnt++;
+                              strcat (errorcomnt,
+                                      "<Phone Number too many parts> ");
+                            }
+                        }
                     }           //
 
                   if (checkbaud () != 0)

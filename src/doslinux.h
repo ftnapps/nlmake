@@ -1,4 +1,5 @@
 /* DOS-style file and date/time structures for use in Linux port of NLMake */
+#include <sys/types.h>
 #include <dirent.h>
 
 /* _dos_findfirst structure */
@@ -24,10 +25,10 @@ struct find_t
 unsigned _dos_findfirst (char *, unsigned, struct find_t *);
 unsigned _dos_findnext (struct find_t *);
 
-void _makepath (const char *path, char *drive, char *dir, char *file,
-                char *ext);
-void _splitpath (const char *path, char *drive, char *dir, char *file,
-                 char *ext);
+#ifndef OS2
+void _makepath (const char *path, char *drive, char *dir, char *file, char *ext);
+void _splitpath (const char *path, char *drive, char *dir, char *file, char *ext);
+#endif
 
 char *strupr (char *string);
 

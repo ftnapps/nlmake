@@ -200,6 +200,10 @@ free_flags_lists (void)
 #endif
 }
 
+
+/*
+This is the function where we compile all segments into an "outfile"
+*/
 short
 process_segment (void)
 {
@@ -330,6 +334,8 @@ process_segment (void)
         }
       eof = calc_eof (namebuf) - 1;
 
+
+      /* Open a segment */
       segmentfile = fopen (namebuf, "rb");
 
       if (segmentfile != NULL)
@@ -347,14 +353,19 @@ process_segment (void)
                 break;
               //memset (str, 0, 254);
               str[0] = 0;
+
+              /* Read a line from the segment */
               fgets (str, MAXSTR, segmentfile);
               linecnt++;
+
+              /* If the line is a comment, save it to the comments file */
               if (str[0] == ';' && strlen (str) >= 3)
                 if (comntsp != NULL)
                   fprintf (comntsp, "%s", str);
 
+              /* Is this line a good data line...? */
               if (str[0] != ';' && str[0] != 0 && str[0] != 26
-                  && str[0] != '\n')
+                  && str[0] != '\r' && str[0] != '\n')
                 {
                   kill_spaces ();
                   ExtractInfo ();

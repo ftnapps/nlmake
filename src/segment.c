@@ -195,7 +195,7 @@ process_segment (void)
   short bcnt;
   time_t utime;
   struct tm *tm;
-  char date[40];
+  char date[100];
   char logline[255];
   short errorlvl = 0;
   short linecnt;
@@ -243,8 +243,7 @@ process_segment (void)
   time (&utime);
   tm = localtime (&utime);
   fix_proc_date (tm);
-
-  strftime(date, 40, "%a, %b %d %Y -- Day number %j", tm);
+  strftime(date, 100, "%A, %B %d, %Y -- Day number %j", tm);
 
   //memset(str,0,254);
   str[0] = 0;

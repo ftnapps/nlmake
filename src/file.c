@@ -360,7 +360,7 @@ list_file_dates (char *filename)
   FILE *stats2;
   time_t utime;
   struct tm *tm;
-  char date[40];
+  char date[100];
 
   stats2 = fopen (filename, "wt");
   if (stats2 == NULL)
@@ -372,7 +372,7 @@ list_file_dates (char *filename)
   time (&utime);
   tm = localtime (&utime);
   fix_proc_date (tm);
-  strftime(date, 40, "%a, %b %d %Y -- Day number %j", tm);
+  strftime(date, 100, "%A, %B %d, %Y -- Day number %j", tm);
 
   fprintf (stats2, "Segment file Dates for the week of %s \n\n", date);
   fprintf (stats2, "Last Processed Files:\n\n");

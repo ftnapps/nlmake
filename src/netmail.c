@@ -125,7 +125,7 @@ send_netmail (char *subject, short SFI, char Type)
   // Write date/time to msg
   time (&utime);
   tm = localtime (&utime);
-  strftime(msg, 20, "%d %a %y  %H:%M:%S", tm);
+  strftime(msg, 20, "%d %b %y  %H:%M:%S", tm);
 
   msg += 22;
 

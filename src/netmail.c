@@ -264,24 +264,24 @@ void send_netmail(char *subject,short SFI, char Type)
                  switch(Type)
                  {
                  case 0:
-                 sprintf(msg,"\rSegment file received \rNo Errors detected\r");
-                 eof = strlen("\rSegment file received \rNo Errors detected\r");
+                 sprintf(msg,"\rSegment file received \rNo Errors Detected\r");
+                 eof = strlen("\rSegment file received \rNo Errors Detected\r");
                  break;
                  case 1:
-                 sprintf(msg,"\rLocal segment File Update\rNo Errors detected\r");
-                 eof = strlen("\rLocal segment File Update\rNo Errors detected\r");
+                 sprintf(msg,"\rLocal Segment File Update\rNo Errors Detected\r");
+                 eof = strlen("\rLocal Segment File Update\rNo Errors Detected\r");
                  break;
                  case 2:
-                 sprintf(msg,"\rSegment file received \rNo Errors detected\r");
-                 eof = strlen("\rSegment file received \rNo Errors detected\r");
+                 sprintf(msg,"\rSegment File Received \rNo Errors Detected\r");
+                 eof = strlen("\rSegment File Received \rNo Errors Detected\r");
                  break;
                  case 3:
-                 sprintf(msg,"\rSegment update\r\r---\r");
-                 eof = strlen("\rSegment update\r\r---\r");
+                 sprintf(msg,"\rSegment Update\r\r---\r");
+                 eof = strlen("\rSegment Update\r\r---\r");
                  break;
                  default:
-                 sprintf(msg,"\rSegment update\r\r---\r");
-                 eof = strlen("\rSegment update\r\r---\r");
+                 sprintf(msg,"\rSegment Update\r\r---\r");
+                 eof = strlen("\rSegment Update\r\r---\r");
                  break;
                  }
                   msg += eof;
@@ -319,7 +319,7 @@ void send_netmail(char *subject,short SFI, char Type)
 
   if(ptr == NULL)
   {
-        logtext("Message path not found ",1,YES);
+        logtext("Message path not found. ",1,YES);
         return;
   }
 

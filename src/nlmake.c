@@ -6,11 +6,10 @@
 #include <sys/stat.h>
 
 #ifdef __linux__
-#include <unistd.h>
-#include <errno.h>
+#include <unistd.h> // getcwd
 #include "doslinux.h"
 #elif defined(__DOS__) || defined(__NT__) || defined(__OS2__)
-#include <direct.h>
+#include <direct.h> // getcwd
 #endif
 
 #include "records.h"
@@ -28,14 +27,12 @@
   #define strnicmp strncasecmp
 #endif
 
-#if defined(__linux__) || defined(__EMX__)
-  #define mkdir(x) mkdir(x, 0750)
-#endif
-
 #if defined(__linux__)
   #define PathChar '/'
+  #define ARGIND "-"
 #else
   #define PathChar '\\'
+  #define ARGIND "/"
 #endif
 
 
@@ -69,7 +66,8 @@ extern short getJDate (short type);
 extern short test_segment (void);
 extern short process_new (void);
 extern short copynew (void);
-extern void copyfile (char *filename, char *destination);
+extern int create_directory (char *dirname);
+extern int copyfile (char *filename, char *destination);
 extern void deletefile (char *filename);
 extern short init_compressors (void);
 extern short merge_list (char *filename);
@@ -92,7 +90,6 @@ void printctrlinfo (void);
 void breakbaud (void);
 int proctrlfile (void);
 void parnotify (char *str);
-void makedirerror (void);
 
 // Global Switches
 char TEST;
@@ -266,61 +263,31 @@ main (int ParmsCtr, char *Parms[])
           break;
         case 7:
           //printf("Nodelist production/testing utility\n");
-          printf ("Syntax:\n\n");
-          printf ("-Standard Functions:\n");
-#ifdef __linux__
-          printf
-            ("nlmake [nlmake.ctl] -P -F -T -M=[Nodelist] -N=[NetWork]\n\n");
-          printf
-            ("-Process - Processes all segment files and submits changes, if needed.\n");
-          printf
-            ("-Force   - During a production run, Forces submission to submit address\n");
-          printf
-            ("-Test    - Tests & accepts new inbound segments. (default)\n");
-          printf
-            ("-Merge=  - Creates a merged nodelist. [Nodelist + Segment]\n");
-          printf ("-Name=   - Network Name.\n\n");
-          printf ("Statistic Files and Netmail:\n");
-          printf ("nlmake [nlmake.ctl] -ALL -ERR -STA -LAS\n\n");
-          printf ("-ALL     - Tests All & accepts new inbound segments.\n");
-          printf ("-ERRors  - NetMail Notify all (current errors).\n");
-          printf ("-STAts   - Saves stats to [nlmake].ERR.\n");
-          printf
-            ("-LASt    - Last segment receive dates output to lastin.txt\n");
-          printf
-            ("-LATe    - NetMail Notify all who's segments are older than MAXAGE.\n\n");
-          printf ("Debugging and Flags:\n");
-          printf ("nlmake [nlmake.ctl] -D -COM\n\n");
-          printf
-            ("-Display - Displays what is read from the *.ctl file. (debug)\n");
-          printf ("-COMpile - Refresh Database with flags.ctl.\n");
-#else
-          printf
-            ("nlmake [nlmake.ctl] /P /F /T /M=[Nodelist] /N=[NetWork]\n");
-          printf
-            ("/Process - Processes all segment files and submits changes, if needed.\n");
-          printf
-            ("/Force   - During a production run, Forces submission to submit address\n");
-          printf
-            ("/Test    - Tests & accepts new inbound segments. (default)\n");
-          printf
-            ("/Merge=  - Creates a merged nodelist. [Nodelist + Segment]\n");
-          printf ("/Name=   - Network Name.\n\n");
-          printf ("-Statistic Files and Netmail:\n");
-          printf ("nlmake [nlmake.ctl] /ALL /ERR /STA /LAS\n\n");
-          printf ("/ALL     - Tests All & accepts new inbound segments.\n");
-          printf ("/ERRors  - NetMail Notify all (current errors).\n");
-          printf ("/STAts   - Saves stats to [nlmake].ERR.\n");
-          printf
-            ("/LASt    - Last segment receive dates output to lastin.txt\n");
-          printf
-            ("/LATe    - NetMail Notify all who's segments are older than MAXAGE.\n\n");
-          printf ("-Debugging and Flags:\n");
-          printf ("nlmake [nlmake.ctl] /D /COM\n\n");
-          printf
-            ("/Display - Displays what is read from the *.ctl file. (debug)\n");
-          printf ("/COMpile - Refresh Database with flags.ctl.\n");
-#endif
+          printf (
+            "Syntax:\n"
+            "\n"
+            "-Standard Functions:\n"
+            "nlmake [nlmake.ctl] " ARGIND "P " ARGIND "F " ARGIND "T " ARGIND "M=[Nodelist] " ARGIND "N=[NetWork]\n"
+            "\n"
+            ARGIND "Process - Processes all segment files and submits changes, if needed.\n"
+            ARGIND "Force   - During a production run, Forces submission to submit address\n"
+            ARGIND "Test    - Tests & accepts new inbound segments. (default)\n"
+            ARGIND "Merge=  - Creates a merged nodelist. [Nodelist + Segment]\n"
+            ARGIND "Name=   - Network Name.\n"
+            "\n"
+            "Statistic Files and Netmail:\n"
+            "nlmake [nlmake.ctl] " ARGIND "ALL " ARGIND "ERR " ARGIND "STA " ARGIND "LAS\n\n"
+            ARGIND "ALL     - Tests All & accepts new inbound segments.\n"
+            ARGIND "ERRors  - NetMail Notify all (current errors).\n"
+            ARGIND "STAts   - Saves stats to [nlmake].ERR.\n"
+            ARGIND "LASt    - Last segment receive dates output to lastin.txt\n"
+            ARGIND "LATe    - NetMail Notify all who's segments are older than MAXAGE.\n"
+            "\n"
+            "Debugging and Flags:\n"
+            "nlmake [nlmake.ctl] " ARGIND "D " ARGIND "COM\n"
+            "\n"
+            ARGIND "Display - Displays what is read from the *.ctl file. (debug)\n"
+            ARGIND "COMpile - Refresh Database with flags.ctl.\n");
           logtext ("User requested command line help", 4, YES);
           logwrite (SYS_STOP, 0);
           closelog ();          // close logfile
@@ -548,11 +515,7 @@ proctrlfile (void)
   outfilep = fopen ("data.tmp", "wt+");
   if (outfilep == NULL)
     {
-      if (errno <= 39)
-        sprintf (LogLine, "Critial Error - Can not open temporary file <%s>",
-                 errnostr[errno]);
-      else
-        sprintf (LogLine, "Critial Error - Can not open temporary <?>");
+      sprintf (LogLine, "Critial Error - Can not open temporary file");
       logtext (LogLine, 0, YES);
       errorlvl = 254;
       return errorlvl;
@@ -566,12 +529,7 @@ proctrlfile (void)
 
   if (outfilep == NULL)
     {
-      if (errno <= 39)
-        sprintf (LogLine, "Critial Error - Can not open file %s <%s>",
-                 ControlFile, errnostr[errno]);
-      else
-        sprintf (LogLine, "Critial Error - Can not open file %s <?>",
-                 ControlFile);
+      sprintf (LogLine, "Critial Error - Can not open file %s", ControlFile);
       logtext (LogLine, 0, YES);
       //fclose(outfilep); - outfilep is NULL
       errorlvl = 254;
@@ -1968,158 +1926,60 @@ testctrlinfo (void)
   // test master
   if (Master[0] == 0)
     {
-      logtext ("No Master statement Assuming Current Directory", 3, YES);
-      sprintf (Master, "%s\\", CWD);
+      logtext ("No Master statement - assuming current directory", 3, YES);
+      strcpy (Master, CWD);
     }
   else
     {
-      if (Master[strlen (Master) - 1] != PathChar)
-        {
-          if (mkdir (Master) == 0)
-            logtext ("Master Directory not found - Creating", 1, YES);
-          else
-            makedirerror ();
-          Master[strlen (Master)] = PathChar;
-        }
-      else
-        {
-          Master[strlen (Master) - 1] = 0;
-          if (mkdir (Master) == 0)
-            logtext ("Master Directory not found - Creating", 1, YES);
-          else
-            makedirerror ();
-          Master[strlen (Master)] = PathChar;
-        }
-
+          create_directory (Master);
     }
   // test uploads
   if (Uploads[0] == 0)
-    logtext ("No Uploads statement NotScanned", 3, YES);
+    logtext ("No Uploads statement - not scanned", 3, YES);
   else
     {
-      if (Uploads[strlen (Uploads) - 1] != PathChar)
-        {
-          if (mkdir (Uploads) == 0)
-            logtext ("Uploads Directory not found - Creating", 1, YES);
-          else
-            makedirerror ();
-          Uploads[strlen (Uploads)] = PathChar;
-        }
-      else
-        {
-          Uploads[strlen (Uploads) - 1] = 0;
-          if (mkdir (Uploads) == 0)
-            logtext ("Uploads Directory not found - Creating", 1, YES);
-          else
-            makedirerror ();
-          Uploads[strlen (Uploads)] = PathChar;
-        }
-
+          create_directory (Uploads);
     }
   // test mailfiles
   // need to figure out if this is needed
   if (MailFiles[0] == 0)
     {
-      logtext ("No MailFiles statement Can not receive segments", 1, YES);
+      logtext ("No MailFiles statement - can not receive segments", 1, YES);
     }
   else
     {
-      if (MailFiles[strlen (MailFiles) - 1] != PathChar)
-        {
-          if (mkdir (MailFiles) == 0)
-            logtext ("MailFiles Directory not found - Creating", 1, YES);
-          else
-            makedirerror ();
-          MailFiles[strlen (MailFiles)] = PathChar;
-        }
-      else
-        {
-          MailFiles[strlen (MailFiles) - 1] = 0;
-          if (mkdir (MailFiles) == 0)
-            logtext ("MailFiles Directory not found - Creating", 1, YES);
-          else
-            makedirerror ();
-          MailFiles[strlen (MailFiles)] = PathChar;
-        }
+          create_directory (MailFiles);
     }
 
   // update
   // need to figure out if this is needed
   if (Update[0] == 0)
     {
-      logtext ("No Update statement Assuming Current Directory", 2, YES);
-      sprintf (Update, "%s\\", CWD);
+      logtext ("No Update statement - assuming current directory", 2, YES);
+      strcpy (Update, CWD);
     }
   else
     {
-      if (Update[strlen (Update) - 1] != PathChar)
-        {
-          if (mkdir (Update) == 0)
-            logtext ("Update Directory not found - Creating", 1, YES);
-          else
-            makedirerror ();
-          Update[strlen (Update)] = PathChar;
-        }
-      else
-        {
-          Update[strlen (Update) - 1] = 0;
-          if (mkdir (Update) == 0)
-            logtext ("Update Directory not found - Creating", 1, YES);
-          else
-            makedirerror ();
-          Update[strlen (Update)] = PathChar;
-        }
+          create_directory (Update);
     }
 
   // test badfiles
   // need to figure out if this is needed
   if (BadFiles[0] == 0)
-    logtext ("No BadFiles statement - Files will be deleted", 2, YES);
+    logtext ("No BadFiles statement - files will be deleted", 2, YES);
   else
     {
-      if (BadFiles[strlen (BadFiles) - 1] != PathChar)
-        {
-          if (mkdir (BadFiles) == 0)
-            logtext ("BadFiles Directory not found - Creating", 1, YES);
-          else
-            makedirerror ();
-          BadFiles[strlen (BadFiles)] = PathChar;
-        }
-      else
-        {
-          BadFiles[strlen (BadFiles) - 1] = 0;
-          if (mkdir (BadFiles) == 0)
-            logtext ("BadFiles Directory not found - Creating", 1, YES);
-          else
-            makedirerror ();
-          BadFiles[strlen (BadFiles)] = PathChar;
-        }
+          create_directory (BadFiles);
     }
   // test outpath
   if (OutPath[0] == 0)
     {
-      logtext ("No OutPath statement Assuming Master Directory", 4, YES);
+      logtext ("No OutPath statement - assuming master directory", 4, YES);
       strcpy (OutPath, Master);
     }
   else
     {
-      if (OutPath[strlen (OutPath) - 1] != PathChar)
-        {
-          if (mkdir (OutPath) == 0)
-            logtext ("OutPath Directory not found - Creating", 1, YES);
-          else
-            makedirerror ();
-          OutPath[strlen (OutPath)] = PathChar;
-        }
-      else
-        {
-          OutPath[strlen (OutPath) - 1] = 0;
-          if (mkdir (OutPath) == 0)
-            logtext ("OutPath Directory not found - Creating", 1, YES);
-          else
-            makedirerror ();
-          OutPath[strlen (OutPath)] = PathChar;
-        }
+          create_directory (OutPath);
     }
 
   // test outfile
@@ -2195,23 +2055,7 @@ testctrlinfo (void)
     }
   else
     {
-      if (Messages[strlen (Messages) - 1] != PathChar)
-        {
-          if (mkdir (Messages) == 0)
-            logtext ("Messages Directory not found - Creating", 1, YES);
-          else
-            makedirerror ();
-          Messages[strlen (Messages)] = PathChar;
-        }
-      else
-        {
-          Messages[strlen (Messages) - 1] = 0;
-          if (mkdir (Messages) == 0)
-            logtext ("Messages Directory not found - Creating", 1, YES);
-          else
-            makedirerror ();
-          Messages[strlen (Messages)] = PathChar;
-        }
+          create_directory (Messages);
     }
   // test copyright
   if (strcmp (CopyRight, "NONE") == 0)
@@ -2343,44 +2187,6 @@ testctrlinfo (void)
   free (CWD);
 
 }
-
-void
-makedirerror (void)
-{
-  switch (errno)
-    {
-    case 1:
-      logtext ("Critcal error can not create requested directory", 0, YES);
-      logwrite (CFE_ABORT, 0);
-      logwrite (SYS_STOP, 0);
-      closelog ();              // close logfile
-      exit (255);
-      break;
-    case 5:
-      break;                    //BC 4.5++ returns this if mkdir() and dir already exists
-      /* commenting out unreachable code, because of break above?
-      logtext ("Memory Problem.", 5, YES);
-      logwrite (CFE_ABORT, 0);
-      logwrite (SYS_STOP, 0);
-      closelog ();              // close logfile
-      exit (255);
-      break; */
-    case 6:
-      //logtext("Directory Exists or Permission denied.",5,YES);
-      break;
-    case 12:
-      logtext ("No Space left on DISK.", 0, YES);
-      logwrite (CFE_ABORT, 0);
-      logwrite (SYS_STOP, 0);
-      closelog ();              // close logfile
-      exit (255);
-      break;
-    default:
-      break;
-    }
-
-}
-
 
 void
 printctrlinfo (void)

@@ -50,7 +50,7 @@ extern void logwrite (short message, short indicator);
 extern void logtext (char *string, short indicator, short dateon);
 extern short test_crc (char *filename, char *CRCLine);
 extern short FindMostCurr (char *FileName);
-extern void copyfile (char *filename, char *destination);
+extern int copyfile (char *filename, char *destination);
 extern void movefile (char *filename, char *destination);
 extern void deletefile (char *filename);
 extern void netmail_text (char *message);

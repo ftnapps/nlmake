@@ -5,15 +5,23 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <errno.h>
 
 #if defined(__linux__) || defined(__EMX__)
 #include "doslinux.h"
 #elif defined(__DOS__) || defined(__NT__) || defined(__OS2__)
 #include <dos.h>
+#include <direct.h>
 #endif
 
 #include "records.h"
 #include "logdef.h"
+
+#ifdef __linux__
+#define PathChar '/'
+#else
+#define PathChar '\\'
+#endif
 
 
 extern char OutPath[];
@@ -28,122 +36,161 @@ extern char *extchr (char *string, char dot);
 
 // externs
 extern void logtext (char *string, short indicator, short dateon);
+extern void logwrite (short message, short indicator);
+extern void closelog (void);
 extern void fix_proc_date (struct tm *date);
 extern short FindMostCurr (char *FileName);
 extern short getJDate (short type);
 
 // prototype
-long filesize (FILE * fp);
 long calc_eof (char *filename);
 short is_file_there (char *filename);
 short file_age (char *filename);
 short comp_compile_date (void);
 void get_file_date (char *filename, char *date_stamp);
 
-
 void
-copyfile (char *filename, char *destination)
+create_directory (char *dirname)
 {
-  //char buffer[255];
-  FILE *inf, *otf;
-  char *mbptr;
-  long size_read;
-  unsigned long fsize;
+  int result;
+  char msg[256];
 
-  inf = fopen (filename, "rb");
-  if (inf == NULL)
+  // remove trailing PathChar?
+
+#if defined(__linux__) || defined(__EMX__)
+  result = mkdir(dirname, 0750);
+#elif defined(__DOS__) || defined(__NT__) || defined(__OS2__)
+  result = mkdir(dirname);
+#endif
+
+  // add trailing PathChar?
+
+  if (result == 0){
+    snprintf (msg, sizeof (msg), "Created directory %s", dirname);
+    logtext (msg, 1, YES);
     return;
-  fsize = filesize (inf);
-  //_heapshrink();
+  }
 
-  //printf("calculated file size <%ld>\n",fsize);
-
-  mbptr = (char *) malloc (10000);
-  if (mbptr == NULL)
-    {
-      fclose (inf);
-      printf ("Insufficent memory to copy <%ld>\n", fsize);
-      exit (254);
-    }
-  //            printf("allocated memory to copy <%ld>\n",fsize);
-  otf = fopen (destination, "wb");
-
-  do
-    {
-      memset (mbptr, 0, sizeof (mbptr));
-      size_read = fread (mbptr, 1, sizeof (mbptr), inf);
-      fwrite (mbptr, 1, size_read, otf);
-    }
-  while (size_read != 0);
-  fclose (inf);
-  fclose (otf);
-
-  free (mbptr);
-}
-
-void
-movefile (char *filename, char *destination)
-{
-  //char buffer[255];
-  char finaldest[255];
-  char destdrv[5];
-  char destpath[255];
-  char destfname[9];
-  char destext[5];
-  char sourdrv[5];
-  char sourpath[255];
-  char sourfname[9];
-  char sourext[5];
-  FILE *temp;
-
-  if (destination[0] == 0)
-    {
-      temp = fopen (filename, "rt");
-      if (temp != NULL)
-        {
-          fclose (temp);
-          remove (filename);
-        }
-      return;
-    }
-
-  _splitpath (filename, sourdrv, sourpath, sourfname, sourext);
-  _splitpath (destination, destdrv, destpath, destfname, destext);
-
-  _makepath (finaldest, destdrv, destpath, sourfname, sourext);
-  //    sprintf(buffer,"copy %s %s >> NULL", filename, finaldest);
-  //    printf("Buffer : %s\n",buffer);
-
-  temp = fopen (filename, "rb");
-  if (temp == NULL)
+  if (errno == EEXIST) {
+    // It is not an error if the directory already exists
     return;
-  fclose (temp);
-  copyfile (filename, finaldest);
-//  add_eof(finaldest);
+  }
 
-  temp = fopen (finaldest, "rt");
-
-  if (temp != NULL)
-    {
-      remove (filename);
-      fclose (temp);
-    }
+  snprintf (msg, sizeof (msg), "Critical error - can not create directory %s (%s)", dirname, strerror(errno));
+  logtext (msg, 0, YES);
+  logwrite (CFE_ABORT, 0);
+  logwrite (SYS_STOP, 0);
+  closelog ();              // close logfile
+  exit (255);
 }
 
 void
 deletefile (char *filename)
 {
-  FILE *temp;
+  char msg[256];
 
-  temp = fopen (filename, "rt");
-  if (temp != NULL)
+  if (remove (filename))
     {
-      fclose (temp);
-      remove (filename);
+      snprintf (msg, sizeof (msg), "Cannot delete %s", filename);
     }
-  remove ("NULL");
+  else
+    {
+      snprintf (msg, sizeof (msg), "Deleted %s", filename);
+    }
+  logtext (msg, 5, YES);
 }
 
+int
+copyfile (char *filename, char *destination)
+{
+  FILE *in, *out;
+  char buf[1024];
+  char msg[256];
+  size_t len;
+  int result;
+
+  /* open the input file */
+  if ((in = fopen (filename, "rb")) == NULL)
+    {
+      return -1;
+    }
+  if ((out = fopen (destination, "wb")) == NULL)
+    {
+      fclose (in);
+      return -1;
+    }
+
+  /* copy the file contents */
+  while ((len = fread (buf, 1, 100, in)) != 0)
+    {
+      if (fwrite (buf, 1, len, out) != len)
+        {
+          break;
+        }
+    }
+
+  /* now set up the return */
+  result = (ferror (in) || ferror (out)) ? -1 : 0;
+
+  /* close the files */
+  fclose (in);
+  fclose (out);
+
+  if (result)
+    {
+      snprintf (msg, sizeof (msg), "Couldn't copy %s to %s", filename, destination);
+    }
+  else
+    {
+      snprintf (msg, sizeof (msg), "Copied %s to %s", filename, destination);
+    }
+  logtext (msg, 5, YES);
+
+  return result;
+}
+
+void
+movefile (char *filename, char *destdir)
+{
+  char msg[256];
+  char newname[256];            // FIXME: how big buffer?
+  char *basename;
+
+  if (destdir[0] == 0)
+    {
+      // Empty destination - kill file
+      remove (filename);
+      return;
+    }
+
+  // Extract filename from path
+  basename = strrchr (filename, PathChar);
+  if (basename == NULL)
+    {
+      basename = filename;
+    }
+
+  snprintf (newname, sizeof (newname), "%s%s", destdir, basename);
+
+  if (rename (filename, newname))
+    {
+      // Renaming didn't work - we need to copy the file instead
+      if (!copyfile (filename, newname))
+        {
+          // Ok, delete the original
+          deletefile (filename);
+        }
+    }
+  else
+    {
+      snprintf (msg, sizeof (msg), "Moved %s to %s", filename, newname);
+      logtext (msg, 5, YES);
+    }
+
+}
+
+
+/* Remove old segment files (matching the filename) */
 void
 clean_dir (char *filename)
 {
@@ -163,11 +210,7 @@ clean_dir (char *filename)
   if (dot != NULL)
     strcpy (dot, ".*");
   else
-    strcpy (cleaname, ".*");
-
-  rc = _dos_findfirst (cleaname, _A_NORMAL, &fileinfo);
-
-  //printf("\nfind first %s\n",cleaname);
+    strcpy (cleaname, ".*");    // Should probably be strcat?
 
   jfriday = getJDate (1);
   lastfriday = jfriday - 7;
@@ -187,6 +230,9 @@ clean_dir (char *filename)
     }
 
   sprintf (ascjfriday, "%03d", jfriday);
+
+  rc = _dos_findfirst (cleaname, _A_NORMAL, &fileinfo);
+  //printf("\nfind first %s\n",cleaname);
 
   if (rc == 0)
     {
@@ -220,15 +266,17 @@ clean_dir (char *filename)
           rc = _dos_findnext (&fileinfo);
         }
     }
-
 }
 
+/* Compare two files; return 0 if equal and 1 if they differ */
 short
 filecomp (char *filename1, char *filename2)
 {
   FILE *file1, *file2;
   char str1[255];
   char str2[255];
+  int first = 1;
+  int result = 0;
 
   file1 = fopen (filename1, "rb");
   file2 = fopen (filename2, "rb");
@@ -242,47 +290,44 @@ filecomp (char *filename1, char *filename2)
       return (1);
     }
 
-  //    printf("filename 1: %s\n",filename1);
-  //    printf("filename 2: %s\n",filename2);
-  // ignore first line of file ;)
-  fgets (str1, sizeof (str1), file1);
-  fgets (str2, sizeof (str2), file2);
-
   while (1)
     {
-      memset (str1, 0, sizeof (str1));
-      fgets (str1, sizeof (str1), file1);
-      memset (str2, 0, sizeof (str2));
-      fgets (str2, sizeof (str2), file2);
-      if (strcmp (str1, str2) != 0)
+      char *r1, *r2;
+
+      r1 = fgets (str1, sizeof (str1), file1);
+      r2 = fgets (str2, sizeof (str2), file2);
+
+      if (first)
         {
-          fclose (file1);
-          fclose (file2);
-          return (1);
+          // ignore first line of file ;)
+          first = 0;
         }
-      if (str1[0] == 0 && str2[0] == 0)
-        break;
+      else
+        {
+          if ((r1 == NULL) && (r2 == NULL))
+            {
+              // End of both files, without any differences
+              break;
+            }
+          if ((r1 == NULL) || (r2 == NULL))
+            {
+              // We've reached the end of one of the files (but not both)
+              result = 1;
+              break;
+            }
+          if (strcmp (str1, str2) != 0)
+            {
+              // The lines differ
+              result = 1;
+              break;
+            }
+        }
     }
 
   fclose (file1);
   fclose (file2);
 
-  return (0);
-}
-
-long
-filesize (FILE * fp)
-{
-  long size_of_file;
-
-  fseek (fp, 0L, SEEK_END);
-  size_of_file = ftell (fp);
-  fseek (fp, 0L, SEEK_SET);
-
-  // printf("file size before return <%ld>\n",size_of_file);
-
-  return (size_of_file);
-
+  return (result);
 }
 
 short
@@ -302,19 +347,17 @@ is_file_there (char *filename)
 long
 calc_eof (char *filename)
 {
-  FILE *temp;
-  long eof;
+  struct stat st;
 
-  temp = fopen (filename, "rt");
-  if (temp == NULL)
-    return (0);
+  // Get file info
+  if (stat (filename, &st))
+    {
+      // FIXME: check errno
+      logtext ("Unable to stat file", 2, YES);
+      return 0;
+    }
 
-  fseek (temp, 0L, SEEK_END);
-  eof = ftell (temp);
-  fclose (temp);
-
-  return (eof);
-
+  return st.st_size;
 }
 
 void
@@ -323,11 +366,10 @@ add_eof (char *filename)
   FILE *temp;
   char ch = 0x1A;
 
-  temp = fopen (filename, "rb+");
+  temp = fopen (filename, "ab");
   if (temp == NULL)
     return;
 
-  fseek (temp, 0L, SEEK_END);
   fputc (ch, temp);
 
   fclose (temp);
@@ -338,14 +380,14 @@ touch_file_date (char *filename)
 {
   FILE *f;
 
-  if ((f = fopen(filename, "a")) == NULL)
+  if ((f = fopen (filename, "a")) == NULL)
     {
       logtext ("Unable to set file time stamp", 2, YES);
     }
   else
     {
       logtext ("Reset file time stamp", 5, YES);
-      fclose(f);
+      fclose (f);
     }
 
 }
@@ -372,7 +414,7 @@ list_file_dates (char *filename)
   time (&utime);
   tm = localtime (&utime);
   fix_proc_date (tm);
-  strftime(date, 100, "%A, %B %d, %Y -- Day number %j", tm);
+  strftime (date, 100, "%A, %B %d, %Y -- Day number %j", tm);
 
   fprintf (stats2, "Segment file Dates for the week of %s \n\n", date);
   fprintf (stats2, "Last Processed Files:\n\n");
@@ -447,16 +489,19 @@ get_file_date (char *filename, char *date_stamp)
   struct stat st;
 
   // Get file info
-  if (stat(filename, &st)) {
-    // FIXME: check errno
-    logtext ("Unable to get file time stamp", 2, YES);
-  } else {
-    struct tm *t;
+  if (stat (filename, &st))
+    {
+      // FIXME: check errno
+      logtext ("Unable to get file time stamp", 2, YES);
+    }
+  else
+    {
+      struct tm *t;
 
-    t = localtime(&st.st_mtime);
-    strftime(date_stamp, 20, "%Y-%m-%d %H:%M:%S", t);
-    logtext ("Retrieved file time stamp", 6, YES);
-  }
+      t = localtime (&st.st_mtime);
+      strftime (date_stamp, 20, "%Y-%m-%d %H:%M:%S", t);
+      logtext ("Retrieved file time stamp", 6, YES);
+    }
 }
 
 /* Returns the age of a file, counted in days */
@@ -466,21 +511,24 @@ file_age (char *filename)
   struct stat st;
 
   // Get file info
-  if (stat(filename, &st)) {
-    // FIXME: check errno
-    logtext ("Unable to get file time stamp", 2, YES);
-    return 0;
-  } else {
-    time_t now;
+  if (stat (filename, &st))
+    {
+      // FIXME: check errno
+      logtext ("Unable to get file time stamp", 2, YES);
+      return 0;
+    }
+  else
+    {
+      time_t now;
 
-    logtext ("Retrieved file time stamp", 6, YES);
+      // Get current time
+      now = time (NULL);
 
-    // Get current time
-    now = time(NULL);
+      logtext ("Retrieved file time stamp", 6, YES);
 
-    // return current time minus file time, in days instead of seconds
-    return (now - st.st_mtime) / (3600 * 24);
-  }
+      // return current time minus file time, in days instead of seconds
+      return (now - st.st_mtime) / (3600 * 24);
+    }
 }
 
 /* Return 1 if flags.ctl is newer than quick.lst, or if quick.lst doesn't exist */
@@ -490,24 +538,29 @@ comp_compile_date (void)
   struct stat st1, st2;
 
   // Get file info
-  if (stat("flags.ctl", &st1)) {
-    logtext ("Unable to read flags.ctl date", 2, YES);
-    return (0);
-  }
+  if (stat ("flags.ctl", &st1))
+    {
+      logtext ("Unable to read flags.ctl date", 2, YES);
+      return 0;
+    }
 
-  if (stat("quick.lst", &st2)) {
-    logtext ("Unable to read quick.lst date", 2, YES);
-    return (1);
-  }
+  if (stat ("quick.lst", &st2))
+    {
+      logtext ("Unable to read quick.lst date", 2, YES);
+      return 1;
+    }
 
   logtext ("Checking for update of FLAGS lists.", 5, YES);
 
   // Check if quick.lst has later time stamp
-  if (st1.st_mtime <= st2.st_mtime) {
-    logtext ("Compile of flags.ctl is not required.", 5, YES);
-    return (0);
-  } else {
-    logtext ("Compile of flags.ctl is required.", 5, YES);
-    return (1);
-  }
+  if (st1.st_mtime <= st2.st_mtime)
+    {
+      logtext ("Compile of flags.ctl is not required.", 5, YES);
+      return 0;
+    }
+  else
+    {
+      logtext ("Compile of flags.ctl is required.", 5, YES);
+      return 1;
+    }
 }

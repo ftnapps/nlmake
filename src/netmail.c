@@ -79,8 +79,6 @@ send_netmail (char *subject, short SFI, char Type)
   unsigned short crc16, crctt;
   char intl = 0;
   short msgnum = 0;
-  char Fmtdate[12];
-  char Fmttime[9];
   char msgcrc[25];
   char msgintl[25];
   char DByte[5];
@@ -101,23 +99,10 @@ send_netmail (char *subject, short SFI, char Type)
   if (Type == 3 && SubNameNotify[0] != 0)
     strcpy (sysop, SubNameNotify);
 
-  _dos_getdate (&date);
-  _dos_gettime (&time);
-
   if (Type != 3 && segfile[SFI].AltNotify[0] != 0)
     subbreakaddress (segfile[SFI].AltNotify);
   else
     subbreakaddress (SubAddress);
-
-  sprintf (Fmttime, "%02d:%02d:%02d", time.hour, time.minute, time.second);
-
-  if (date.year <= 1999)
-    sprintf (Fmtdate, "%d %s %02d  ", date.day, Months[date.month].Single,
-             (date.year - 1900));
-  else
-    sprintf (Fmtdate, "%d %s %02d  ", date.day, Months[date.month].Single,
-             (date.year - 2000));
-
 
 #ifdef DOS
   front = (char *) _fmalloc (MBUFSIZE);
@@ -147,11 +132,14 @@ send_netmail (char *subject, short SFI, char Type)
     memmove (msg += 36, subject, strlen (subject));
   else
     memmove (msg += 36, subject, 71);
-  memmove (msg += 72, Fmtdate, 12);     // Work from here
 
-  memmove (msg += 11, Fmttime, 9);      // Work from here
+  _dos_getdate (&date);
+  _dos_gettime (&time);
+  sprintf (msg += 72, "%02d %s %02d  %02d:%02d:%02d",
+             date.day, Months[date.month].Single, date.year % 100,
+             time.hour, time.minute, time.second);
 
-  msg += 11;
+  msg += 22;
   if (Type == 3 || segfile[SFI].AltNotify[0] != 0)
     byte_convert (DByte, SUBNODE);      // submit node
   else

@@ -1,24 +1,6 @@
 /* DOS-style file and date/time structures for use in Linux port of NLMake */
 #include <dirent.h>
 
-/* _dos_getdate/_dossetdate and _dos_gettime/_dos_settime structures */
-
-struct dosdate_t
-{
-  unsigned char day;            /* 1-31 */
-  unsigned char month;          /* 1-12 */
-  unsigned int year;            /* 1980-2099 */
-  unsigned char dayofweek;      /* 0-6, 0=Sunday */
-};
-
-struct dostime_t
-{
-  unsigned char hour;           /* 0-23 */
-  unsigned char minute;         /* 0-59 */
-  unsigned char second;         /* 0-59 */
-  unsigned char hsecond;        /* 0-99 */
-};
-
 /* _dos_findfirst structure */
 
 struct find_t
@@ -50,6 +32,3 @@ void _splitpath (const char *path, char *drive, char *dir, char *file,
 char *strupr (char *string);
 
 #define _A_NORMAL 0
-
-/* map spawnlp() calls to UNIX-style system() calls*/
-#define P_WAIT 0

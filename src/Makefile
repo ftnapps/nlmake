@@ -3,7 +3,7 @@ SRC_DIR=./
 OBJ=.o
 EXE=
 GPP=g++
-CFLAGS=-g
+CFLAGS=-g -Wall
 LFLAGS=
 
 

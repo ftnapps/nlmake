@@ -492,73 +492,31 @@ file_age (char *filename)
   }
 }
 
-
-void
-fix_compile_date (void)
-{
-#ifndef LINUX
-  int handle;
-  unsigned short date, time;
-
-  if (_dos_open ("flags.ctl", O_RDWR, &handle) != 0)
-    {
-      logtext ("Unable to get file time stamp", 2, YES);
-    }
-  else
-    {
-      _dos_getftime (handle, &date, &time);
-      _dos_close (handle);
-      if (_dos_open ("quick.lst", O_RDWR, &handle) != 0)
-        {
-          logtext ("Unable to set file time stamp", 2, YES);
-        }
-      else
-        {
-          logtext ("Reset file time stamp", 5, YES);
-
-          _dos_setftime (handle, date, time);
-          _dos_close (handle);
-        }
-    }
-#endif
-}
-
+/* Return 1 if flags.ctl is newer than quick.lst, or if quick.lst doesn't exist */
 short
 comp_compile_date (void)
 {
-  int handle;
-  unsigned short Fdate = 1, Ftime = 1;
-  unsigned short Qdate = 0, Qtime = 0;
+  struct stat st1, st2;
 
-  if (_dos_open ("flags.ctl", O_RDWR, &handle) != 0)
-    {
-      logtext ("Unable to read flags.ctl date", 2, YES);
-    }
-  else
-    {
-      logtext ("Checking for update of FLAGS lists.", 5, YES);
+  // Get file info
+  if (stat("flags.ctl", &st1)) {
+    logtext ("Unable to read flags.ctl date", 2, YES);
+    return (0);
+  }
 
-      _dos_getftime (handle, &Fdate, &Ftime);
-      _dos_close (handle);
-    }
+  if (stat("quick.lst", &st2)) {
+    logtext ("Unable to read quick.lst date", 2, YES);
+    return (1);
+  }
 
-  if (_dos_open ("quick.lst", O_RDWR, &handle) != 0)
-    {
-      logtext ("Unable to read quick.lst date", 2, YES);
-    }
-  else
-    {
-      _dos_getftime (handle, &Qdate, &Qtime);
-      _dos_close (handle);
-    }
+  logtext ("Checking for update of FLAGS lists.", 5, YES);
 
-  if (Qdate == Fdate && Qtime == Ftime)
-    {
-      logtext ("Compile of flags.ctl is not required (same dates).", 5, YES);
-      return (0);
-    }
-
-  logtext ("Compile of flags.ctl is required.", 5, YES);
-  return (1);
-
+  // Check if quick.lst has later time stamp
+  if (st1.st_mtime <= st2.st_mtime) {
+    logtext ("Compile of flags.ctl is not required.", 5, YES);
+    return (0);
+  } else {
+    logtext ("Compile of flags.ctl is required.", 5, YES);
+    return (1);
+  }
 }

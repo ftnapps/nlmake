@@ -75,7 +75,6 @@ extern short openlog (void);
 extern void closelog (void);
 extern long calc_eof (char *filename);
 extern void list_file_dates (char *filename);
-extern void fix_compile_date (void);
 extern short comp_compile_date (void);
 
 
@@ -436,31 +435,14 @@ main (short ParmsCtr, char *Parms[])
 
   if (FLAGCHK == 'Y' || FLAGCHKAUTO == 'Y')
     {
-      temp = fopen ("quick.lst", "rt");
-      if (temp == NULL)
+      if (comp_compile_date () == 1)
         {
-          //fclose(temp); - don't do this, temp==NULL!!!
           sprintf (textline,
                    "Compiling flag lookup file from flags.ctl ... ");
           logtext (textline, 0, YES);
           cre_flags_db ("flags.ctl");
           sprintf (textline, "Compile completed.");
           logtext (textline, 0, YES);
-          fix_compile_date ();
-        }
-      else
-        {
-          fclose (temp);
-          if (comp_compile_date () == 1)
-            {
-              sprintf (textline,
-                       "Compiling flag lookup file from flags.ctl ... ");
-              logtext (textline, 0, YES);
-              cre_flags_db ("flags.ctl");
-              sprintf (textline, "Compile completed.");
-              logtext (textline, 0, YES);
-              fix_compile_date ();
-            }
         }
     }
 

@@ -44,8 +44,6 @@ void _dos_gettime (struct dostime_t *);
 unsigned _dos_findfirst (char *, unsigned, struct find_t *);
 unsigned _dos_findnext (struct find_t *);
 void _dos_getftime (int, unsigned short *, unsigned short *);
-unsigned _dos_open (const char *, unsigned, int *);
-unsigned _dos_close (int);
 
 void _makepath (const char *path, char *drive, char *dir, char *file,
                 char *ext);

@@ -15,25 +15,6 @@
 #include <ctype.h>
 #include "doslinux.h"
 
-/* open a file, return file handle as *handle and errors as return code */
-unsigned
-_dos_open (const char *fname, unsigned mode, int *handle)
-{
-  int file;
-  file = open (fname, mode);
-  if (file < 0)
-    return file;
-  *handle = file;
-  return 0;
-}
-
-/* remap _dos_close to close() */
-unsigned
-_dos_close (int file)
-{
-  return close (file);
-}
-
 /* split a path into dir/file.ext - DOS-style drive letter is not used */
 void
 _splitpath (const char *path, char *drive, char *dir, char *file, char *ext)

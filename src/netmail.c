@@ -18,8 +18,8 @@
 
 #define                 KLUDGE 0x01
 #define                 RCVED  0x04
-#define         MM16    0xA001	/* crc-16 mask */
-#define         MMTT    0x1021	/* crc-ccitt mask */
+#define         MM16    0xA001  /* crc-16 mask */
+#define         MMTT    0x1021  /* crc-ccitt mask */
 #define     MBUFSIZE 50000
 
 // externs
@@ -89,8 +89,8 @@ send_netmail (char *subject, short SFI, char Type)
   char *dot;
   char *msg;
 
-  struct dosdate_t date;	//date
-  struct dostime_t time;	//time
+  struct dosdate_t date;        //date
+  struct dostime_t time;        //time
 
   struct find_t fileinfo;
 
@@ -110,14 +110,14 @@ send_netmail (char *subject, short SFI, char Type)
   else
     subbreakaddress (SubAddress);
 
-  sprintf (Fmttime, "%.2d:%.2d:%.2d", time.hour, time.minute, time.second);
+  sprintf (Fmttime, "%02d:%02d:%02d", time.hour, time.minute, time.second);
 
   if (date.year <= 1999)
-    sprintf (Fmtdate, "%.2d %s %0.2d  ", date.day, Months[date.month].Single,
-	     (date.year - 1900));
+    sprintf (Fmtdate, "%d %s %02d  ", date.day, Months[date.month].Single,
+             (date.year - 1900));
   else
-    sprintf (Fmtdate, "%.2d %s %0.2d  ", date.day, Months[date.month].Single,
-	     (date.year - 2000));
+    sprintf (Fmtdate, "%d %s %02d  ", date.day, Months[date.month].Single,
+             (date.year - 2000));
 
 
 #ifdef DOS
@@ -148,35 +148,35 @@ send_netmail (char *subject, short SFI, char Type)
     memmove (msg += 36, subject, strlen (subject));
   else
     memmove (msg += 36, subject, 71);
-  memmove (msg += 72, Fmtdate, 12);	// Work from here
+  memmove (msg += 72, Fmtdate, 12);     // Work from here
 
-  memmove (msg += 11, Fmttime, 9);	// Work from here
+  memmove (msg += 11, Fmttime, 9);      // Work from here
 
   msg += 11;
   if (Type == 3 || segfile[SFI].AltNotify[0] != 0)
-    byte_convert (DByte, SUBNODE);	// submit node
+    byte_convert (DByte, SUBNODE);      // submit node
   else
     byte_convert (DByte, segfile[SFI].Node);
-  memmove (msg, DByte, 2);	// Dest Net
+  memmove (msg, DByte, 2);      // Dest Net
   msg += 2;
   // *msg = 0xA6;                        // Orig net (168)
   byte_convert (DByte, MAKENODE);
-  memmove (msg, DByte, 2);	// Dest Net
+  memmove (msg, DByte, 2);      // Dest Net
   msg += 4;
 
   //*msg = 0xA7;                        // Orig Node       (174)
   byte_convert (DByte, MAKENET);
-  memmove (msg, DByte, 2);	// Dest Net
+  memmove (msg, DByte, 2);      // Dest Net
   msg += 2;
 
   if (Type == 3 || segfile[SFI].AltNotify[0] != 0)
-    byte_convert (DByte, SUBNET);	// submit net
+    byte_convert (DByte, SUBNET);       // submit net
   else
     byte_convert (DByte, segfile[SFI].Net);
-  memmove (msg, DByte, 2);	// Dest Net
-  msg += 11;			// left off here
+  memmove (msg, DByte, 2);      // Dest Net
+  msg += 11;                    // left off here
 
-  *(msg++) = 0x00;		// Leave here
+  *(msg++) = 0x00;              // Leave here
 
   //*(msg++) = 0x83;            // Attribs  low order
 
@@ -190,30 +190,30 @@ send_netmail (char *subject, short SFI, char Type)
     mattrib = 0;
   if (mnotify[Type].Intl == 'Y')
     intl = 1;
-  mattrib += 128;		// Set Kill sent
-  mattrib += 256;		// Set Local
-  mattrib += 1;			// Set Local
+  mattrib += 128;               // Set Kill sent
+  mattrib += 256;               // Set Local
+  mattrib += 1;                 // Set Local
 
 
   if (Type != 3)
     sprintf (msgintl, "INTL %d:%d/%d %d:%d/%d", segfile[SFI].Zone,
-	     segfile[SFI].Net, segfile[SFI].Node, MAKEZONE, MAKENET,
-	     MAKENODE);
+             segfile[SFI].Net, segfile[SFI].Node, MAKEZONE, MAKENET,
+             MAKENODE);
   else
     {
       sprintf (msgintl, "INTL %d:%d/%d %d:%d/%d", SUBZONE, SUBNET, SUBNODE,
-	       MAKEZONE, MAKENET, MAKENODE);
-      mattrib += 16;		// Set File Attach
+               MAKEZONE, MAKENET, MAKENODE);
+      mattrib += 16;            // Set File Attach
     }
 
-  byte_convert (DByte, mattrib);	// submit net
-  memmove (msg, DByte, 2);	// Dest Net
+  byte_convert (DByte, mattrib);        // submit net
+  memmove (msg, DByte, 2);      // Dest Net
 
   msg += 2;
 
-  *(msg++) = 0x00;		// Reply
+  *(msg++) = 0x00;              // Reply
 
-  *(msg++) = 0x00;		// Leave here
+  *(msg++) = 0x00;              // Leave here
 
   /*     for(cnt=0;cnt<=4;cnt++)
      {
@@ -231,17 +231,17 @@ send_netmail (char *subject, short SFI, char Type)
       crctt = mupdcrc (crctt, *front + cnt, MMTT);
     }
   // stuff intl here
-  sprintf (msgcrc, "MSGID: %d:%d/%d %0.4X%0.4X", MAKEZONE, MAKENET, MAKENODE,
-	   crc16, crctt);
-  memmove (msg += 1, msgcrc, strlen (msgcrc));	// Message ID CRC
-  *(msg += strlen (msgcrc)) = 0x0D;	// end message ID
+  sprintf (msgcrc, "MSGID: %d:%d/%d %04X%04X", MAKEZONE, MAKENET, MAKENODE,
+           crc16, crctt);
+  memmove (msg += 1, msgcrc, strlen (msgcrc));  // Message ID CRC
+  *(msg += strlen (msgcrc)) = 0x0D;     // end message ID
   msg++;
 
   if (intl == 1)
     {
       *msg = (char) 0x01;
-      memmove (msg += 1, msgintl, strlen (msgintl));	// Message ID CRC
-      *(msg += strlen (msgintl)) = 0x0D;	// end message ID
+      memmove (msg += 1, msgintl, strlen (msgintl));    // Message ID CRC
+      *(msg += strlen (msgintl)) = 0x0D;        // end message ID
       msg++;
     }
 
@@ -256,72 +256,72 @@ send_netmail (char *subject, short SFI, char Type)
   while (multimessage == 0)
     {
       if (multimessage == 1)
-	break;
+        break;
       if (ptr1 != NULL)
-	{
-	  if ((MBUFSIZE - (msg - front)) >= eof)
-	    {
-	      fread (msg, eof, 1, ptr1);
-	      msg += eof;
-	      multimessage = 1;
-	    }
-	  else
-	    {
-	      fread (msg, MBUFSIZE - (msg - front), 1, ptr1);
-	      eof -= MBUFSIZE - (msg - front);
-	      msg += MBUFSIZE - (msg - front);
-	      multimessage = 0;
-	    }
-	}
+        {
+          if ((MBUFSIZE - (msg - front)) >= eof)
+            {
+              fread (msg, eof, 1, ptr1);
+              msg += eof;
+              multimessage = 1;
+            }
+          else
+            {
+              fread (msg, MBUFSIZE - (msg - front), 1, ptr1);
+              eof -= MBUFSIZE - (msg - front);
+              msg += MBUFSIZE - (msg - front);
+              multimessage = 0;
+            }
+        }
       else
-	{
-	  switch (Type)
-	    {
-	    case 0:
-	      sprintf (msg, "\rSegment file received \rNo Errors Detected\r");
-	      eof = strlen ("\rSegment file received \rNo Errors Detected\r");
-	      break;
-	    case 1:
-	      sprintf (msg,
-		       "\rLocal Segment File Update\rNo Errors Detected\r");
-	      eof =
-		strlen ("\rLocal Segment File Update\rNo Errors Detected\r");
-	      break;
-	    case 2:
-	      sprintf (msg, "\rSegment File Received \rNo Errors Detected\r");
-	      eof = strlen ("\rSegment File Received \rNo Errors Detected\r");
-	      break;
-	    case 3:
-	      sprintf (msg, "\rSegment Update\r\r---\r");
-	      eof = strlen ("\rSegment Update\r\r---\r");
-	      break;
-	    default:
-	      sprintf (msg, "\rSegment Update\r\r---\r");
-	      eof = strlen ("\rSegment Update\r\r---\r");
-	      break;
-	    }
-	  msg += eof;
-	  multimessage = 1;
-	}
+        {
+          switch (Type)
+            {
+            case 0:
+              sprintf (msg, "\rSegment file received \rNo Errors Detected\r");
+              eof = strlen ("\rSegment file received \rNo Errors Detected\r");
+              break;
+            case 1:
+              sprintf (msg,
+                       "\rLocal Segment File Update\rNo Errors Detected\r");
+              eof =
+                strlen ("\rLocal Segment File Update\rNo Errors Detected\r");
+              break;
+            case 2:
+              sprintf (msg, "\rSegment File Received \rNo Errors Detected\r");
+              eof = strlen ("\rSegment File Received \rNo Errors Detected\r");
+              break;
+            case 3:
+              sprintf (msg, "\rSegment Update\r\r---\r");
+              eof = strlen ("\rSegment Update\r\r---\r");
+              break;
+            default:
+              sprintf (msg, "\rSegment Update\r\r---\r");
+              eof = strlen ("\rSegment Update\r\r---\r");
+              break;
+            }
+          msg += eof;
+          multimessage = 1;
+        }
 
       strcpy (messagepath, Messages);
       strcat (messagepath, "*.msg");
       rc = _dos_findfirst (messagepath, _A_NORMAL, &fileinfo);
 
       if (rc == 0)
-	{
-	  while (rc == 0)
-	    {
-	      dot = extchr (fileinfo.name, '.');
-	      if (dot != NULL)
-		*dot = 0;
-	      else
-		break;
-	      if (atoi (fileinfo.name) > msgnum)
-		msgnum = atoi (fileinfo.name);
-	      rc = _dos_findnext (&fileinfo);
-	    }
-	}
+        {
+          while (rc == 0)
+            {
+              dot = extchr (fileinfo.name, '.');
+              if (dot != NULL)
+                *dot = 0;
+              else
+                break;
+              if (atoi (fileinfo.name) > msgnum)
+                msgnum = atoi (fileinfo.name);
+              rc = _dos_findnext (&fileinfo);
+            }
+        }
       memset (filename, 0, sizeof (filename));
       itoa ((msgnum + 1), filename, 10);
 
@@ -334,15 +334,15 @@ send_netmail (char *subject, short SFI, char Type)
       ptr = fopen (messagepath, "wb+");
 
       if (ptr == NULL)
-	{
-	  logtext ("Message path not found. ", 1, YES);
-	  return;
-	}
+        {
+          logtext ("Message path not found. ", 1, YES);
+          return;
+        }
 
       fwrite (front, sizeof (char), (long) (msg - front), ptr);
       fclose (ptr);
       if (ptr1)
-	fclose (ptr1);
+        fclose (ptr1);
     }
   deletefile ("msgtext.tmp");
 #ifdef DOS
@@ -361,9 +361,9 @@ mupdcrcr (unsigned short crc, short c, unsigned short mask)
   for (i = 0; i < 8; i++)
     {
       if ((crc ^ c) & 1)
-	crc = (crc >> 1) ^ mask;
+        crc = (crc >> 1) ^ mask;
       else
-	crc >>= 1;
+        crc >>= 1;
       c >>= 1;
     }
   return (short) crc;
@@ -377,9 +377,9 @@ mupdcrc (unsigned short crc, short c, unsigned short mask)
   for (i = 0; i < 8; i++)
     {
       if ((crc ^ c) & 0x8000)
-	crc = (crc << 1) ^ mask;
+        crc = (crc << 1) ^ mask;
       else
-	crc <<= 1;
+        crc <<= 1;
       c <<= 1;
     }
   return (short) crc;
@@ -403,23 +403,23 @@ subbreakaddress (char *address)
     {
       pzone = address;
       if (strchr (address, '/') != NULL)
-	{
-	  pnet = strchr (address, ':');
-	  pnode = strchr (address, '/');
-	  pnet++;
-	  pnode++;
-	}
+        {
+          pnet = strchr (address, ':');
+          pnode = strchr (address, '/');
+          pnet++;
+          pnode++;
+        }
     }
   else
     {
       if (strchr (address, '/') != NULL)
-	{
-	  pnode = strchr (address, '/');
-	  pnode++;
-	  pnet = address;
-	}
+        {
+          pnode = strchr (address, '/');
+          pnode++;
+          pnet = address;
+        }
       else
-	return (1);
+        return (1);
     }
 
   if (pzone == NULL)

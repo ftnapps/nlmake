@@ -84,54 +84,53 @@ create_diff (char *ODFile)
       _dos_getdate (&date);
       date.year--;
       if ((date.year % 4) == 0)
-	ext += 366;
+        ext += 366;
       else
-	ext += 365;
+        ext += 365;
     }
   ext -= 7;
 
   //itoa(ext,newext,10);
   memset (exten, 0, sizeof (exten));
-  strcpy (exten, ".");
-  sprintf (exten + 1, "%0.3d", ext);
+  sprintf (exten, ".%03d", ext);
   //    strncpy(exten+1,newext,3);
 
   _makepath (fullname, drive, path, fname, exten);
 
   //printf("filename :%s\n",fullname);
-  if (rc = test_crc (fullname, CRCLine) != 0)
+  if ((rc = test_crc (fullname, CRCLine)) != 0)
     {
       if (rc == 1)
-	{
-	  logtext ("Can not produce diff file ", 1, YES);
-	  sprintf (logline, "CRC error file %s", fullname);
-	  logtext (logline, 1, YES);
-	  logtext (CRCLine, 1, YES);
-	}
+        {
+          logtext ("Can not produce diff file ", 1, YES);
+          sprintf (logline, "CRC error file %s", fullname);
+          logtext (logline, 1, YES);
+          logtext (CRCLine, 1, YES);
+        }
       if (rc == 2)
-	{
-	  logtext ("Can not produce diff file ", 1, YES);
-	  sprintf (logline, "file %s not found", fullname);
-	  logtext (logline, 1, YES);
-	}
+        {
+          logtext ("Can not produce diff file ", 1, YES);
+          sprintf (logline, "file %s not found", fullname);
+          logtext (logline, 1, YES);
+        }
       return (1);
     }
 
-  if (rc = test_crc (OutFile, CRCLine) != 0)
+  if ((rc = test_crc (OutFile, CRCLine)) != 0)
     {
       if (rc == 1)
-	{
-	  logtext ("Can not produce diff file ", 1, YES);
-	  sprintf (logline, "CRC error file %s", OutFile);
-	  logtext (logline, 1, YES);
-	  logtext (CRCLine, 1, YES);
-	}
+        {
+          logtext ("Can not produce diff file ", 1, YES);
+          sprintf (logline, "CRC error file %s", OutFile);
+          logtext (logline, 1, YES);
+          logtext (CRCLine, 1, YES);
+        }
       if (rc == 2)
-	{
-	  logtext ("Can not produce diff file ", 1, YES);
-	  sprintf (logline, "file %s not found", OutFile);
-	  logtext (logline, 1, YES);
-	}
+        {
+          logtext ("Can not produce diff file ", 1, YES);
+          sprintf (logline, "file %s not found", OutFile);
+          logtext (logline, 1, YES);
+        }
       return (1);
     }
 
@@ -157,21 +156,21 @@ create_diff (char *ODFile)
   diff = fopen (ODFile, "wb");
   fgets (oldstr, MAXSTR, olist);
   fprintf (diff, "%s", oldstr);
-  del++;			// set delete for copied line
+  del++;                        // set delete for copied line
 
 
   // total old comments to be deleted
   while (1)
     {
       if (oldeof == ftell (olist))
-	break;			// hard error
+        break;                  // hard error
       memset (oldstr, 0, sizeof (oldstr));
       fgetpos (olist, &position);
       fgets (oldstr, MAXSTR, olist);
       if (strnicmp (oldstr, ";A", 2) != 0)
-	break;
+        break;
       if (oldstr[0] == 0)
-	break;
+        break;
       del++;
     }
   //fseek (olist,(long)((-1) * (strlen(oldstr)+1)),SEEK_CUR);
@@ -181,13 +180,13 @@ create_diff (char *ODFile)
   while (1)
     {
       if (neweof == ftell (nlist))
-	break;			// hard error
+        break;                  // hard error
       memset (newstr, 0, sizeof (newstr));
       fgets (newstr, MAXSTR, nlist);
       if (strnicmp (newstr, ";A", 2) != 0)
-	break;
+        break;
       if (newstr[0] == 0)
-	break;
+        break;
       add++;
     }
 
@@ -195,19 +194,19 @@ create_diff (char *ODFile)
   fseek (nlist, 0L, SEEK_SET);
 
   // indicate directives
-  fprintf (diff, "D%d\r\n", del);
-  fprintf (diff, "A%d\r\n", add);
+  fprintf (diff, "D%ld\r\n", del);
+  fprintf (diff, "A%ld\r\n", add);
   del = 0;
 
   // copy over added lines
   while (add >= 1)
     {
       if (neweof == ftell (nlist))
-	break;			// hard error
+        break;                  // hard error
       memset (newstr, 0, sizeof (newstr));
       fgets (newstr, MAXSTR, nlist);
       if (newstr[0] == 0)
-	break;
+        break;
       fprintf (diff, "%s", newstr);
       add--;
     }
@@ -219,64 +218,64 @@ create_diff (char *ODFile)
       matchline = find_match ();
 
       if (matchline == 0)
-	{
-	  if (del > 0)
-	    {
-	      if (neweof != ftell (nlist))
-		fprintf (diff, "D%d\r\n", del);
-	      del = 0;
-	    }
-	  if (newstr[0] == 0 && oldstr[0] == 0)
-	    break;
-	  else
-	    copy++;
-	}
+        {
+          if (del > 0)
+            {
+              if (neweof != ftell (nlist))
+                fprintf (diff, "D%ld\r\n", del);
+              del = 0;
+            }
+          if (newstr[0] == 0 && oldstr[0] == 0)
+            break;
+          else
+            copy++;
+        }
       else if (matchline < 0)
-	{
-	  if (copy > 0)
-	    {
-	      fprintf (diff, "C%d\r\n", copy);
-	      copy = 0;
-	    }
-	  if (oldeof == ftell (olist) && del > 0)
-	    fprintf (diff, "D%d\r\n", del);
-	  del++;
-	}
+        {
+          if (copy > 0)
+            {
+              fprintf (diff, "C%ld\r\n", copy);
+              copy = 0;
+            }
+          if (oldeof == ftell (olist) && del > 0)
+            fprintf (diff, "D%ld\r\n", del);
+          del++;
+        }
       else if (matchline > 0)
-	{
-	  if (copy > 0)
-	    {
-	      fprintf (diff, "C%d\r\n", copy);
-	      copy = 0;
-	    }
-	  if (del > 0)
-	    {
-	      if (neweof != ftell (nlist))
-		fprintf (diff, "D%d\r\n", del);
-	      del = 0;
-	    }
-	  add = matchline;
-	  if (oldeof == ftell (olist) && add >= 2)
-	    fprintf (diff, "A%d\r\n", add - 1);
-	  else
-	    fprintf (diff, "A%d\r\n", add);
-	  for (i = 1; i <= add; i++)
-	    {
-	      fgets (newstr, MAXSTR, nlist);
-	      fprintf (diff, "%s", newstr);
-	    }
-	  // fseek (olist,(long)((-1) * (strlen(oldstr)+1)),SEEK_CUR);
-	  fsetpos (olist, &position);
-	  add = 0;
-	}
+        {
+          if (copy > 0)
+            {
+              fprintf (diff, "C%ld\r\n", copy);
+              copy = 0;
+            }
+          if (del > 0)
+            {
+              if (neweof != ftell (nlist))
+                fprintf (diff, "D%ld\r\n", del);
+              del = 0;
+            }
+          add = matchline;
+          if (oldeof == ftell (olist) && add >= 2)
+            fprintf (diff, "A%ld\r\n", add - 1);
+          else
+            fprintf (diff, "A%ld\r\n", add);
+          for (i = 1; i <= add; i++)
+            {
+              fgets (newstr, MAXSTR, nlist);
+              fprintf (diff, "%s", newstr);
+            }
+          // fseek (olist,(long)((-1) * (strlen(oldstr)+1)),SEEK_CUR);
+          fsetpos (olist, &position);
+          add = 0;
+        }
 
       if (newstr[0] == 0 && oldstr[0] == 0)
-	break;
+        break;
     }
 
   if (copy > 1)
     {
-      fprintf (diff, "C%d\r\n", copy);
+      fprintf (diff, "C%ld\r\n", copy);
       copy = 0;
     }
 
@@ -306,16 +305,16 @@ find_match (void)
   while (1)
     {
       if (neweof == ftell (nlist))
-	{
-	  if (oldstr[0] != 0)
-	    linecnt = -1;
-	  break;
-	}
+        {
+          if (oldstr[0] != 0)
+            linecnt = -1;
+          break;
+        }
       if (linecnt == 2500)
-	{
-	  linecnt = -1;
-	  break;
-	}
+        {
+          linecnt = -1;
+          break;
+        }
       fgets (newstr, MAXSTR, nlist);
       //resetcntr += (long) ((-1) * (strlen(newstr) + 1));
       //printf("Seek 3%d\n",resetcntr);
@@ -323,9 +322,9 @@ find_match (void)
       //printf("newstr - %s\n",newstr);
       //printf("cntr - %d\n",linecnt);
       if (strcmp (oldstr, newstr) == 0)
-	break;
+        break;
       else
-	linecnt++;
+        linecnt++;
     }
 
   if (linecnt != 0)
@@ -364,7 +363,7 @@ apply_diff (char *filename, short SFI)
     {
       sprintf (diffname, "%s%s", Uploads, filename);
       if (Findiff (diffname) == 1)
-	return (1);
+        return (1);
       difeof = calc_eof (diffname);
       diff = fopen (diffname, "rt");
     }
@@ -392,12 +391,12 @@ apply_diff (char *filename, short SFI)
   if (olist == NULL)
     {
       sprintf (logline, "Can not find segment <%s> to apply diff to",
-	       localname);
+               localname);
       logtext (logline, 5, YES);
       fclose (diff);
       fclose (olist);
       fclose (nlist);
-      movefile (diffname, BadFiles);	// kill processed diff
+      movefile (diffname, BadFiles);    // kill processed diff
       return (1);
     }
 
@@ -418,7 +417,7 @@ apply_diff (char *filename, short SFI)
       fclose (diff);
       fclose (olist);
       fclose (nlist);
-      movefile (diffname, BadFiles);	// kill processed diff
+      movefile (diffname, BadFiles);    // kill processed diff
       return (1);
     }
 
@@ -434,7 +433,7 @@ apply_diff (char *filename, short SFI)
       fclose (diff);
       fclose (olist);
       fclose (nlist);
-      deletefile (ofname);	// Kill bad new file
+      deletefile (ofname);      // Kill bad new file
       logtext ("Apply Diff Failed! ", 1, YES);
       return (1);
     }
@@ -451,80 +450,80 @@ apply_diff (char *filename, short SFI)
   while (1)
     {
       if (difeof == ftell (diff))
-	break;
+        break;
       memset (diffstr, 0, sizeof (diffstr));
       fgets (diffstr, MAXSTR, diff);
       if (diffstr[0] == 0)
-	break;
+        break;
       switch (diffstr[0])
-	{
-	case 'A':
-	  add = atoi (diffstr + 1);
-	  for (i = 1; i <= add; i++)
-	    {
-	      memset (diffstr, 0, sizeof (diffstr));
-	      if (difeof != ftell (diff))
-		{
-		  fgets (diffstr, MAXSTR, diff);
-		  fprintf (nlist, "%s", diffstr);
-		}
-	      else
-		{
-		  fclose (diff);
-		  fclose (olist);
-		  fclose (nlist);
-		  deletefile (ofname);	// Kill bad new file
-		  movefile (diffname, BadFiles);	// kill processed diff
-		  logtext ("Apply Diff Failed! ", 1, YES);
-		  logtext ("Moved Diff to BadFiles ", 1, YES);
-		  return (1);
-		}
-	    }
-	  break;
-	case 'D':
-	  if (diffstr[1] != 'o' || diffstr[1] != 'O')
-	    del = atoi (diffstr + 1);
-	  for (i = 1; i <= del; i++)
-	    if (oldeof != ftell (olist))
-	      fgets (oldstr, MAXSTR, olist);
-	    else
-	      {
-		fclose (diff);
-		fclose (olist);
-		fclose (nlist);
-		deletefile (ofname);	// Kill bad new file
-		movefile (diffname, BadFiles);	// kill processed diff
-		logtext ("Apply Diff Failed! ", 1, YES);
-		logtext ("Moved Diff to BadFiles ", 1, YES);
-		return (1);
-	      }
-	  break;
-	case 'C':
-	  copy = atoi (diffstr + 1);
-	  for (i = 1; i <= copy; i++)
-	    {
-	      memset (oldstr, 0, sizeof (oldstr));
-	      if (oldeof != ftell (olist))
-		{
-		  fgets (oldstr, MAXSTR, olist);
-		  fprintf (nlist, "%s", oldstr);
-		}
-	      else
-		{
-		  fclose (diff);
-		  fclose (olist);
-		  fclose (nlist);
-		  deletefile (ofname);	// Kill bad new file
-		  movefile (diffname, BadFiles);	// kill processed diff
-		  logtext ("Apply Diff Failed! ", 1, YES);
-		  logtext ("Moved Diff to BadFiles ", 1, YES);
-		  return (1);
-		}
-	    }
-	  break;
-	default:
-	  break;
-	}
+        {
+        case 'A':
+          add = atoi (diffstr + 1);
+          for (i = 1; i <= add; i++)
+            {
+              memset (diffstr, 0, sizeof (diffstr));
+              if (difeof != ftell (diff))
+                {
+                  fgets (diffstr, MAXSTR, diff);
+                  fprintf (nlist, "%s", diffstr);
+                }
+              else
+                {
+                  fclose (diff);
+                  fclose (olist);
+                  fclose (nlist);
+                  deletefile (ofname);  // Kill bad new file
+                  movefile (diffname, BadFiles);        // kill processed diff
+                  logtext ("Apply Diff Failed! ", 1, YES);
+                  logtext ("Moved Diff to BadFiles ", 1, YES);
+                  return (1);
+                }
+            }
+          break;
+        case 'D':
+          if (diffstr[1] != 'o' || diffstr[1] != 'O')
+            del = atoi (diffstr + 1);
+          for (i = 1; i <= del; i++)
+            if (oldeof != ftell (olist))
+              fgets (oldstr, MAXSTR, olist);
+            else
+              {
+                fclose (diff);
+                fclose (olist);
+                fclose (nlist);
+                deletefile (ofname);    // Kill bad new file
+                movefile (diffname, BadFiles);  // kill processed diff
+                logtext ("Apply Diff Failed! ", 1, YES);
+                logtext ("Moved Diff to BadFiles ", 1, YES);
+                return (1);
+              }
+          break;
+        case 'C':
+          copy = atoi (diffstr + 1);
+          for (i = 1; i <= copy; i++)
+            {
+              memset (oldstr, 0, sizeof (oldstr));
+              if (oldeof != ftell (olist))
+                {
+                  fgets (oldstr, MAXSTR, olist);
+                  fprintf (nlist, "%s", oldstr);
+                }
+              else
+                {
+                  fclose (diff);
+                  fclose (olist);
+                  fclose (nlist);
+                  deletefile (ofname);  // Kill bad new file
+                  movefile (diffname, BadFiles);        // kill processed diff
+                  logtext ("Apply Diff Failed! ", 1, YES);
+                  logtext ("Moved Diff to BadFiles ", 1, YES);
+                  return (1);
+                }
+            }
+          break;
+        default:
+          break;
+        }
 
     }
 
@@ -533,20 +532,20 @@ apply_diff (char *filename, short SFI)
   fclose (nlist);
   if (test_crc (ofname, CRCLine) == 1)
     {
-      deletefile (ofname);	// kill bad make
-      movefile (diffname, BadFiles);	// kill processed diff
+      deletefile (ofname);      // kill bad make
+      movefile (diffname, BadFiles);    // kill processed diff
       logtext ("Apply Diff Failed! CRC invalid", 1, YES);
       logtext ("Moved Diff to BadFiles ", 1, YES);
       if (mnotify[1].active == 'Y')
-	{
-	  netmail_text ("\rFile not processed! \r\r---\r");
-	  send_netmail ("Apply Diff Failed! CRC invalid!", SFI, 1);
-	}
+        {
+          netmail_text ("\rFile not processed! \r\r---\r");
+          send_netmail ("Apply Diff Failed! CRC invalid!", SFI, 1);
+        }
       return (1);
     }
   else
     {
-      deletefile (diffname);	// kill processed diff
+      deletefile (diffname);    // kill processed diff
       logtext ("Applied Diff sucessful!", 1, YES);
       netmail_text ("\rApplied Diff sucessful! \r\r---\r");
       send_netmail ("Info", SFI, 1);
@@ -617,35 +616,35 @@ merge_list (char *filename)
       memset (str, 0, sizeof (str));
       fgets (str, MAXSTR, Nodelst);
       if (strnicmp (str, cpstr, strlen (cpstr)) != 0)
-	fprintf (temp, "%s", str);
+        fprintf (temp, "%s", str);
       else
-	break;
+        break;
     }
 
   // If we're a hub or node scan for us in segment
   if (lmaketype <= 1)
     {
       if (lmaketype == 1)
-	sprintf (cpstr, "%s,%d", SegmentType[lmaketype].String, MAKENUMBER);
+        sprintf (cpstr, "%s,%d", SegmentType[lmaketype].String, MAKENUMBER);
       else
-	sprintf (cpstr, ",%d", MAKENODE);
+        sprintf (cpstr, ",%d", MAKENODE);
       while (1)
-	{
-	  memset (str, 0, sizeof (str));
-	  fgets (str, MAXSTR, Nodelst);
-	  if (str[0] == 0)
-	    break;
-	  if (strnicmp (str, "ZONE", 4) == 0)
-	    break;
-	  if (strnicmp (str, "REGION", 6) == 0)
-	    break;
-	  if (strnicmp (str, "HOST", 4) == 0)
-	    break;
-	  if (strnicmp (str, cpstr, strlen (cpstr)) != 0)
-	    fprintf (temp, "%s", str);
-	  else
-	    break;
-	}
+        {
+          memset (str, 0, sizeof (str));
+          fgets (str, MAXSTR, Nodelst);
+          if (str[0] == 0)
+            break;
+          if (strnicmp (str, "ZONE", 4) == 0)
+            break;
+          if (strnicmp (str, "REGION", 6) == 0)
+            break;
+          if (strnicmp (str, "HOST", 4) == 0)
+            break;
+          if (strnicmp (str, cpstr, strlen (cpstr)) != 0)
+            fprintf (temp, "%s", str);
+          else
+            break;
+        }
 
     }
 
@@ -655,10 +654,10 @@ merge_list (char *filename)
     {
       memset (str, 0, sizeof (str));
       if (fgets (str, MAXSTR, outseg) == NULL)
-	break;
+        break;
       if (str[0] == ';' && strlen (str) >= 3);
       else
-	fprintf (temp, "%s", str);
+        fprintf (temp, "%s", str);
     }
 
 
@@ -670,13 +669,13 @@ merge_list (char *filename)
 
       // skip nodelist to next Zone Region or Host
       while (1)
-	{
-	  memset (str, 0, sizeof (str));
-	  if (fgets (str, MAXSTR, Nodelst) == NULL)
-	    break;
-	  if (strnicmp (str, cpstr, strlen (cpstr)) == 0)
-	    break;
-	}
+        {
+          memset (str, 0, sizeof (str));
+          if (fgets (str, MAXSTR, Nodelst) == NULL)
+            break;
+          if (strnicmp (str, cpstr, strlen (cpstr)) == 0)
+            break;
+        }
       // because we read one in to test it must be output
       fprintf (temp, "%s", str);
 
@@ -686,22 +685,22 @@ merge_list (char *filename)
   if (lmaketype <= 1)
     {
       if (lmaketype == 1)
-	sprintf (cpstr, "%s,", SegmentType[lmaketype].String);
+        sprintf (cpstr, "%s,", SegmentType[lmaketype].String);
       else
-	sprintf (cpstr, ",%d", MAKENODE);
+        sprintf (cpstr, ",%d", MAKENODE);
       while (1)
-	{
-	  memset (str, 0, sizeof (str));
-	  fgets (str, MAXSTR, Nodelst);
-	  if (strnicmp (str, "ZONE", 4) == 0)
-	    break;
-	  if (strnicmp (str, "REGION", 6) == 0)
-	    break;
-	  if (strnicmp (str, "HOST", 4) == 0)
-	    break;
-	  if (strnicmp (str, cpstr, strlen (cpstr)) == 0)
-	    break;
-	}
+        {
+          memset (str, 0, sizeof (str));
+          fgets (str, MAXSTR, Nodelst);
+          if (strnicmp (str, "ZONE", 4) == 0)
+            break;
+          if (strnicmp (str, "REGION", 6) == 0)
+            break;
+          if (strnicmp (str, "HOST", 4) == 0)
+            break;
+          if (strnicmp (str, cpstr, strlen (cpstr)) == 0)
+            break;
+        }
 
       // because we read one in to test it must be output
       fprintf (temp, "%s", str);
@@ -712,7 +711,7 @@ merge_list (char *filename)
     {
       memset (str, 0, sizeof (str));
       if (fgets (str, MAXSTR, Nodelst) == NULL)
-	break;
+        break;
       fprintf (temp, "%s", str);
     }
 

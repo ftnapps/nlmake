@@ -31,51 +31,51 @@ _dos_open (const char *fname, unsigned mode, int *handle)
 unsigned
 _dos_close (int file)
 {
-  close (file);
+  return close (file);
 }
 
 /* split a path into dir/file.ext - DOS-style drive letter is not used */
 void
 _splitpath (const char *path, char *drive, char *dir, char *file, char *ext)
 {
-  unsigned char pos = strlen (path),	/* posn in string, scan right->left */
-    state = 'e';		/* presently copy: e-ext, f-file, d-dir */
+  unsigned char pos = strlen (path),    /* posn in string, scan right->left */
+    state = 'e';                /* presently copy: e-ext, f-file, d-dir */
   drive[0] = dir[1] = file[0] = ext[0] = 0;
   dir[0] = '/';
   while (pos)
     {
       pos--;
       switch (state)
-	{
-	case 'e':		/* copy .extension */
-	  if (path[pos] == '/')
-	    {
-	      strcpy (file, ext);
-	      ext[0] = 0;
-	      state = 'd';
-	    }
-	  else
-	    {
-	      memmove (ext + 1, ext, strlen (ext) + 1);
-	      ext[0] = path[pos];
-	    }
-	  if (path[pos] == '.')
-	    state = 'f';
-	  break;
-	case 'f':		/* copy /filename */
-	  if (path[pos] == '/')
-	    state = 'd';
-	  else
-	    {
-	      memmove (file + 1, file, strlen (file) + 1);
-	      file[0] = path[pos];
-	    }
-	  break;
-	case 'd':		/* copy base directory */
-	  memmove (dir + 1, dir, strlen (dir) + 1);
-	  dir[0] = path[pos];
-	  break;
-	}
+        {
+        case 'e':               /* copy .extension */
+          if (path[pos] == '/')
+            {
+              strcpy (file, ext);
+              ext[0] = 0;
+              state = 'd';
+            }
+          else
+            {
+              memmove (ext + 1, ext, strlen (ext) + 1);
+              ext[0] = path[pos];
+            }
+          if (path[pos] == '.')
+            state = 'f';
+          break;
+        case 'f':               /* copy /filename */
+          if (path[pos] == '/')
+            state = 'd';
+          else
+            {
+              memmove (file + 1, file, strlen (file) + 1);
+              file[0] = path[pos];
+            }
+          break;
+        case 'd':               /* copy base directory */
+          memmove (dir + 1, dir, strlen (dir) + 1);
+          dir[0] = path[pos];
+          break;
+        }
     }
 }
 
@@ -95,8 +95,8 @@ _makepath (const char *path, char *drive, char *dir, char *file, char *ext)
 
 /* convert findfirst/findnext to Linux readdir() calls */
 unsigned
-_dos_findnext (struct find_t *f)	//translate dos-style findfirst/next()
-{				//calls to linux direntry.h functions
+_dos_findnext (struct find_t *f)        //translate dos-style findfirst/next()
+{                               //calls to linux direntry.h functions
   char fullpath[NAME_MAX];
   struct stat fs;
   do
@@ -105,10 +105,10 @@ _dos_findnext (struct find_t *f)	//translate dos-style findfirst/next()
       f->name = NULL;
       f->dd = readdir (f->dir);
       if (!f->dd)
-	{
-	  closedir (f->dir);
-	  return (unsigned) -1;
-	}
+        {
+          closedir (f->dir);
+          return (unsigned) -1;
+        }
     }
   while (!strstr (f->dd->d_name, f->fname));
   f->name = f->dd->d_name;
@@ -117,7 +117,7 @@ _dos_findnext (struct find_t *f)	//translate dos-style findfirst/next()
   strcat (fullpath, f->name);
   stat (fullpath, &fs);
   f->size = fs.st_size;
-  f->wr_date = (unsigned) (fs.st_mtime / 86400);	/* # of days since 1/1/70 */
+  f->wr_date = (unsigned) (fs.st_mtime / 86400);        /* # of days since 1/1/70 */
   return 0;
 }
 
@@ -148,7 +148,7 @@ _dos_findfirst (char *name, unsigned start, struct find_t *f)
 
 /* split unix file timestamp into time (2s increments), and dosdate  */
 /* note that time is non-standard and used only to find newest files */
-unsigned
+void
 _dos_getftime (int file, unsigned short *d, unsigned short *t)
 {
   time_t utime;
@@ -158,9 +158,9 @@ _dos_getftime (int file, unsigned short *d, unsigned short *t)
   time (&utime);
   tm = localtime (&utime);
 
-  day = (unsigned char) tm->tm_mday;	/* 1-31 */
-  month = (unsigned char) tm->tm_mon + 1;	/* 1-12 */
-  year = (unsigned short) tm->tm_year - 80;	/* 1980-2099 */
+  day = (unsigned char) tm->tm_mday;    /* 1-31 */
+  month = (unsigned char) tm->tm_mon + 1;       /* 1-12 */
+  year = (unsigned short) tm->tm_year - 80;     /* 1980-2099 */
 
   *d = (unsigned short) (day | (month << 5) | (year << 9));
   *t = (unsigned short) ((utime % 86400) / 2);
@@ -174,10 +174,10 @@ _dos_getdate (struct dosdate_t *t)
   struct tm *tm;
   time (&utime);
   tm = localtime (&utime);
-  t->day = (unsigned char) tm->tm_mday;	/* 1-31 */
-  t->month = (unsigned char) tm->tm_mon + 1;	/* 1-12 */
-  t->year = (unsigned short) tm->tm_year + 1900;	/* 1980-2099 */
-  t->dayofweek = (unsigned char) tm->tm_wday;	/* 0-6, 0=Sunday */
+  t->day = (unsigned char) tm->tm_mday; /* 1-31 */
+  t->month = (unsigned char) tm->tm_mon + 1;    /* 1-12 */
+  t->year = (unsigned short) tm->tm_year + 1900;        /* 1980-2099 */
+  t->dayofweek = (unsigned char) tm->tm_wday;   /* 0-6, 0=Sunday */
 }
 
 void
@@ -187,22 +187,22 @@ _dos_gettime (struct dostime_t *t)
   struct tm *tm;
   time (&utime);
   tm = localtime (&utime);
-  t->hour = (unsigned char) tm->tm_hour;	/* 0-23 */
-  t->minute = (unsigned char) tm->tm_min;	/* 0-59 */
-  t->second = (unsigned char) tm->tm_sec;	/* 0-59 */
-  t->hsecond = 0;		/* 0-99 */
+  t->hour = (unsigned char) tm->tm_hour;        /* 0-23 */
+  t->minute = (unsigned char) tm->tm_min;       /* 0-59 */
+  t->second = (unsigned char) tm->tm_sec;       /* 0-59 */
+  t->hsecond = 0;               /* 0-99 */
 }
 
 /* a simple routine to convert integers (0-99999) to string values */
 char *
 itoa (int value, char *string, int radix)
 {
-  const char digit[] = "0123456789abcdef";
+  /* const char digit[] = "0123456789abcdef"; */
   char *p = string;
   *p = 0;
   if (radix != 10)
-    return string;		/* radix other than 10 not implemented */
-  if (value >= 10000)		/* split integer into 5 ASCII digits */
+    return string;              /* radix other than 10 not implemented */
+  if (value >= 10000)           /* split integer into 5 ASCII digits */
     *(p++) = '0' + ((value / 10000) % 10);
   if (value >= 1000)
     *(p++) = '0' + ((value / 1000) % 10);

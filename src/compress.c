@@ -56,7 +56,7 @@ compress (char *filename)
 
   strcpy (compress, filename);
 
-  ptr = extchr (compress, '.');	/* 4/4/01 - handle more than one . in pathname */
+  ptr = extchr (compress, '.'); /* 4/4/01 - handle more than one . in pathname */
   ptr++;
   if (*ptr != 'D')
     {
@@ -124,10 +124,10 @@ decompress (char *filename)
   for (cnt = 0; cnt <= 9; cnt++)
     {
       if (tolower (*ptr) == tolower (CompressType[cnt].ext))
-	break;
+        break;
     }
   if (cnt == 10)
-    return 1;			// 5/1/01 - if not an archive, exit
+    return 1;                   // 5/1/01 - if not an archive, exit
 
   if (CompressType[cnt].compressor == 1)
     strcat (compress, "*.*");
@@ -158,20 +158,20 @@ comsplit_parms (char *filename, char *compress)
     {
       aparms[pcnt] = strtok (NULL, delim);
       if (aparms[pcnt] == NULL)
-	break;
+        break;
       if (strnicmp (aparms[pcnt], "%a", 2) == 0)
-	aparms[pcnt] = compress;	// %a
+        aparms[pcnt] = compress;        // %a
       if (strnicmp (aparms[pcnt], "%f", 2) == 0)
-	aparms[pcnt] = filename;	// %f
-      if (strnicmp (aparms[pcnt], "\"%f\"", 4) == 0)	// 4/10/2001 "%f" for linux use
-	{
-	  static char qfilename[80];	//a filename enclosed in quotes
-	  qfilename[0] = 34;
-	  qfilename[1] = 0;	//(to protect it from Linux shell)
-	  strcat (qfilename, filename);
-	  strcat (qfilename, "\"");
-	  aparms[pcnt] = qfilename;
-	}
+        aparms[pcnt] = filename;        // %f
+      if (strnicmp (aparms[pcnt], "\"%f\"", 4) == 0)    // 4/10/2001 "%f" for linux use
+        {
+          static char qfilename[80];    //a filename enclosed in quotes
+          qfilename[0] = 34;
+          qfilename[1] = 0;     //(to protect it from Linux shell)
+          strcat (qfilename, filename);
+          strcat (qfilename, "\"");
+          aparms[pcnt] = qfilename;
+        }
     }
 
 }
@@ -197,162 +197,162 @@ init_compressors (void)
       //    eof = ftell (comctl);
       //fseek (comctl, 0L, SEEK_SET);
       while (1)
-	{
-	  //memset (str, 0, 254);
-	  str[0] = 0;
-	  fgets (str, 254, comctl);
-	  linecnt++;
-	  // kill leading spaces
-	  while (str[0] == ' ')
-	    memmove (str, str + 1, 253);
-	  // remove comments
-	  ptr = strchr (str, ';');
-	  if (ptr != NULL)
-	    *ptr = 0;
+        {
+          //memset (str, 0, 254);
+          str[0] = 0;
+          fgets (str, 254, comctl);
+          linecnt++;
+          // kill leading spaces
+          while (str[0] == ' ')
+            memmove (str, str + 1, 253);
+          // remove comments
+          ptr = strchr (str, ';');
+          if (ptr != NULL)
+            *ptr = 0;
 
-	  if (str[0] != 0)
-	    {
-	      while (compressor_verbs[cntr] != NULL)
-		{
-		  if (strnicmp
-		      (str, compressor_verbs[cntr],
-		       strlen (compressor_verbs[cntr])) == 0)
-		    {
-		      //printf("found verb %s\n", compressor_verbs[cntr]);
-		      break;
-		    }
-		  else
-		    cntr++;
-		}
-	      if (compressor_verbs[cntr] != NULL)
-		{
-		  switch (cntr)
-		    {
-		    case 0:	// add
-		      ptr = str;
-		      ptr += strlen (compressor_verbs[cntr]);	// advance ptr to end of verb
-		      while (*ptr == ' ')
-			ptr++;
-		      if (strlen (ptr) <= 99)
-			strncpy (CompressType[compcnt].add, ptr,
-				 (strlen (ptr) - 1));
-		      else
-			strncpy (CompressType[compcnt].add, ptr, 99);
-		      break;
-		    case 1:	// archiver
-		      ptr = str;
-		      ptr += strlen (compressor_verbs[cntr]);	// advance ptr to end of verb
-		      while (*ptr == ' ')
-			ptr++;
-		      cntr = 0;
-		      while (compressor_name[cntr] != NULL)
-			{
-			  if (strnicmp
-			      (ptr, compressor_name[cntr],
-			       strlen (compressor_name[cntr])) == 0)
-			    {
-			      compcnt = cntr;
-			      CompressType[compcnt].compressor = 0;
-			      break;
-			    }
-			  else
-			    cntr++;
-			}
-		      //printf("unknown compressor\n");
-		      break;
-		    case 2:	// extension
-		      ptr = str;
-		      ptr += strlen (compressor_verbs[cntr]);	// advance ptr to end of verb
-		      while (*ptr == ' ')
-			ptr++;
-		      if (*(ptr + 1) == '?' && *(ptr + 2) == '?')
-			{
-			  CompressType[compcnt].ext = ptr[0];
-			}
-		      else
-			{
-			  // major error
-			  //printf("unknown compressor extension\n");
-			}
-		      break;
-		    case 3:	// extract
-		      ptr = str;
-		      ptr += strlen (compressor_verbs[cntr]);	// advance ptr to end of verb
-		      while (*ptr == ' ')
-			ptr++;
-		      if (strlen (ptr) <= 99)
-			strncpy (CompressType[compcnt].extract, ptr,
-				 (strlen (ptr) - 1));
-		      else
-			strncpy (CompressType[compcnt].extract, ptr, 99);
-		      break;
-		    case 4:	// ident
-		      ptr = str;
-		      ptr += strlen (compressor_verbs[cntr]);	// advance ptr to end of verb
-		      while (*ptr == ' ')
-			ptr++;
-		      ptr1 = strchr (str, ',');
-		      if (ptr1 != NULL)
-			{
-			  ptr1++;
-			  if (strlen (ptr1) <= 99)
-			    strncpy (CompressType[compcnt].ident, ptr1,
-				     (strlenII (ptr1)));
-			  else
-			    strncpy (CompressType[compcnt].ident, ptr1, 99);
-			  ptr1--;
-			  *ptr1 = 0;
-			  CompressType[compcnt].offset = atol (ptr);
-			}
-		      else
-			{
-			  // major error
-			  //printf("unknown compressor ident\n");
-			}
-		      break;
-		    case 5:	// end
-		      if (CompressType[compcnt].add[0] == 0)
-			{
-			  // major error
-			  printf ("Compressor Config Error\n");
-			}
-		      else if (CompressType[compcnt].extract[0] == 0)
-			{
-			  // major error
-			  printf ("Compressor Config Error\n");
-			}
-		      else if (CompressType[compcnt].ext == 0)
-			{
-			  // major error
-			  printf ("Compressor Config Error\n");
-			}
-		      else if (CompressType[compcnt].ident[0] == 0)
-			{
-			  // major error
-			  printf ("Compressor Config Error\n");
-			}
-		      //    printf("got %s \n%s \n%c \n%s \n%ul", CompressType[compcnt].add,
-		      //                             CompressType[compcnt].extract,
-		      //                                                                        CompressType[compcnt].ext,
-		      //                                                                        CompressType[compcnt].ident,
-		      //                                                                        CompressType[compcnt].offset);
-		      //compcnt++;
-		      break;
-		    case 6:	// Needs *.* for extraction path
-		      CompressType[compcnt].compressor = 1;
-		      break;
-		    default:
-		      break;
-		    }
-		  //printf("here %s\n",ptr);
-		  cntr = 0;
+          if (str[0] != 0)
+            {
+              while (compressor_verbs[cntr] != NULL)
+                {
+                  if (strnicmp
+                      (str, compressor_verbs[cntr],
+                       strlen (compressor_verbs[cntr])) == 0)
+                    {
+                      //printf("found verb %s\n", compressor_verbs[cntr]);
+                      break;
+                    }
+                  else
+                    cntr++;
+                }
+              if (compressor_verbs[cntr] != NULL)
+                {
+                  switch (cntr)
+                    {
+                    case 0:     // add
+                      ptr = str;
+                      ptr += strlen (compressor_verbs[cntr]);   // advance ptr to end of verb
+                      while (*ptr == ' ')
+                        ptr++;
+                      if (strlen (ptr) <= 99)
+                        strncpy (CompressType[compcnt].add, ptr,
+                                 (strlen (ptr) - 1));
+                      else
+                        strncpy (CompressType[compcnt].add, ptr, 99);
+                      break;
+                    case 1:     // archiver
+                      ptr = str;
+                      ptr += strlen (compressor_verbs[cntr]);   // advance ptr to end of verb
+                      while (*ptr == ' ')
+                        ptr++;
+                      cntr = 0;
+                      while (compressor_name[cntr] != NULL)
+                        {
+                          if (strnicmp
+                              (ptr, compressor_name[cntr],
+                               strlen (compressor_name[cntr])) == 0)
+                            {
+                              compcnt = cntr;
+                              CompressType[compcnt].compressor = 0;
+                              break;
+                            }
+                          else
+                            cntr++;
+                        }
+                      //printf("unknown compressor\n");
+                      break;
+                    case 2:     // extension
+                      ptr = str;
+                      ptr += strlen (compressor_verbs[cntr]);   // advance ptr to end of verb
+                      while (*ptr == ' ')
+                        ptr++;
+                      if (*(ptr + 1) == '?' && *(ptr + 2) == '?')
+                        {
+                          CompressType[compcnt].ext = ptr[0];
+                        }
+                      else
+                        {
+                          // major error
+                          //printf("unknown compressor extension\n");
+                        }
+                      break;
+                    case 3:     // extract
+                      ptr = str;
+                      ptr += strlen (compressor_verbs[cntr]);   // advance ptr to end of verb
+                      while (*ptr == ' ')
+                        ptr++;
+                      if (strlen (ptr) <= 99)
+                        strncpy (CompressType[compcnt].extract, ptr,
+                                 (strlen (ptr) - 1));
+                      else
+                        strncpy (CompressType[compcnt].extract, ptr, 99);
+                      break;
+                    case 4:     // ident
+                      ptr = str;
+                      ptr += strlen (compressor_verbs[cntr]);   // advance ptr to end of verb
+                      while (*ptr == ' ')
+                        ptr++;
+                      ptr1 = strchr (str, ',');
+                      if (ptr1 != NULL)
+                        {
+                          ptr1++;
+                          if (strlen (ptr1) <= 99)
+                            strncpy (CompressType[compcnt].ident, ptr1,
+                                     (strlenII (ptr1)));
+                          else
+                            strncpy (CompressType[compcnt].ident, ptr1, 99);
+                          ptr1--;
+                          *ptr1 = 0;
+                          CompressType[compcnt].offset = atol (ptr);
+                        }
+                      else
+                        {
+                          // major error
+                          //printf("unknown compressor ident\n");
+                        }
+                      break;
+                    case 5:     // end
+                      if (CompressType[compcnt].add[0] == 0)
+                        {
+                          // major error
+                          printf ("Compressor Config Error\n");
+                        }
+                      else if (CompressType[compcnt].extract[0] == 0)
+                        {
+                          // major error
+                          printf ("Compressor Config Error\n");
+                        }
+                      else if (CompressType[compcnt].ext == 0)
+                        {
+                          // major error
+                          printf ("Compressor Config Error\n");
+                        }
+                      else if (CompressType[compcnt].ident[0] == 0)
+                        {
+                          // major error
+                          printf ("Compressor Config Error\n");
+                        }
+                      //    printf("got %s \n%s \n%c \n%s \n%ul", CompressType[compcnt].add,
+                      //                             CompressType[compcnt].extract,
+                      //                                                                        CompressType[compcnt].ext,
+                      //                                                                        CompressType[compcnt].ident,
+                      //                                                                        CompressType[compcnt].offset);
+                      //compcnt++;
+                      break;
+                    case 6:     // Needs *.* for extraction path
+                      CompressType[compcnt].compressor = 1;
+                      break;
+                    default:
+                      break;
+                    }
+                  //printf("here %s\n",ptr);
+                  cntr = 0;
 
-		}
-	    }
-	  if (eof == ftell (comctl))
-	    break;
+                }
+            }
+          if (eof == ftell (comctl))
+            break;
 
-	}
+        }
     }
   fclose (comctl);
   return (0);
@@ -373,7 +373,7 @@ call_spawn (void)
     {
       //printf("%s ",aparms[i]);
       if (i > 1)
-	strcat (cmdline, " ");
+        strcat (cmdline, " ");
       strcat (cmdline, aparms[i]);
       i++;
     }
@@ -391,91 +391,91 @@ call_spawn (void)
     {
     case 2:
       val_exit =
-	spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3], NULL);
+        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3], NULL);
       break;
     case 3:
       val_exit =
-	spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-		 aparms[4], NULL);
+        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
+                 aparms[4], NULL);
       break;
     case 4:
       val_exit =
-	spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-		 aparms[4], aparms[5], NULL);
+        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
+                 aparms[4], aparms[5], NULL);
       break;
     case 5:
       val_exit =
-	spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-		 aparms[4], aparms[5], aparms[6], NULL);
+        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
+                 aparms[4], aparms[5], aparms[6], NULL);
       break;
     case 6:
       val_exit =
-	spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-		 aparms[4], aparms[5], aparms[6], aparms[7], NULL);
+        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
+                 aparms[4], aparms[5], aparms[6], aparms[7], NULL);
       break;
     case 7:
       val_exit =
-	spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-		 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8], NULL);
+        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
+                 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8], NULL);
       break;
     case 8:
       val_exit =
-	spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-		 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
-		 aparms[9], NULL);
+        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
+                 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
+                 aparms[9], NULL);
       break;
     case 9:
       val_exit =
-	spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-		 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
-		 aparms[9], aparms[10], NULL);
+        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
+                 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
+                 aparms[9], aparms[10], NULL);
       break;
     case 10:
       val_exit =
-	spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-		 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
-		 aparms[9], aparms[10], aparms[11], NULL);
+        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
+                 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
+                 aparms[9], aparms[10], aparms[11], NULL);
       break;
     case 11:
       val_exit =
-	spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-		 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
-		 aparms[9], aparms[10], aparms[11], aparms[12], NULL);
+        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
+                 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
+                 aparms[9], aparms[10], aparms[11], aparms[12], NULL);
       break;
     case 12:
       val_exit =
-	spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-		 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
-		 aparms[9], aparms[10], aparms[11], aparms[12], aparms[13],
-		 NULL);
+        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
+                 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
+                 aparms[9], aparms[10], aparms[11], aparms[12], aparms[13],
+                 NULL);
       break;
     case 13:
       val_exit =
-	spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-		 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
-		 aparms[9], aparms[10], aparms[11], aparms[12], aparms[13],
-		 aparms[14], NULL);
+        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
+                 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
+                 aparms[9], aparms[10], aparms[11], aparms[12], aparms[13],
+                 aparms[14], NULL);
       break;
     case 14:
       val_exit =
-	spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-		 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
-		 aparms[9], aparms[10], aparms[11], aparms[12], aparms[13],
-		 aparms[14], aparms[15], NULL);
+        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
+                 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
+                 aparms[9], aparms[10], aparms[11], aparms[12], aparms[13],
+                 aparms[14], aparms[15], NULL);
       break;
     case 15:
       val_exit =
-	spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-		 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
-		 aparms[9], aparms[10], aparms[11], aparms[12], aparms[13],
-		 aparms[14], aparms[15], aparms[16], NULL);
+        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
+                 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
+                 aparms[9], aparms[10], aparms[11], aparms[12], aparms[13],
+                 aparms[14], aparms[15], aparms[16], NULL);
       break;
     default:
       val_exit =
-	spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
-		 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
-		 aparms[9], aparms[10], aparms[11], aparms[12], aparms[13],
-		 aparms[14], aparms[15], aparms[16], aparms[17], NULL);
+        spawnlp (P_WAIT, aparms[0], aparms[1], aparms[2], aparms[3],
+                 aparms[4], aparms[5], aparms[6], aparms[7], aparms[8],
+                 aparms[9], aparms[10], aparms[11], aparms[12], aparms[13],
+                 aparms[14], aparms[15], aparms[16], aparms[17], NULL);
       break;
     }
 #endif
@@ -484,7 +484,7 @@ call_spawn (void)
   logtext (logline, 4, YES);
 
   i = 2;
-  sprintf (logline, "PRMS : ", aparms[i]);
+  strcpy (logline, "PRMS : ");
 
   while (aparms[i] != NULL)
     {
@@ -494,7 +494,7 @@ call_spawn (void)
     }
   logtext (logline, 5, YES);
 
-  sprintf (logline, "archiver return value %d", val_exit);
+  sprintf (logline, "archiver return value %ld", val_exit);
   logtext (logline, 5, YES);
 
 //       printf("error no %d\n",errno);
@@ -502,28 +502,28 @@ call_spawn (void)
   if (val_exit < 0)
     switch (errno)
       {
-      case EZERO:		// No Error
-	break;
-      case ENOENT:		// No Such File
-	sprintf (logline, "Archiver not found - Check PATH.\n");
-	logtext (logline, 0, YES);
-	break;
-      case E2BIG:		// Too many arguments
-	sprintf (logline,
-		 "Archiver command line too long. - Check compress.ctl!\n");
-	logtext (logline, 0, YES);
-	break;
-      case ENOMEM:		// Not Enough Memory
-	sprintf (logline, "Not enough memory to activate archiver.\n");
-	logtext (logline, 0, YES);
-	break;
+      case EZERO:               // No Error
+        break;
+      case ENOENT:              // No Such File
+        sprintf (logline, "Archiver not found - Check PATH.\n");
+        logtext (logline, 0, YES);
+        break;
+      case E2BIG:               // Too many arguments
+        sprintf (logline,
+                 "Archiver command line too long. - Check compress.ctl!\n");
+        logtext (logline, 0, YES);
+        break;
+      case ENOMEM:              // Not Enough Memory
+        sprintf (logline, "Not enough memory to activate archiver.\n");
+        logtext (logline, 0, YES);
+        break;
       default:
-	sprintf (logline, "Unknown Archiver error.\n");
-	logtext (logline, 0, YES);
-	break;
+        sprintf (logline, "Unknown Archiver error.\n");
+        logtext (logline, 0, YES);
+        break;
       }
 
-  return val_exit;		//5-01-01 return 0 if success, error code if not
+  return val_exit;              //5-01-01 return 0 if success, error code if not
 }
 
 //#endif
@@ -540,10 +540,10 @@ fcn_threshold (char *filename)
     {
       rc = fstat (handle, &buf);
       if (rc == -1)
-	{
-	  close (handle);
-	  return (2);
-	}
+        {
+          close (handle);
+          return (2);
+        }
     }
   else
     {
@@ -569,20 +569,20 @@ fcn_threshold (char *filename)
   if (threshold.diff_size <= -1)
     {
       if (buf.st_size >= threshold.arc_size)
-	return (1);
+        return (1);
       else
-	return (0);
+        return (0);
     }
   else
     {
       if ((buf.st_size / 50) >= threshold.diff_size)
-	return (3);
+        return (3);
       else
-	if (buf.st_size >= threshold.arc_size
-	    && buf.st_size <= threshold.diff_size)
-	return (1);
+        if (buf.st_size >= threshold.arc_size
+            && buf.st_size <= threshold.diff_size)
+        return (1);
       else
-	return (2);
+        return (2);
     }
 
 //      return(0);

@@ -5,18 +5,18 @@
 
 struct dosdate_t
 {
-  unsigned char day;		/* 1-31 */
-  unsigned char month;		/* 1-12 */
-  unsigned int year;		/* 1980-2099 */
-  unsigned char dayofweek;	/* 0-6, 0=Sunday */
+  unsigned char day;            /* 1-31 */
+  unsigned char month;          /* 1-12 */
+  unsigned int year;            /* 1980-2099 */
+  unsigned char dayofweek;      /* 0-6, 0=Sunday */
 };
 
 struct dostime_t
 {
-  unsigned char hour;		/* 0-23 */
-  unsigned char minute;		/* 0-59 */
-  unsigned char second;		/* 0-59 */
-  unsigned char hsecond;	/* 0-99 */
+  unsigned char hour;           /* 0-23 */
+  unsigned char minute;         /* 0-59 */
+  unsigned char second;         /* 0-59 */
+  unsigned char hsecond;        /* 0-99 */
 };
 
 /* _dos_findfirst structure */
@@ -43,14 +43,14 @@ void _dos_getdate (struct dosdate_t *);
 void _dos_gettime (struct dostime_t *);
 unsigned _dos_findfirst (char *, unsigned, struct find_t *);
 unsigned _dos_findnext (struct find_t *);
-unsigned _dos_getftime (int, unsigned short *, unsigned short *);
+void _dos_getftime (int, unsigned short *, unsigned short *);
 unsigned _dos_open (const char *, unsigned, int *);
 unsigned _dos_close (int);
 
 void _makepath (const char *path, char *drive, char *dir, char *file,
-		char *ext);
+                char *ext);
 void _splitpath (const char *path, char *drive, char *dir, char *file,
-		 char *ext);
+                 char *ext);
 
 char *strupr (char *string);
 char *itoa (int value, char *string, int radix);

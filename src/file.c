@@ -125,10 +125,10 @@ movefile (char *filename, char *destination)
     {
       temp = fopen (filename, "rt");
       if (temp != NULL)
-	{
-	  fclose (temp);
-	  remove (filename);
-	}
+        {
+          fclose (temp);
+          remove (filename);
+        }
       return;
     }
 
@@ -202,48 +202,48 @@ clean_dir (char *filename)
       _dos_getdate (&date);
       date.year--;
       if ((date.year % 4) == 0)
-	lastfriday += 366;
+        lastfriday += 366;
       else
-	lastfriday += 365;
+        lastfriday += 365;
     }
 
   itoa (jfriday, ascjfriday, 10);
   if (jfriday < 100)
     {
-      sprintf (ascjfriday, "%0.3d", jfriday);
+      sprintf (ascjfriday, "%03d", jfriday);
     }
 
   if (rc == 0)
     {
       while (rc == 0)
-	{
-	  dot = extchr (fileinfo.name, '.');
-	  if (strncmp (filename, Master, strlen (Master)) == 0)
-	    sprintf (cleaname, "%s%s", Master, fileinfo.name);
-	  else
-	    sprintf (cleaname, "%s%s", OutPath, fileinfo.name);
+        {
+          dot = extchr (fileinfo.name, '.');
+          if (strncmp (filename, Master, strlen (Master)) == 0)
+            sprintf (cleaname, "%s%s", Master, fileinfo.name);
+          else
+            sprintf (cleaname, "%s%s", OutPath, fileinfo.name);
 //     printf("\nfind  %s\n",cleaname);
-	  if (dot != NULL)
-	    {
-	      dot++;		// deal with outfiles
-	      if (atoi (dot) != lastfriday && atoi (dot) != jfriday)
-		{
-		  //printf("\nfind  %c\n",*dot);
-		  if (isalpha (*dot))	// deal with archives
-		    {
-		      dot++;
-		      //printf("\nfind  %c\n",*dot);
-		      //printf("\nfind  %s\n",ascjfriday);
-		      if (strncmp (dot, ascjfriday + 1, 2) != 0)
-			deletefile (cleaname);
-		    }
-		  else
-		    deletefile (cleaname);
-		}
-	    }
-	  // delete
-	  rc = _dos_findnext (&fileinfo);
-	}
+          if (dot != NULL)
+            {
+              dot++;            // deal with outfiles
+              if (atoi (dot) != lastfriday && atoi (dot) != jfriday)
+                {
+                  //printf("\nfind  %c\n",*dot);
+                  if (isalpha (*dot))   // deal with archives
+                    {
+                      dot++;
+                      //printf("\nfind  %c\n",*dot);
+                      //printf("\nfind  %s\n",ascjfriday);
+                      if (strncmp (dot, ascjfriday + 1, 2) != 0)
+                        deletefile (cleaname);
+                    }
+                  else
+                    deletefile (cleaname);
+                }
+            }
+          // delete
+          rc = _dos_findnext (&fileinfo);
+        }
     }
 
 }
@@ -261,9 +261,9 @@ filecomp (char *filename1, char *filename2)
   if (file1 == NULL || file2 == NULL)
     {
       if (file1)
-	fclose (file1);
+        fclose (file1);
       if (file2)
-	fclose (file2);
+        fclose (file2);
       return (1);
     }
 
@@ -280,13 +280,13 @@ filecomp (char *filename1, char *filename2)
       memset (str2, 0, sizeof (str2));
       fgets (str2, sizeof (str2), file2);
       if (strcmp (str1, str2) != 0)
-	{
-	  fclose (file1);
-	  fclose (file2);
-	  return (1);
-	}
+        {
+          fclose (file1);
+          fclose (file2);
+          return (1);
+        }
       if (str1[0] == 0 && str2[0] == 0)
-	break;
+        break;
     }
 
   fclose (file1);
@@ -419,9 +419,9 @@ list_file_dates (char *filename)
     }
 
   fprintf (stats2,
-	   "Segment file Dates for the week of %s, %s %0.2d, %d -- Day number %0.3d \n\n",
-	   Publish_day, Months[date.month].String, date.day, date.year,
-	   getJDate (1));
+           "Segment file Dates for the week of %s, %s %02d, %d -- Day number %03d \n\n",
+           Publish_day, Months[date.month].String, date.day, date.year,
+           getJDate (1));
 
   fprintf (stats2, "Last Processed Files:\n\n");
 
@@ -429,34 +429,34 @@ list_file_dates (char *filename)
     {
       sprintf (namebuf, "%s%s", Master, segfile[bcnt].FileName);
       if (strchr (segfile[bcnt].FileName, '.') == NULL)
-	FindMostCurr (namebuf);
+        FindMostCurr (namebuf);
       segmentfile = fopen (namebuf, "rt");
       if (segmentfile != NULL)
-	{
-	  fclose (segmentfile);
-	  get_file_date (namebuf, date_stamp);
-	  if (segfile[bcnt].SegmentType >= 2)
-	    fprintf (stats2, "%-8.8s %-5d segment was last modified %s\n",
-		     SegmentType[segfile[bcnt].SegmentType].String,
-		     segfile[bcnt].Net, date_stamp);
-	  else
-	    fprintf (stats2, "%-8.8s %-5d segment was last modified %s",
-		     SegmentType[segfile[bcnt].SegmentType].String,
-		     segfile[bcnt].Net, date_stamp);
-	}
+        {
+          fclose (segmentfile);
+          get_file_date (namebuf, date_stamp);
+          if (segfile[bcnt].SegmentType >= 2)
+            fprintf (stats2, "%-8.8s %-5d segment was last modified %s\n",
+                     SegmentType[segfile[bcnt].SegmentType].String,
+                     segfile[bcnt].Net, date_stamp);
+          else
+            fprintf (stats2, "%-8.8s %-5d segment was last modified %s",
+                     SegmentType[segfile[bcnt].SegmentType].String,
+                     segfile[bcnt].Net, date_stamp);
+        }
       else
-	{
-	  if (segfile[bcnt].SegmentType >= 2)
-	    fprintf (stats2,
-		     "%-8.8s %-5d segment is not found in master directory\n",
-		     SegmentType[segfile[bcnt].SegmentType].String,
-		     segfile[bcnt].Net);
-	  else
-	    fprintf (stats2,
-		     "%-8.8s %-5d segment is not found in master directory\n",
-		     SegmentType[segfile[bcnt].SegmentType].String,
-		     segfile[bcnt].Node);
-	}
+        {
+          if (segfile[bcnt].SegmentType >= 2)
+            fprintf (stats2,
+                     "%-8.8s %-5d segment is not found in master directory\n",
+                     SegmentType[segfile[bcnt].SegmentType].String,
+                     segfile[bcnt].Net);
+          else
+            fprintf (stats2,
+                     "%-8.8s %-5d segment is not found in master directory\n",
+                     SegmentType[segfile[bcnt].SegmentType].String,
+                     segfile[bcnt].Node);
+        }
 
     }
 
@@ -466,21 +466,21 @@ list_file_dates (char *filename)
     {
       sprintf (namebuf, "%s%s", Update, segfile[bcnt].FileName);
       if (strchr (segfile[bcnt].FileName, '.') == NULL)
-	FindMostCurr (namebuf);
+        FindMostCurr (namebuf);
       segmentfile = fopen (namebuf, "rt");
       if (segmentfile != NULL)
-	{
-	  fclose (segmentfile);
-	  get_file_date (namebuf, date_stamp);
-	  if (segfile[bcnt].SegmentType >= 2)
-	    fprintf (stats2, "%-8.8s %-5d segment was last modified %s\n",
-		     SegmentType[segfile[bcnt].SegmentType].String,
-		     segfile[bcnt].Net, date_stamp);
-	  else
-	    fprintf (stats2, "%-8.8s %-5d segment was last modified %s",
-		     SegmentType[segfile[bcnt].SegmentType].String,
-		     segfile[bcnt].Net, date_stamp);
-	}
+        {
+          fclose (segmentfile);
+          get_file_date (namebuf, date_stamp);
+          if (segfile[bcnt].SegmentType >= 2)
+            fprintf (stats2, "%-8.8s %-5d segment was last modified %s\n",
+                     SegmentType[segfile[bcnt].SegmentType].String,
+                     segfile[bcnt].Net, date_stamp);
+          else
+            fprintf (stats2, "%-8.8s %-5d segment was last modified %s",
+                     SegmentType[segfile[bcnt].SegmentType].String,
+                     segfile[bcnt].Net, date_stamp);
+        }
 
     }
 
@@ -505,9 +505,9 @@ get_file_date (char *filename, char *date_stamp)
       logtext ("Retrieved file time stamp", 6, YES);
 
       _dos_getftime (handle, &date, &time);
-      sprintf (date_stamp, "%0.2d/%0.2d/%d @ %0.2d:%0.2d:%0.2d",
-	       MONTH (date), DAY (date), YEAR (date),
-	       HOUR (time), MINUTE (time), SECOND (time));
+      sprintf (date_stamp, "%02d/%02d/%d @ %02d:%02d:%02d",
+               MONTH (date), DAY (date), YEAR (date),
+               HOUR (time), MINUTE (time), SECOND (time));
       _dos_close (handle);
     }
 }
@@ -533,98 +533,98 @@ file_age (char *filename)
       _dos_getftime (handle, &date, &time);
 
       switch (MONTH (date))
-	{
-	case 1:
-	  File_JDate = DAY (date);
-	  break;
-	case 2:
-	  File_JDate += 31;
-	  File_JDate += DAY (date);
-	  break;
-	case 3:
-	  if ((YEAR (date) % 4) == 0)
-	    File_JDate += 60;
-	  else
-	    File_JDate += 59;
-	  File_JDate += DAY (date);
-	  break;
-	case 4:
-	  if ((YEAR (date) % 4) == 0)
-	    File_JDate += 91;
-	  else
-	    File_JDate += 90;
-	  File_JDate += DAY (date);
-	  break;
-	case 5:
-	  if ((YEAR (date) % 4) == 0)
-	    File_JDate += 121;
-	  else
-	    File_JDate += 120;
-	  File_JDate += DAY (date);
-	  break;
-	case 6:
-	  if ((YEAR (date) % 4) == 0)
-	    File_JDate += 152;
-	  else
-	    File_JDate += 151;
-	  File_JDate += DAY (date);
-	  break;
-	case 7:
-	  if ((YEAR (date) % 4) == 0)
-	    File_JDate += 182;
-	  else
-	    File_JDate += 181;
-	  File_JDate += DAY (date);
-	  break;
-	case 8:
-	  if ((YEAR (date) % 4) == 0)
-	    File_JDate += 213;
-	  else
-	    File_JDate += 212;
-	  File_JDate += DAY (date);
-	  break;
-	case 9:
-	  if ((YEAR (date) % 4) == 0)
-	    File_JDate += 244;
-	  else
-	    File_JDate += 243;
-	  File_JDate += DAY (date);
-	  break;
-	case 10:
-	  if ((YEAR (date) % 4) == 0)
-	    File_JDate += 274;
-	  else
-	    File_JDate += 273;
-	  File_JDate += DAY (date);
-	  break;
-	case 11:
-	  if ((YEAR (date) % 4) == 0)
-	    File_JDate += 305;
-	  else
-	    File_JDate += 304;
-	  File_JDate += DAY (date);
-	  break;
-	case 12:
-	  if ((YEAR (date) % 4) == 0)
-	    File_JDate += 335;
-	  else
-	    File_JDate += 334;
-	  File_JDate += DAY (date);
-	  break;
-	}
+        {
+        case 1:
+          File_JDate = DAY (date);
+          break;
+        case 2:
+          File_JDate += 31;
+          File_JDate += DAY (date);
+          break;
+        case 3:
+          if ((YEAR (date) % 4) == 0)
+            File_JDate += 60;
+          else
+            File_JDate += 59;
+          File_JDate += DAY (date);
+          break;
+        case 4:
+          if ((YEAR (date) % 4) == 0)
+            File_JDate += 91;
+          else
+            File_JDate += 90;
+          File_JDate += DAY (date);
+          break;
+        case 5:
+          if ((YEAR (date) % 4) == 0)
+            File_JDate += 121;
+          else
+            File_JDate += 120;
+          File_JDate += DAY (date);
+          break;
+        case 6:
+          if ((YEAR (date) % 4) == 0)
+            File_JDate += 152;
+          else
+            File_JDate += 151;
+          File_JDate += DAY (date);
+          break;
+        case 7:
+          if ((YEAR (date) % 4) == 0)
+            File_JDate += 182;
+          else
+            File_JDate += 181;
+          File_JDate += DAY (date);
+          break;
+        case 8:
+          if ((YEAR (date) % 4) == 0)
+            File_JDate += 213;
+          else
+            File_JDate += 212;
+          File_JDate += DAY (date);
+          break;
+        case 9:
+          if ((YEAR (date) % 4) == 0)
+            File_JDate += 244;
+          else
+            File_JDate += 243;
+          File_JDate += DAY (date);
+          break;
+        case 10:
+          if ((YEAR (date) % 4) == 0)
+            File_JDate += 274;
+          else
+            File_JDate += 273;
+          File_JDate += DAY (date);
+          break;
+        case 11:
+          if ((YEAR (date) % 4) == 0)
+            File_JDate += 305;
+          else
+            File_JDate += 304;
+          File_JDate += DAY (date);
+          break;
+        case 12:
+          if ((YEAR (date) % 4) == 0)
+            File_JDate += 335;
+          else
+            File_JDate += 334;
+          File_JDate += DAY (date);
+          break;
+        }
       Today_JDate = getJDate (0);
 
-      if (cdate.year == YEAR (date))	// This year
-	{
-	  dayscnt = Today_JDate - File_JDate;
-	}
-      else if (cdate.year == YEAR (date) + 1)	// last year
-	{
-	  if ((YEAR (date) % 4) == 0)	// was leap
-	    dayscnt = Today_JDate + 366 - File_JDate;
-	  else
-	    dayscnt = Today_JDate + 365 - File_JDate;
-	}
+      if (cdate.year == (unsigned) YEAR (date))    // This year
+        {
+          dayscnt = Today_JDate - File_JDate;
+        }
+      else if (cdate.year == (unsigned) YEAR (date) + 1)   // last year
+        {
+          if ((YEAR (date) % 4) == 0)   // was leap
+            dayscnt = Today_JDate + 366 - File_JDate;
+          else
+            dayscnt = Today_JDate + 365 - File_JDate;
+        }
 
       _dos_close (handle);
     }
@@ -653,16 +653,16 @@ fix_compile_date (void)
       _dos_getftime (handle, &date, &time);
       _dos_close (handle);
       if (_dos_open ("quick.lst", O_RDWR, &handle) != 0)
-	{
-	  logtext ("Unable to set file time stamp", 2, YES);
-	}
+        {
+          logtext ("Unable to set file time stamp", 2, YES);
+        }
       else
-	{
-	  logtext ("Reset file time stamp", 5, YES);
+        {
+          logtext ("Reset file time stamp", 5, YES);
 
-	  _dos_setftime (handle, date, time);
-	  _dos_close (handle);
-	}
+          _dos_setftime (handle, date, time);
+          _dos_close (handle);
+        }
     }
 #endif
 }

@@ -844,14 +844,16 @@ kill_spaces (void)
 
 // printf("spn %d strlen %d\n",strspn(str,cset),strlen(str));
 
+  /*
   if (strspn (str, cset) != strlen (str))
     for (space = 0; space < strlen (str); space++)
       {
-        if (str[space] & 0x80)
-          str[space] = '?';
-        //    if (str[space] < 0x20) str[space] = '?';
+        // if (str[space] & 0x80)
+        //   str[space] = '?';
+        // if (str[space] < 0x20)
+	//   str[space] = '?';
       }
-
+  */
 }
 
 void

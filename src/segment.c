@@ -1191,20 +1191,12 @@ add_crc (unsigned short crctt, char *filename)
 {
   FILE *fp;
   char localstr[256];
-  char crc[10];
-
-  memset (crc, 0, sizeof (crc));
 
   fp = fopen (filename, "rb+");
-
   fgets (localstr, 255, fp);
-
   fseek (fp, (long) (strlen (localstr) - 7), SEEK_SET);
-
-  sprintf (crc, "%05hu", (unsigned short) crctt);
-  fwrite (crc, sizeof (char), 5, fp);
+  fprintf (fp, "%05hu", (unsigned short) crctt);
   //printf("CRC : %0.5u\n",crctt);
-
   fclose (fp);
 }
 
@@ -1305,6 +1297,7 @@ test_segment (void)
       init_flags_lists ();
     }
 
+  // For each segment...?
   for (bcnt = 0; bcnt <= sfilecnt; bcnt++)
     {
       //memset(namebuf,0,254);
@@ -1312,6 +1305,7 @@ test_segment (void)
 
       if (bcnt != 0 || expSourceFile[0] != 0)
         {
+          // Try getting segment from update directory
           sprintf (namebuf, "%s%s", Update, segfile[bcnt].FileName);
           if (strchr (segfile[bcnt].FileName, '.') == NULL)
             FindMostCurr (namebuf);
@@ -1319,6 +1313,7 @@ test_segment (void)
           segmentfile = fopen (namebuf, "rt");
           if (segmentfile == NULL)
             {
+              // Use segment from master directory
               //fclose(segmentfile); - no, it's null!
               sprintf (namebuf, "%s%s", Master, segfile[bcnt].FileName);
               if (strchr (segfile[bcnt].FileName, '.') == NULL)

@@ -23,16 +23,15 @@ extern COMPRESSTYPE CompressType[];
 char *
 extchr (char *string, char dot)
 {
-  char *p = strchr (string, '.');       // find first '.'
-  if (!p)
+  char *p = strrchr (string, '.');       // find last '.'
+  if (p == NULL)
     return NULL;
-  while (strchr (p + 1, '.') != NULL)   // if there are more, find next one
-    p = strchr (p + 1, '.');
   if (strchr (p, PathChar))     //if further path info at end, not an .ext
     return NULL;
   return p;                     //else return pointer to last dot in name
 }
 
+// Find the most current version of a segment file
 short
 FindMostCurr (char *FileName)
 {
@@ -47,38 +46,36 @@ FindMostCurr (char *FileName)
   if (dot != NULL)
     *dot = 0;
 
-  strcpy (lookfor, FileName);
-  strcat (lookfor, ".*");
+  sprintf (lookfor, "%s.*", FileName);
 
   rc = _dos_findfirst (lookfor, _A_NORMAL, &fileinfo);
-  //filedate = fileinfo.wr_date;
-
   while (rc == 0)
     {
 //      printf("%s %u %u %u\n",fileinfo.name,fileinfo.wr_time, fileinfo.wr_date, fileinfo.size);
       dot = extchr (fileinfo.name, '.');
       if (dot != NULL)
         {
-          if ((Jdate <= atoi (dot + 1)) && (atoi (dot + 1) <= 366)
-              && (filedate <= fileinfo.wr_date))
+          int fileDay = atoi (dot + 1);
+          if ((Jdate <= fileDay) && (fileDay <= 366) && (filedate <= fileinfo.wr_date))
             {
-              Jdate = atoi (dot + 1);
+              Jdate = fileDay;
               filedate = fileinfo.wr_date;
             }
         }
       rc = _dos_findnext (&fileinfo);
     }
-  memset (lookfor, 0, sizeof (lookfor));
+
   sprintf (lookfor, "%03d", Jdate);
   strcat (FileName, ".");
   strcat (FileName, lookfor);
+
   if (Jdate >= 0)
     return (0);
   else
     return (1);
-
 }
 
+// Find a diff file
 short
 Findiff (char *FileName)
 {
@@ -91,11 +88,9 @@ Findiff (char *FileName)
   if (dot != NULL)
     *dot = 0;
 
-  strcpy (lookfor, FileName);
-  strcat (lookfor, ".D*");
+  sprintf (lookfor, "%s.D*", FileName);
 
   rc = _dos_findfirst (lookfor, _A_NORMAL, &fileinfo);
-  //filedate = fileinfo.wr_date;
   if (rc == 0)
     {
       dot = extchr (fileinfo.name, '.');
@@ -105,17 +100,16 @@ Findiff (char *FileName)
           return (0);
         }
     }
-  return (1);
 
+  return (1);
 }
 
-
+// Find a compressed segment
 short
 FindArch (char *FileName)
 {
   long rc;
   char *dot;
-  char ext[4];
   struct find_t fileinfo;
   short i;
   char lookfor[255];
@@ -125,12 +119,8 @@ FindArch (char *FileName)
       dot = extchr (FileName, '.');
       if (dot != NULL)
         *dot = 0;
-      strcpy (lookfor, FileName);
-      ext[0] = '.';
-      ext[1] = CompressType[i].ext;
-      ext[2] = '*';
-      ext[3] = 0;
-      strcat (lookfor, ext);
+
+      sprintf (lookfor, "%s.%c*", FileName, CompressType[i].ext);
 //      printf("lookfor %s\n",lookfor);
 
       rc = _dos_findfirst (lookfor, _A_NORMAL, &fileinfo);

@@ -100,7 +100,6 @@ create_diff (char *ODFile)
     }
   ext -= 7;
 
-  memset (exten, 0, sizeof (exten));
   sprintf (exten, ".%03d", ext);
   //    strncpy(exten+1,newext,3);
 

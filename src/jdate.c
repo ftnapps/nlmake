@@ -18,6 +18,7 @@
 extern LINEPRMS WeekDays[];
 extern char Publish_day[];
 
+// Get current day_of_year (if type == 0) or day_of_year for next publish day (if type == 1)
 short
 getJDate (short type)
 {

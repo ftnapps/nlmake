@@ -249,7 +249,7 @@ int main (short ParmsCtr, char *Parms[])
                                 break;
                         case 7:
                                 //printf("Nodelist production/testing utility\n");
-                                //printf("Syntax:\n");
+                                printf("Syntax:\n\n");
                                 printf("-Standard Functions:\n");
 #ifdef LINUX
                                 printf("nlmake [nlmake.ctl] -P -F -T -M=[Nodelist] -N=[NetWork]\n\n");
@@ -257,32 +257,32 @@ int main (short ParmsCtr, char *Parms[])
                                 printf("-Force   - During a production run, Forces submission to submit address\n");
                                 printf("-Test    - Tests & accepts new inbound segments. (default)\n");
                                 printf("-Merge=  - Creates a merged nodelist. [Nodelist + Segment]\n");
-                                printf("-Name=   - Network Name.\n");
+                                printf("-Name=   - Network Name.\n\n");
                                 printf("Statistic Files and Netmail:\n");
                                 printf("nlmake [nlmake.ctl] -ALL -ERR -STA -LAS\n\n");
                                 printf("-ALL     - Tests All & accepts new inbound segments.\n");
                                 printf("-ERRors  - NetMail Notify all (current errors).\n");
                                 printf("-STAts   - Saves stats to [nlmake].ERR.\n");
                                 printf("-LASt    - Last segment receive dates output to lastin.txt\n");
-                                printf("-LATe    - NetMail Notify all who's segments are older than MAXAGE.\n");
+                                printf("-LATe    - NetMail Notify all who's segments are older than MAXAGE.\n\n");
                                 printf("Debugging and Flags:\n");
                                 printf("nlmake [nlmake.ctl] -D -COM\n\n");
                                 printf("-Display - Displays what is read from the *.ctl file. (debug)\n");
                                 printf("-COMpile - Refresh Database with flags.ctl.\n");
 #else
-                                printf("nlmake [nlmake.ctl] /P /F /T /M=[Nodelist] /N=[NetWork]\n\n");
+                                printf("nlmake [nlmake.ctl] /P /F /T /M=[Nodelist] /N=[NetWork]\n");
                                 printf("/Process - Processes all segment files and submits changes, if needed.\n");
                                 printf("/Force   - During a production run, Forces submission to submit address\n");
                                 printf("/Test    - Tests & accepts new inbound segments. (default)\n");
                                 printf("/Merge=  - Creates a merged nodelist. [Nodelist + Segment]\n");
-                                printf("/Name=   - Network Name.\n");
+                                printf("/Name=   - Network Name.\n\n");
                                 printf("-Statistic Files and Netmail:\n");
                                 printf("nlmake [nlmake.ctl] /ALL /ERR /STA /LAS\n\n");
                                 printf("/ALL     - Tests All & accepts new inbound segments.\n");
                                 printf("/ERRors  - NetMail Notify all (current errors).\n");
                                 printf("/STAts   - Saves stats to [nlmake].ERR.\n");
                                 printf("/LASt    - Last segment receive dates output to lastin.txt\n");
-                                printf("/LATe    - NetMail Notify all who's segments are older than MAXAGE.\n");
+                                printf("/LATe    - NetMail Notify all who's segments are older than MAXAGE.\n\n");
                                 printf("-Debugging and Flags:\n");
                                 printf("nlmake [nlmake.ctl] /D /COM\n\n");
                                 printf("/Display - Displays what is read from the *.ctl file. (debug)\n");
@@ -337,7 +337,7 @@ int main (short ParmsCtr, char *Parms[])
                                                 ControlFile[0] = 0;
                                                 if (temp) fclose(temp);
                                 } else
-                                printf("Ignoring bad command in command line <%s>\n",Parms[cntr2]);
+                                printf("Ignoring bad command in commandline <%s>\n",Parms[cntr2]);
                                 cntr = 0;
                                 break;
                                 default:
@@ -359,7 +359,7 @@ int main (short ParmsCtr, char *Parms[])
 
                 if(temp == NULL)
                 {
-                sprintf(textline,"nlmake.ctl config file not found");
+                sprintf(textline,"nlmake.ctl config file not found.");
                 logtext(textline,0,YES);
                 logwrite(SYS_COMMAND_ABORT,0);
                 logwrite(SYS_STOP,0);
@@ -376,7 +376,7 @@ int main (short ParmsCtr, char *Parms[])
         errorlvl = proctrlfile();
   if(errorlvl > 0)
   {
-                printf("ERRORLEVEL %d - Critial stop - I/O problem\n",errorlvl);
+                printf("ERRORLEVEL %d - Critial stop - I/O problem.\n",errorlvl);
                 exit(errorlvl);
   }
         sfilecnt--;

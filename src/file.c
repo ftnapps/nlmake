@@ -54,8 +54,14 @@ create_directory (char *dirname)
 {
   int result;
   char msg[256];
+  int len;
 
-  // remove trailing PathChar?
+  // remove trailing PathChar
+  len = strlen(dirname);
+  if (dirname[len] == PathChar)
+  {
+    dirname[len] = 0;
+  }
 
 #if defined(__linux__) || defined(__EMX__)
   result = mkdir(dirname, 0750);
@@ -63,7 +69,9 @@ create_directory (char *dirname)
   result = mkdir(dirname);
 #endif
 
-  // add trailing PathChar?
+  // add trailing PathChar
+  dirname[len] = PathChar;
+  dirname[++len] = 0;
 
   if (result == 0){
     snprintf (msg, sizeof (msg), "Created directory %s", dirname);

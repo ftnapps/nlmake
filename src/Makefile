@@ -25,7 +25,7 @@ OBJFILES = \
  flags$(OBJ) \
  jdate$(OBJ) \
  log$(OBJ) \
- makenl2$(OBJ) \
+ nlmake$(OBJ) \
  netmail$(OBJ) \
  segment$(OBJ) \
  stats$(OBJ)

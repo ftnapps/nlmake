@@ -1,0 +1,5 @@
+nlmake (1.13.1.2+030617-0~1) UNRELEASED; urgency=low
+
+  * Initial release of a new test build of NLMake.
+
+ -- Robert James Clay <jame@rocasa.us>  Thu, 06 Jun 2013 20:28:11 -0400

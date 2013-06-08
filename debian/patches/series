@@ -1,2 +1,3 @@
 BuildSystem.patch
 FixSegmentC.patch
+FixNlmakeC.patch

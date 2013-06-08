@@ -1,6 +1,7 @@
 Description: Patch nlmake Makefile for Debian builds.
- - Change to use the standard flag LDFLAGS instead of using LFLAGS.
+ - Change to use the standard variable LDFLAGS instead of using LFLAGS.
  - Set CFLAGS using '+=' instead of just '=' to enable compile time changes.
+ - To enable builds without failing; remove '-Wall' and add '-Wno-write-strings'.
 Author: Robert James Clay <jame@rocasa.us>
 Origin: vendor
 Last-Update: 2013-06-08
@@ -13,7 +14,7 @@ Last-Update: 2013-06-08
  GPP=g++
 -CFLAGS=-g -Wall -pedantic
 -LFLAGS=
-+CFLAGS+= -g -Wall -pedantic
++CFLAGS+=-g -Wno-write-strings -pedantic
 +#LFLAGS=
  
  

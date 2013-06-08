@@ -14,12 +14,12 @@ Last-Update: 2013-06-08
  GPP=g++
 -CFLAGS=-g -Wall -pedantic
 -LFLAGS=
-+CFLAGS+=-g -Wno-write-strings -pedantic
++CFLAGS=-g -Wno-write-strings -pedantic
 +#LFLAGS=
  
  
  CDEFS= -DINCS_NEED_DOT_H -DNOEXCEPTIONS $(ADDCDEFS)
-@@ -34,10 +34,10 @@ default: nlmake$(EXE)
+@@ -34,7 +34,7 @@ default: nlmake$(EXE)
  all: nlmake$(EXE)
  
  nlmake$(EXE): $(OBJFILES)
@@ -27,8 +27,4 @@ Last-Update: 2013-06-08
 +	$(GPP) $(LDFLAGS) -o nlmake$(EXE) $(OBJFILES)
  
  install:
--	$(INSTALL) $(IBOPT) nlmake$(EXE) $(BINDIR)
-+	$(INSTALL) $(IBOPT) nlmake$(EXE) $(DESTDIR)$(DIRSEP)$(BINDIR)
- 
- uninstall:
- 	-$(RM) $(RMOPT) $(BINDIR)$(DIRSEP)nlmake$(EXE)
+ 	$(INSTALL) $(IBOPT) nlmake$(EXE) $(BINDIR)

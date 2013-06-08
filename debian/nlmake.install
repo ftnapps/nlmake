@@ -2,3 +2,4 @@ docs/fts-0005.txt   usr/share/doc/nlmake/history
 docs/fts-5000.001   usr/share/doc/nlmake/history
 docs/fts-5001.001   usr/share/doc/nlmake/history
 docs/makenl.prn     usr/share/doc/nlmake/history
+src/nlmake          usr/bin

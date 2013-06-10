@@ -1,10 +1,8 @@
 Description: Fix compile time error in src/segment.c
  Fix for 'format not a string literal and no format arguments' issue at 247:25.
 Author: Robert James Clay <jame@rocasa.us>
-Origin: <upstream|other>, <url of original patch>
-Bug: <url in upstream bugtracker>
-Forwarded: <no|not-needed|url proving that it has been forwarded>
-Last-Update: 2013-06-08
+Bug: https://sourceforge.net/p/nlmake/bugs/4/
+Last-Update: 2013-06-10
 
 --- nlmake-1.13.1.2+030617.orig/src/segment.c
 +++ nlmake-1.13.1.2+030617/src/segment.c

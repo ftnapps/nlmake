@@ -2,12 +2,10 @@ Description: Fixes for the src/nlmake.c file.
  - Corrected an issue where although the version number is being tracked
  as four separate integers, MajVer, MinVer, Rev, & SubRev; the last two
  were not being printed separated by a period when the program printed
- the version number. Added the period to the format.
+ the version number. Added the period to the format. (Bug #3)
 Author: Robert James Clay <jame@rocasa.us>
-Origin: vendor
-Bug: <url in upstream bugtracker>
-Forwarded: <no|not-needed|url proving that it has been forwarded>
-Last-Update: 2013-06-08
+Bug: http://sourceforge.net/p/nlmake/bugs/3/
+Last-Update: 2013-06-10
 
 --- nlmake-1.13.1.2+030617.orig/src/nlmake.c
 +++ nlmake-1.13.1.2+030617/src/nlmake.c

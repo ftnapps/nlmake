@@ -1,10 +1,19 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: nlmake
-Source: <url://example.com>
+Source: http://sourceforge.net/p/nlmake
 
 Files: *
-Copyright: <years> <put author's name and email here>
-           <years> <likewise for another author>
+Copyright: Copyright 1999, DSO Enterprises
+           Copyright 2001, Carl Austin Bennett <1:249/116@fidonet>
+           Copyright 2002, RuneSoft Creations 
+           Copyright 2002, Robert Couture <runemaster@users.sourceforge.net>  
+           Copyright 2003, Jesper Sörensen <yeppe@users.sourceforge.net> 
+Comment: Quoting from src/nlmake.c: "Copyright (c) 2002, RuneSoft Creations", 
+ "Original Copyright: (c) 1999, DSO Enterprises", "Original Linux Port:
+ (c) 2001, Carl Austin Bennett 1:249/116\n". "This version retains original
+ copyrights with modifications released under the GPL"; that would have been
+ GPL 2.0 at the time. Entries for Robert Couture and Jesper Sörensen derived
+ from their commits in the code repository.
 License: GPL-2.0+
 
 Files: debian/*

@@ -1,0 +1,28 @@
+Source: nlmake
+Section: admin
+Priority: extra
+Maintainer: Robert James Clay <jame@rocasa.us>
+Build-Depends: debhelper (>= 8.0.0), dpkg-dev (>= 1.16.1)
+Standards-Version: 3.9.3
+Homepage: http://sourceforge.net/projects/nlmake/
+Vcs-Git: git://github.com/ftnapps/nlmake.git
+Vcs-Browser: http://github.com/ftnapps/nlmake
+
+Package: nlmake
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: an FTN/Fidonet nodelist compiler.
+ NLMake is an open-sourced FTN/Fidonet nodelist processing program. It is
+ used to process FTN/Fidonet nodelists for submission to coordinators and/or
+ for creation of nodelist files for  distribution.
+
+Package: nlmake-dbg
+Architecture: any
+Section: debug
+Depends: nlmake (= ${binary:Version}), ${misc:Depends}
+Description: debugging symbols for nlmake
+ NLMake is an open-sourced FTN/Fidonet nodelist processing program. It is
+ used to process FTN/Fidonet nodelists for submission to coordinators and/or
+ for creation of nodelist files for  distribution.
+ .
+ This package contains the debugging symbols for nlmake.

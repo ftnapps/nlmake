@@ -1,0 +1,20 @@
+Description: Fixes for the src/nlmake.c file.
+ - Corrected an issue where although the version number is being tracked
+ as four separate integers, MajVer, MinVer, Rev, & SubRev; the last two
+ were not being printed separated by a period when the program printed
+ the version number. Added the period to the format. (Bug #3)
+Author: Robert James Clay <jame@rocasa.us>
+Bug: http://sourceforge.net/p/nlmake/bugs/3/
+Last-Update: 2013-06-10
+
+--- nlmake-1.13.1.2+030617.orig/src/nlmake.c
++++ nlmake-1.13.1.2+030617/src/nlmake.c
+@@ -173,7 +173,7 @@ main (int ParmsCtr, char *Parms[])
+   char textline[512];
+   short cntr = 0, cntr2;
+ 
+-  printf ("%s v%i.%i.%i%i (%s) \n", ProgName, MajVer, MinVer, Rev, SubRev,
++  printf ("%s v%i.%i.%i.%i (%s) \n", ProgName, MajVer, MinVer, Rev, SubRev,
+           OSType);
+   printf ("Copyright (c) 2002, RuneSoft Creations\n");
+   printf ("Original Copyright: (c) 1999, DSO Enterprises\n");

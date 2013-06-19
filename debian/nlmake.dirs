@@ -1,0 +1,6 @@
+etc/nlmake
+var/lib/nlmake
+var/log/nlmake
+usr/bin
+usr/share/doc/nlmake/history
+

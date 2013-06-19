@@ -1,6 +1,10 @@
-nlmake for Debian
+NLMake for Debian
 -----------------
 
-<possible notes regarding this package - if none, delete this file>
+NLMake is an open-sourced FTN/Fidonet nodelist processing program. It is used
+to process FTN/Fidonet nodelists for submission to coordinators and/or for the
+creation of nodelist files for distribution.
 
- -- Robert James Clay <jame@rocasa.us>  Thu, 06 Jun 2013 20:28:11 -0400
+
+
+ -- Robert James Clay <jame@rocasa.us>  Wed, 19 Jun 2013 17:12:28 -0400
